@@ -151,7 +151,7 @@ export function Navbar() {
               </li>
             ))}
 
-            <li className="px-2 pt-3 text-label font-semibold uppercase tracking-[0.18em] text-terracotta">
+            <li className="px-2 pt-3 text-label font-semibold uppercase tracking-[0.18em] text-terracotta-deep">
               Sub-brand
             </li>
             {subBrandList.map((sb) => (

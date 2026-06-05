@@ -29,7 +29,7 @@ export default function KateringPage() {
       <section className="border-b border-teal/10 bg-cream-deep py-section">
         <div className="container-dama grid items-center gap-12 lg:grid-cols-2">
           <div className="max-w-xl">
-            <p className="text-label font-semibold uppercase tracking-[0.2em] text-terracotta">
+            <p className="text-label font-semibold uppercase tracking-[0.2em] text-terracotta-deep">
               Katering & Acara
             </p>
             <h1 className="mt-4 text-display-lg text-teal">

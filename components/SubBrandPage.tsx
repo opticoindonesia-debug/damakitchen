@@ -108,7 +108,7 @@ export function SubBrandPage({ subBrand }: { subBrand: SubBrand }) {
       {/* ── Cross-sell strip ────────────────────────────────── */}
       <section className="container-dama pb-section">
         <DiamondDivider />
-        <p className="mb-6 text-label font-semibold uppercase tracking-[0.18em] text-terracotta">
+        <p className="mb-6 text-label font-semibold uppercase tracking-[0.18em] text-terracotta-deep">
           Mungkin juga cocok…
         </p>
         <div className="grid gap-6 sm:grid-cols-2">

@@ -37,6 +37,9 @@ const config: Config = {
           60: '#D4866F',
           80: '#CB6B50',
           100: '#C65B3E',
+          // AA-safe (≈5.2:1 on cream) for small terracotta TEXT on cream.
+          // The base #C65B3E is ~3.8:1 — fine for large text/icons only.
+          deep: '#A8472C',
           DEFAULT: '#C65B3E',
         },
         // 8% highlight. Gold — surfaces/accents, never body text on cream.

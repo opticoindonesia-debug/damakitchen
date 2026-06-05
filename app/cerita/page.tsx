@@ -24,7 +24,7 @@ export default function CeritaPage() {
       <section className="py-section">
         <div className="container-dama grid items-center gap-12 lg:grid-cols-2">
           <div className="max-w-xl">
-            <p className="text-label font-semibold uppercase tracking-[0.2em] text-terracotta">
+            <p className="text-label font-semibold uppercase tracking-[0.2em] text-terracotta-deep">
               Cerita kami
             </p>
             <h1 className="mt-4 text-display-lg text-teal">
@@ -77,7 +77,7 @@ export default function CeritaPage() {
       <section className="bg-cream-deep py-section">
         <div className="container-dama">
           <header className="mb-12 max-w-prose">
-            <p className="text-label font-semibold uppercase tracking-[0.18em] text-terracotta">
+            <p className="text-label font-semibold uppercase tracking-[0.18em] text-terracotta-deep">
               Yang kami pegang
             </p>
             <h2 className="mt-3 text-display-md text-teal">Empat pilar DAMA</h2>

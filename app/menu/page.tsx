@@ -25,6 +25,7 @@ export default function MenuPage() {
       <Section
         eyebrow="Menu"
         title="Seluruh hidangan DAMA"
+        titleAs="h1"
         intro="Dikelompokkan per lini. Saring sesuai suasana yang Anda cari, lalu pesan lewat kanal yang tersedia."
       >
         <MenuExplorer />

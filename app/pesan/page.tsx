@@ -25,6 +25,7 @@ export default function PesanPage() {
     <Section
       eyebrow="Di mana memesan"
       title="Pilih kanal sesuai kebutuhan"
+      titleAs="h1"
       intro="Setiap lini punya kanal yang paling pas. Berikut panduan singkatnya — pilih yang paling nyaman untuk Anda."
     >
       <div className="grid gap-6 lg:grid-cols-2">

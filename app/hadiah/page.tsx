@@ -30,7 +30,7 @@ export default function HadiahPage() {
         <PatternBand motif="bunga-floral" opacity={0.07} />
         <div className="container-dama relative grid items-center gap-12 lg:grid-cols-2">
           <div className="max-w-xl">
-            <p className="text-label font-semibold uppercase tracking-[0.2em] text-terracotta">
+            <p className="text-label font-semibold uppercase tracking-[0.2em] text-terracotta-deep">
               TANDO MATO · Hadiah
             </p>
             <h1 className="mt-4 text-display-lg text-teal">Kirim rasa sayang, bukan sekadar makanan</h1>

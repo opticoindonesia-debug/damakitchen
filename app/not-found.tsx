@@ -3,7 +3,7 @@ import { Button } from '@/components/Button';
 
 export default function NotFound() {
   return (
-    <Section eyebrow="404" title="Sepertinya halaman ini tak ada di meja">
+    <Section eyebrow="404" title="Sepertinya halaman ini tak ada di meja" titleAs="h1">
       <div className="max-w-prose">
         <p className="text-body-lg text-ink-soft">
           Mungkin tautannya berubah. Mari kembali dan temukan apa yang Anda cari.

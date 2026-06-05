@@ -22,7 +22,7 @@ export default function HomePage() {
         <PatternBand motif="songket-geometric" opacity={0.05} />
         <div className="container-dama relative grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
           <div className="max-w-xl">
-            <p className="font-sans text-label font-semibold uppercase tracking-[0.2em] text-terracotta">
+            <p className="font-sans text-label font-semibold uppercase tracking-[0.2em] text-terracotta-deep">
               {site.brandLineEn}
             </p>
             <h1 className="mt-5 text-display-xl text-teal">{site.tagline}.</h1>
@@ -179,7 +179,7 @@ export default function HomePage() {
             <div className="mt-7">
               <Button
                 href="/hadiah"
-                className="border border-cream/50 bg-cream text-terracotta hover:bg-cream-paper"
+                className="border border-cream/50 bg-cream text-terracotta-deep hover:bg-cream-paper"
               >
                 Kirim sebagai hadiah
               </Button>

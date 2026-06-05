@@ -14,12 +14,13 @@ export default function KontakPage() {
     <Section
       eyebrow="Kontak"
       title="Senang bisa menyapa Anda"
+      titleAs="h1"
       intro="Cara tercepat menghubungi kami adalah lewat WhatsApp. Bisa juga lewat email atau media sosial."
     >
       <div className="grid gap-10 lg:grid-cols-2">
         <div className="space-y-8">
           <div>
-            <h2 className="text-label font-semibold uppercase tracking-[0.18em] text-terracotta">
+            <h2 className="text-label font-semibold uppercase tracking-[0.18em] text-terracotta-deep">
               WhatsApp
             </h2>
             <p className="mt-2 text-body text-ink-soft">Paling cepat untuk pesanan dan pertanyaan.</p>
@@ -29,7 +30,7 @@ export default function KontakPage() {
           </div>
 
           <div>
-            <h2 className="text-label font-semibold uppercase tracking-[0.18em] text-terracotta">
+            <h2 className="text-label font-semibold uppercase tracking-[0.18em] text-terracotta-deep">
               Email
             </h2>
             <p className="mt-2">
@@ -43,7 +44,7 @@ export default function KontakPage() {
           </div>
 
           <div>
-            <h2 className="text-label font-semibold uppercase tracking-[0.18em] text-terracotta">
+            <h2 className="text-label font-semibold uppercase tracking-[0.18em] text-terracotta-deep">
               Media sosial
             </h2>
             <ul className="mt-2 space-y-2 text-body text-teal">

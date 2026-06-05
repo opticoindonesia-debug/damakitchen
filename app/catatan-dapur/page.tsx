@@ -11,7 +11,7 @@ export const metadata = buildMetadata({
 
 export default function CatatanDapurPage() {
   return (
-    <Section eyebrow="Catatan Dapur" title="Cerita kecil dari dapur kami">
+    <Section eyebrow="Catatan Dapur" title="Cerita kecil dari dapur kami" titleAs="h1">
       <div className="max-w-prose">
         <p className="text-body-lg text-ink-soft">
           Di sini nantinya kami berbagi cerita di balik masakan — resep yang dijaga, bahan yang

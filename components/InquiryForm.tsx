@@ -131,7 +131,7 @@ export function InquiryForm({ variant }: { variant: Variant }) {
           <div key={f.name}>
             <label htmlFor={id} className="block text-caption font-medium text-teal">
               {f.label}
-              {f.required && <span className="text-terracotta"> *</span>}
+              {f.required && <span className="text-terracotta-deep"> *</span>}
             </label>
             {f.type === 'textarea' ? (
               <textarea
