@@ -29,10 +29,7 @@ export const metadata: Metadata = {
   },
   description: site.umbrellaPromise,
   applicationName: site.name,
-  icons: {
-    icon: '/favicon.svg',
-    apple: '/apple-touch-icon.png',
-  },
+  // Favicon + apple icon come from the file conventions (app/icon.svg, app/apple-icon.tsx).
   manifest: '/manifest.webmanifest',
 };
 

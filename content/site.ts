@@ -14,6 +14,17 @@ export const site = {
   themeColor: '#1F4D4D',
 } as const;
 
+/**
+ * Seasonal celebration slot (§7.6). When active, gifting pages surface a
+ * festive note using the songket-red accent (perayaan only).
+ * TODO: toggle `active` and update copy around Lebaran/Natal.
+ */
+export const seasonal = {
+  active: false,
+  label: 'Edisi Perayaan',
+  message: 'Hampers edisi Lebaran sedang kami siapkan. Pesan lebih awal agar tak kehabisan.',
+} as const;
+
 export interface NavLink {
   href: string;
   label: string;
