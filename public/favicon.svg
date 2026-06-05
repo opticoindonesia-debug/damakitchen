@@ -1,0 +1,7 @@
+<!-- DAMA monogram favicon/seal. TODO: swap for official monogram SVG. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#1F4D4D" />
+  <text x="50%" y="50%" dy="0.34em" text-anchor="middle"
+        font-family="Georgia, 'Playfair Display', serif" font-weight="700"
+        font-size="40" fill="#F7F1E3">D</text>
+</svg>

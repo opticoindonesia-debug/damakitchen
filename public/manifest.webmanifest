@@ -1,0 +1,27 @@
+{
+  "name": "DAMA KITCHEN",
+  "short_name": "DAMA",
+  "description": "Masakan Minang otentik yang membuat taraso disayang.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F1E3",
+  "theme_color": "#1F4D4D",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Default page accent = core terracotta. Sub-brand pages override this. */
+    --accent: 198 91 62; /* terracotta #C65B3E */
+    --radius: 12px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-cream font-sans text-ink antialiased;
+    /* Generous body rhythm is a brand requirement (§3.4). */
+    line-height: 1.65;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display text-teal;
+    text-wrap: balance;
+  }
+
+  /* Body copy is left-aligned, never centered paragraphs (§3.4). */
+  p {
+    text-align: left;
+  }
+
+  /* Visible, on-brand focus ring everywhere (§8, §10). */
+  :focus-visible {
+    @apply outline-none ring-2 ring-teal ring-offset-2 ring-offset-cream;
+  }
+
+  ::selection {
+    @apply bg-terracotta/20 text-ink;
+  }
+}
+
+@layer utilities {
+  .container-dama {
+    @apply mx-auto w-full max-w-container px-gutter;
+  }
+
+  /* Calm entrance — honored only when motion is allowed (§3.6). */
+  @media (prefers-reduced-motion: no-preference) {
+    .animate-in {
+      animation: fade-up 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+  }
+}
+
+/* Reduced motion: no transforms, instant opacity (§3.6, §10). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
