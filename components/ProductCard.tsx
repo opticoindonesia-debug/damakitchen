@@ -22,6 +22,8 @@ export function ProductCard({ product }: { product: Product }) {
         category={product.imageCategory}
         ratio="landscape"
         rounded={false}
+        src={product.image}
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
         alt={`${product.name} dari ${sb.name} — ${product.blurb}`}
       />
       <div className="flex flex-1 flex-col p-6">

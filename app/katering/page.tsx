@@ -3,6 +3,7 @@ import { InquiryForm } from '@/components/InquiryForm';
 import { ImageWithScrim } from '@/components/ImageWithScrim';
 import { Reveal } from '@/components/Reveal';
 import { buildMetadata } from '@/lib/seo';
+import { media } from '@/content/site';
 
 export const metadata = buildMetadata({
   title: 'Katering & Acara',
@@ -45,6 +46,8 @@ export default function KateringPage() {
             ratio="landscape"
             warmBorder
             priority
+            src={media.kateringHero}
+            sizes="(max-width: 1024px) 100vw, 600px"
             alt="Hidangan acara DAMA tersaji rapi di meja, suasana hangat menyambut tamu."
           />
         </div>

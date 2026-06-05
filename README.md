@@ -69,6 +69,21 @@ shape is CMS-ready. Common edits:
 > **Voice guardrails (§5):** no superlatives, no caps-lock urgency, no fake discounts,
 > at most one emoji, customers have names. These apply to outbound WhatsApp templates too.
 
+### Adding photography
+
+Image slots render a warm placeholder until you point them at a real asset — set a
+path and `next/image` takes over automatically (responsive, LCP-priority aware, same
+aspect ratio so there's no layout shift). No component edits needed:
+
+| Photo | Set |
+| --- | --- |
+| Product / menu cards | `image` on each item in `content/products.ts` (e.g. `image: '/images/food/rendang.jpg'`) |
+| Gifting hampers tiers | same `image` field (TANDO MATO products) |
+| Sub-brand page hero | `heroImage` on each line in `content/subbrands.ts` |
+| Home hero, founder portrait, katering & gifting heroes | `media` object in `content/site.ts` |
+
+Drop files under `public/images/{food,ingredients,product,process,lifestyle}/`.
+
 ## Brand system notes
 
 - **Colors** are tokens only (`tailwind.config.ts`) — no stray hex in components.
@@ -125,7 +140,7 @@ Everything below ships as a clearly-marked placeholder until real assets land.
 
 - [ ] Official logo SVGs (primary, stacked, monogram) → `components/Logo.tsx`, `public/logo/`
 - [ ] The 5 motif files (Songket Teal, Floral Blush, Geometric Gold, Bunga Terracotta, Leaf/Daun) → `public/patterns/`
-- [ ] Photography library → `public/images/{food,ingredients,product,process,lifestyle}/` and swap `<Placeholder>` for `next/image`
+- [ ] Photography library → drop files under `public/images/...` and set `image` / `heroImage` / `media` paths (see **Adding photography**). The `next/image` swap is already wired — placeholders disappear automatically once a path is set.
 - [ ] Founder portrait → used on `/` and `/cerita`
 
 **Live data (env or content)**

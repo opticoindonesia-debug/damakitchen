@@ -6,7 +6,7 @@ import { Reveal } from '@/components/Reveal';
 import { PatternBand } from '@/components/PatternBand';
 import { buildMetadata } from '@/lib/seo';
 import { productsBySubBrand } from '@/content/products';
-import { seasonal, site } from '@/content/site';
+import { seasonal, site, media } from '@/content/site';
 
 export const metadata = buildMetadata({
   title: 'Hadiah',
@@ -44,6 +44,8 @@ export default function HadiahPage() {
             ratio="landscape"
             warmBorder
             priority
+            src={media.giftingHero}
+            sizes="(max-width: 1024px) 100vw, 600px"
             alt="Hampers TANDO MATO yang dirangkai rapi dengan kartu ucapan, hangat dan personal."
           />
         </div>
@@ -69,6 +71,7 @@ export default function HadiahPage() {
                   category="product"
                   ratio="landscape"
                   rounded={false}
+                  src={t.image}
                   alt={`Hampers ${t.name} dari TANDO MATO — ${t.blurb}`}
                 />
                 <div className="flex flex-1 flex-col p-6">

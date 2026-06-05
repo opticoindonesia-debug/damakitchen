@@ -12,7 +12,7 @@ import { Reveal } from '@/components/Reveal';
 import { Placeholder } from '@/components/Placeholder';
 import { subBrandList } from '@/content/subbrands';
 import { founder, enjoyModes } from '@/content/story';
-import { site } from '@/content/site';
+import { site, media } from '@/content/site';
 
 export default function HomePage() {
   return (
@@ -42,6 +42,8 @@ export default function HomePage() {
             ratio="square"
             warmBorder
             priority
+            src={media.homeHero}
+            sizes="(max-width: 1024px) 100vw, 600px"
             alt="Sepiring rendang Minang yang dimasak perlahan, hangat dan menggugah selera di atas meja kayu."
             className="mx-auto w-full max-w-md lg:max-w-none"
           />
@@ -91,6 +93,7 @@ export default function HomePage() {
             category="process"
             ratio="landscape"
             warmBorder
+            src={media.founderPortrait}
             alt="Tangan menakar bumbu dengan teliti di dapur DAMA, uap masakan mengepul hangat."
           />
           <div>

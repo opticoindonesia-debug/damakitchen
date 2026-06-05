@@ -8,7 +8,7 @@ import { Reveal } from '@/components/Reveal';
 import { buildMetadata } from '@/lib/seo';
 import { founder, proverbMovements } from '@/content/story';
 import { values } from '@/content/values';
-import { site } from '@/content/site';
+import { site, media } from '@/content/site';
 
 export const metadata = buildMetadata({
   title: 'Cerita',
@@ -41,6 +41,8 @@ export default function CeritaPage() {
             ratio="portrait"
             warmBorder
             priority
+            src={media.founderPortrait}
+            sizes="(max-width: 1024px) 100vw, 384px"
             alt={`${founder.name}, pendiri DAMA, di dapur yang hangat dan penuh cerita.`}
             className="mx-auto w-full max-w-sm"
           />

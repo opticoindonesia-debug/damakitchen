@@ -52,6 +52,8 @@ export function SubBrandPage({ subBrand }: { subBrand: SubBrand }) {
             ratio="landscape"
             warmBorder
             priority
+            src={subBrand.heroImage}
+            sizes="(max-width: 1024px) 100vw, 600px"
             alt={`Hidangan khas ${subBrand.name} disajikan hangat — ${subBrand.emotion.toLowerCase()} dan menggugah selera.`}
           />
         </div>

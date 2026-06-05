@@ -5,8 +5,8 @@ import { Placeholder, type PlaceholderCategory } from './Placeholder';
  * Art-directed image holder (§4.3). When a photo carries the logo or text,
  * a soft teal→transparent scrim (~35%) keeps overlays legible.
  *
- * Real photography is pending, so this currently renders a warm, correctly
- * proportioned <Placeholder>. TODO: replace with <Image> + real assets.
+ * Renders a real photo when `src` is set, otherwise a warm placeholder of the
+ * same proportions (no CLS on swap). Pass `src` to drop in real assets.
  */
 export function ImageWithScrim({
   category,
@@ -16,6 +16,8 @@ export function ImageWithScrim({
   scrim = false,
   warmBorder = false,
   priority = false,
+  src,
+  sizes,
   children,
   className,
 }: {
@@ -27,6 +29,9 @@ export function ImageWithScrim({
   scrim?: boolean;
   warmBorder?: boolean;
   priority?: boolean;
+  /** Real asset path; when set, renders next/image (§2). */
+  src?: string;
+  sizes?: string;
   /** Overlay content (e.g. logo, headline) placed above the scrim. */
   children?: React.ReactNode;
   className?: string;
@@ -40,7 +45,14 @@ export function ImageWithScrim({
         className,
       )}
     >
-      <Placeholder category={category} alt={alt} ratio={ratio} priority={priority} />
+      <Placeholder
+        category={category}
+        alt={alt}
+        ratio={ratio}
+        priority={priority}
+        src={src}
+        sizes={sizes}
+      />
       {scrim && (
         <div
           aria-hidden="true"

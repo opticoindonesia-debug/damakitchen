@@ -15,6 +15,24 @@ export const site = {
 } as const;
 
 /**
+ * Single drop-in point for key page-level photography (§4.3).
+ * Leave a value undefined to keep the warm placeholder; set a path under
+ * /public/images/... to render the real photo via next/image.
+ * TODO: add real assets and set these paths.
+ */
+export const media: {
+  homeHero?: string;
+  founderPortrait?: string;
+  kateringHero?: string;
+  giftingHero?: string;
+} = {
+  homeHero: undefined,
+  founderPortrait: undefined,
+  kateringHero: undefined,
+  giftingHero: undefined,
+};
+
+/**
  * Seasonal celebration slot (§7.6). When active, gifting pages surface a
  * festive note using the songket-red accent (perayaan only).
  * TODO: toggle `active` and update copy around Lebaran/Natal.

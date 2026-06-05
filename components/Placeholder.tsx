@@ -1,11 +1,15 @@
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 /**
- * Warm, correctly-proportioned image placeholder (§4.3).
- * Real photography is pending — every instance keeps a descriptive ID alt and
- * a true aspect ratio so layout is stable (no CLS) when real photos drop in.
+ * Art-directed image holder (§4.3).
  *
- * TODO: replace with next/image + assets under /public/images/{category}.
+ * When `src` points at a real asset it renders next/image (responsive,
+ * object-cover, LCP-priority aware). Until real photography lands it renders a
+ * warm, correctly-proportioned placeholder — same aspect ratio, so dropping in
+ * a photo causes no layout shift. Either way it carries a descriptive ID alt.
+ *
+ * Real photos drop in by setting `src` (e.g. "/images/food/rendang.jpg").
  */
 
 export type PlaceholderCategory =
@@ -39,19 +43,42 @@ const categoryLabel: Record<PlaceholderCategory, string> = {
   lifestyle: 'Foto suasana',
 };
 
+/** Sensible responsive sizes by aspect; overridable per instance. */
+const defaultSizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px';
+
 export function Placeholder({
   category,
   alt,
   ratio = 'landscape',
   className,
   priority = false,
+  src,
+  sizes,
 }: {
   category: PlaceholderCategory;
   alt: string;
   ratio?: keyof typeof ratioClass;
   className?: string;
   priority?: boolean;
+  /** Real asset path. When set, renders next/image instead of the placeholder. */
+  src?: string;
+  sizes?: string;
 }) {
+  if (src) {
+    return (
+      <div className={cn('relative', ratioClass[ratio], className)}>
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes={sizes ?? defaultSizes}
+          priority={priority}
+          className="object-cover"
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       role="img"

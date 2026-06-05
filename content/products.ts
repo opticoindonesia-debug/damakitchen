@@ -19,6 +19,12 @@ export interface Product {
   price: number | null;
   /** Placeholder image category folder. TODO: real product photo. */
   imageCategory: 'food' | 'product' | 'ingredients' | 'process' | 'lifestyle';
+  /**
+   * Real photo path, e.g. "/images/food/rendang.jpg". When set, the card
+   * renders it via next/image; until then a warm placeholder stands in.
+   * TODO: add real product photos and set this.
+   */
+  image?: string;
 }
 
 export const products: Product[] = [

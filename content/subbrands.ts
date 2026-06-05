@@ -40,6 +40,8 @@ export interface SubBrand {
   faqs: SubBrandFaq[];
   /** Sibling slugs for the gentle cross-sell strip. */
   crossSell: SubBrandSlug[];
+  /** Real hero photo path. When set, renders via next/image. TODO: add asset. */
+  heroImage?: string;
 }
 
 export const subBrands: Record<SubBrandSlug, SubBrand> = {
