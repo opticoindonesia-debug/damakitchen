@@ -18,10 +18,10 @@ export interface ChannelConfig {
 
 /**
  * WhatsApp business number in E.164 WITHOUT the leading "+" (wa.me format).
- * TODO: replace with the real DAMA WhatsApp business number.
+ * Real DAMA business number; overridable via env per environment.
  */
 export const WHATSAPP_NUMBER =
-  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '6280000000000';
+  process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '6281181207201';
 
 export const channels: Record<ChannelId, ChannelConfig> = {
   shopee: {

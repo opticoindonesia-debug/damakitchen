@@ -145,7 +145,7 @@ Everything below ships as a clearly-marked placeholder until real assets land.
 
 **Live data (env or content)**
 
-- [ ] WhatsApp business number — `NEXT_PUBLIC_WHATSAPP_NUMBER`
+- [x] WhatsApp business number — set (`+6281181207201`); overridable via `NEXT_PUBLIC_WHATSAPP_NUMBER`
 - [ ] Shopee / TikTok Shop / GoFood / Grab store URLs — `NEXT_PUBLIC_*_URL`
 - [ ] Social handles + contact email — `content/channels.ts` / `NEXT_PUBLIC_CONTACT_EMAIL`
 - [ ] Service-area coverage copy — `content/channels.ts`
