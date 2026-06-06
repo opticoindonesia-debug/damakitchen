@@ -7,8 +7,8 @@ import { Button } from '@/components/Button';
 import { Reveal } from '@/components/Reveal';
 import { buildMetadata } from '@/lib/seo';
 import { founder, proverbMovements } from '@/content/story';
-import { values } from '@/content/values';
 import { site, media } from '@/content/site';
+import { getPillars, getValues } from '@/lib/cms';
 
 export const metadata = buildMetadata({
   title: 'Cerita',
@@ -17,7 +17,8 @@ export const metadata = buildMetadata({
   path: '/cerita',
 });
 
-export default function CeritaPage() {
+export default async function CeritaPage() {
+  const [pillars, values] = await Promise.all([getPillars(), getValues()]);
   return (
     <>
       {/* Founder's truth */}
@@ -84,7 +85,7 @@ export default function CeritaPage() {
             </p>
             <h2 className="mt-3 text-display-md text-teal">Empat pilar DAMA</h2>
           </header>
-          <PillarRow />
+          <PillarRow pillars={pillars} />
         </div>
       </section>
 

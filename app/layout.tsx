@@ -1,10 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Playfair_Display, Poppins } from 'next/font/google';
 import './globals.css';
-import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
 import { site } from '@/content/site';
-import { OrganizationJsonLd } from '@/components/JsonLd';
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -40,18 +37,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id" className={`${playfair.variable} ${poppins.variable}`}>
-      <body>
-        <OrganizationJsonLd />
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded focus:bg-teal focus:px-4 focus:py-2 focus:text-cream"
-        >
-          Lewati ke konten utama
-        </a>
-        <Navbar />
-        <main id="main">{children}</main>
-        <Footer />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

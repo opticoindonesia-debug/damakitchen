@@ -4,14 +4,20 @@ import { useState } from 'react';
 import { ProductCard } from './ProductCard';
 import { Reveal } from './Reveal';
 import { cn } from '@/lib/utils';
-import { products } from '@/content/products';
-import { subBrandList, type SubBrandSlug } from '@/content/subbrands';
+import { products as staticProducts, type Product } from '@/content/products';
+import { subBrandList as staticSubBrands, type SubBrand, type SubBrandSlug } from '@/content/subbrands';
 
 /**
  * Menu explorer (§7.4): calm pill toggles in marker colors filter the catalog
  * by sub-brand. Active pill uses its marker color; the rest stay quiet.
  */
-export function MenuExplorer() {
+export function MenuExplorer({
+  products = staticProducts,
+  subBrands = staticSubBrands,
+}: {
+  products?: Product[];
+  subBrands?: SubBrand[];
+}) {
   const [active, setActive] = useState<SubBrandSlug | 'all'>('all');
 
   const filtered =
@@ -33,7 +39,7 @@ export function MenuExplorer() {
         >
           Semua
         </button>
-        {subBrandList.map((sb) => {
+        {subBrands.map((sb) => {
           const isActive = active === sb.slug;
           return (
             <button

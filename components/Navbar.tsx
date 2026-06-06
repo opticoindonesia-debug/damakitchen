@@ -5,14 +5,14 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Logo } from './Logo';
-import { subBrandList } from '@/content/subbrands';
+import { subBrandList, type SubBrand } from '@/content/subbrands';
 import { cn } from '@/lib/utils';
 
 /**
  * Sticky cream navbar (§6). Condenses to the monogram on scroll; offers a
  * grouped sub-brand menu and a mobile drawer. Keyboard-operable throughout.
  */
-export function Navbar() {
+export function Navbar({ subBrands = subBrandList }: { subBrands?: SubBrand[] }) {
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [subOpen, setSubOpen] = useState(false);
@@ -87,7 +87,7 @@ export function Navbar() {
             {subOpen && (
               <div className="absolute left-1/2 top-full w-64 -translate-x-1/2 pt-3">
                 <ul className="rounded-lg border border-teal/10 bg-cream-paper p-2 shadow-soft">
-                  {subBrandList.map((sb) => (
+                  {subBrands.map((sb) => (
                     <li key={sb.slug}>
                       <Link
                         href={`/${sb.slug}`}
@@ -154,7 +154,7 @@ export function Navbar() {
             <li className="px-2 pt-3 text-label font-semibold uppercase tracking-[0.18em] text-terracotta-deep">
               Sub-brand
             </li>
-            {subBrandList.map((sb) => (
+            {subBrands.map((sb) => (
               <li key={sb.slug}>
                 <Link
                   href={`/${sb.slug}`}

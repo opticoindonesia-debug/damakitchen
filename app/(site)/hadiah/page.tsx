@@ -5,7 +5,7 @@ import { ChannelButton } from '@/components/ChannelButton';
 import { Reveal } from '@/components/Reveal';
 import { PatternBand } from '@/components/PatternBand';
 import { buildMetadata } from '@/lib/seo';
-import { productsBySubBrand } from '@/content/products';
+import { getProductsBySubBrand } from '@/lib/cms';
 import { seasonal, site, media } from '@/content/site';
 
 export const metadata = buildMetadata({
@@ -15,15 +15,14 @@ export const metadata = buildMetadata({
   path: '/hadiah',
 });
 
-const tiers = productsBySubBrand('tando-mato');
-
 const tierMeta: Record<string, string> = {
   'tando-si-ketek': '1 porsi',
   'tando-si-sedang': '2–3 porsi',
   'tando-si-gadang': '5–8 porsi',
 };
 
-export default function HadiahPage() {
+export default async function HadiahPage() {
+  const tiers = await getProductsBySubBrand('tando-mato');
   return (
     <>
       <section className="relative overflow-hidden border-b border-teal/10 bg-blush/30 py-section">

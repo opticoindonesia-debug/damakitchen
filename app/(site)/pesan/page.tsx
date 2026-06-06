@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Section } from '@/components/Section';
 import { ChannelButton } from '@/components/ChannelButton';
 import { buildMetadata } from '@/lib/seo';
-import { subBrandList } from '@/content/subbrands';
+import { getSubBrands } from '@/lib/cms';
 
 export const metadata = buildMetadata({
   title: 'Di mana memesan',
@@ -20,7 +20,8 @@ const channelNote: Record<string, string> = {
   'tando-mato': 'Paket musiman di Shopee; hampers custom lewat WhatsApp.',
 };
 
-export default function PesanPage() {
+export default async function PesanPage() {
+  const subBrandList = await getSubBrands();
   return (
     <Section
       eyebrow="Di mana memesan"
