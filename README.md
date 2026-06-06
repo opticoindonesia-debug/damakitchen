@@ -37,6 +37,32 @@ pnpm lint      # ESLint
 pnpm format    # Prettier
 ```
 
+## Deploy (Vercel)
+
+This is a standard Next.js 14 app — **zero config**, and it builds with no required
+secrets (sensible defaults, including the real WhatsApp number, are baked in).
+
+One-time setup:
+
+1. Go to [vercel.com/new](https://vercel.com/new) and **Import** the GitHub repo
+   `opticoindonesia-debug/damakitchen`. Framework preset auto-detects as **Next.js**.
+2. Leave build settings as-is (`pnpm build`, output handled by Next). Click **Deploy**.
+3. (Optional) Add env vars under **Settings → Environment Variables** as they become
+   available — see the table below. None are required for the first deploy.
+4. Add your custom domain under **Settings → Domains** when ready, and set
+   `NEXT_PUBLIC_SITE_URL` to it (improves canonical/OG/sitemap URLs).
+
+After the first import, every push to `main` ships to production and every PR gets its
+own preview URL automatically.
+
+| Env var | Needed for | Required? |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | canonical/OG/sitemap URLs | recommended once domain is set |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | override default WA number | no (default set) |
+| `NEXT_PUBLIC_SHOPEE_URL` / `_TIKTOK_URL` / `_GOFOOD_URL` / `_GRAB_URL` | store links | follow later |
+| `NEXT_PUBLIC_CONTACT_EMAIL` | contact email | follow later |
+| `INQUIRY_EMAIL_API_KEY` / `INQUIRY_EMAIL_TO` | optional email on inquiries | no (WhatsApp-only) |
+
 ## Project structure
 
 ```
