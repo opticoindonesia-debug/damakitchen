@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Logo } from './Logo';
 import { PatternBand } from './PatternBand';
-import { subBrandList } from '@/content/subbrands';
+import { subBrandList, type SubBrand } from '@/content/subbrands';
 import { contact } from '@/content/channels';
 import { site } from '@/content/site';
 
@@ -9,7 +9,7 @@ import { site } from '@/content/site';
  * Footer (§6): logo + tagline, sub-brand links, channel links, contact,
  * "by DAMA" endorsement, social, copyright. Calm, on a teal ground.
  */
-export function Footer() {
+export function Footer({ subBrands = subBrandList }: { subBrands?: SubBrand[] }) {
   const year = new Date().getFullYear();
 
   return (
@@ -26,7 +26,7 @@ export function Footer() {
             Sub-brand
           </h2>
           <ul className="space-y-2.5">
-            {subBrandList.map((sb) => (
+            {subBrands.map((sb) => (
               <li key={sb.slug}>
                 <Link
                   href={`/${sb.slug}`}

@@ -10,11 +10,12 @@ import { QuoteBlock } from '@/components/QuoteBlock';
 import { ChannelButton } from '@/components/ChannelButton';
 import { Reveal } from '@/components/Reveal';
 import { Placeholder } from '@/components/Placeholder';
-import { subBrandList } from '@/content/subbrands';
 import { founder, enjoyModes } from '@/content/story';
 import { site, media } from '@/content/site';
+import { getSubBrands, getPillars } from '@/lib/cms';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [subBrandList, pillars] = await Promise.all([getSubBrands(), getPillars()]);
   return (
     <>
       {/* ── Hero (LCP) ─────────────────────────────────────── */}
@@ -66,7 +67,7 @@ export default function HomePage() {
         title="Empat hal yang tak kami tawar"
         intro="Setiap hidangan DAMA lahir dari empat keyakinan yang sama."
       >
-        <PillarRow />
+        <PillarRow pillars={pillars} />
       </Section>
 
       {/* ── Five sub-brands (navigational heart) ───────────── */}

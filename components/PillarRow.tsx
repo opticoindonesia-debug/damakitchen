@@ -1,11 +1,11 @@
-import { pillars } from '@/content/pillars';
+import { pillars as staticPillars, type Pillar } from '@/content/pillars';
 import { pillarIconMap } from './icons';
 import { Reveal } from './Reveal';
 
 /**
  * The four brand pillars as a calm 4-up line-icon row (§5.3).
  */
-export function PillarRow() {
+export function PillarRow({ pillars = staticPillars }: { pillars?: Pillar[] }) {
   return (
     <ul className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
       {pillars.map((pillar, i) => {

@@ -8,16 +8,20 @@ import { ChannelButton } from './ChannelButton';
 import { FAQAccordion } from './FAQAccordion';
 import { Reveal } from './Reveal';
 import { hexToRgbTriple } from '@/lib/utils';
-import { subBrands, type SubBrand } from '@/content/subbrands';
-import { productsBySubBrand } from '@/content/products';
+import { type SubBrand } from '@/content/subbrands';
+import { getProductsBySubBrand, getSubBrands } from '@/lib/cms';
 import { site } from '@/content/site';
 
 /**
  * Single data-driven sub-brand template (§7.3). The page accent is the line's
  * marker color (set on --accent); everything else stays in the core palette.
  */
-export function SubBrandPage({ subBrand }: { subBrand: SubBrand }) {
-  const lineProducts = productsBySubBrand(subBrand.slug);
+export async function SubBrandPage({ subBrand }: { subBrand: SubBrand }) {
+  const [lineProducts, allSubBrands] = await Promise.all([
+    getProductsBySubBrand(subBrand.slug),
+    getSubBrands(),
+  ]);
+  const subBrandBySlug = Object.fromEntries(allSubBrands.map((s) => [s.slug, s]));
   const accentStyle = { '--accent': hexToRgbTriple(subBrand.markerHex) } as React.CSSProperties;
 
   return (
@@ -115,7 +119,8 @@ export function SubBrandPage({ subBrand }: { subBrand: SubBrand }) {
         </p>
         <div className="grid gap-6 sm:grid-cols-2">
           {subBrand.crossSell.map((slug) => {
-            const sib = subBrands[slug];
+            const sib = subBrandBySlug[slug];
+            if (!sib) return null;
             return (
               <Link
                 key={slug}

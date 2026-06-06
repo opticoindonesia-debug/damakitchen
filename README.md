@@ -62,6 +62,41 @@ own preview URL automatically.
 | `NEXT_PUBLIC_SHOPEE_URL` / `_TIKTOK_URL` / `_GOFOOD_URL` / `_GRAB_URL` | store links | follow later |
 | `NEXT_PUBLIC_CONTACT_EMAIL` | contact email | follow later |
 | `INQUIRY_EMAIL_API_KEY` / `INQUIRY_EMAIL_TO` | optional email on inquiries | no (WhatsApp-only) |
+| `NEXT_PUBLIC_SANITY_PROJECT_ID` / `_DATASET` | connect the Sanity CMS + `/studio` | no (static fallback) |
+
+## CMS (Sanity)
+
+The site reads content through a small data layer (`lib/cms`) that fetches from
+**Sanity** when configured and otherwise falls back to the static files in
+`/content`. So the site works fully with **no CMS connected**, and switches to
+live, editable content the moment you set the Sanity env vars — no code changes.
+
+What you can manage from the CMS (editor lives at **`/studio`**):
+
+- **Sub-brand** copy, FAQs, channels, hero photos (marker colours stay as code tokens)
+- **Produk / Menu** items — name, photo, info icons, price, lini
+- **Catatan Dapur** — write & publish articles (rich text + images)
+- **Halaman** — create brand-new pages with their own URL (`/<slug>`), rich text + hero
+- **Pilar, Nilai, Testimoni** reference content
+- **Pengaturan Situs** singleton (brand lines, contact, channels, seasonal banner)
+
+### One-time Sanity setup
+
+1. Create a free project at **[sanity.io/manage](https://www.sanity.io/manage)** →
+   note the **Project ID** and create a dataset named `production`.
+2. Set env vars (locally in `.env.local`, and in Vercel → Settings → Environment Variables):
+   ```
+   NEXT_PUBLIC_SANITY_PROJECT_ID=<your id>
+   NEXT_PUBLIC_SANITY_DATASET=production
+   NEXT_PUBLIC_SANITY_API_VERSION=2024-10-01
+   ```
+3. In sanity.io/manage → **API → CORS origins**, add your site origin(s):
+   `http://localhost:3000` and your production domain (allow credentials).
+4. Redeploy (or `pnpm dev`). Visit **`/studio`**, log in, and start adding content.
+   New/edited content appears on the site within ~1 hour (ISR) or instantly on redeploy.
+
+> Tip: to migrate the current placeholder copy into Sanity in one go, you can later
+> add an import script — the schema field names mirror the `/content` files.
 
 ## Project structure
 
@@ -71,7 +106,11 @@ app/                 Routes (home, cerita, menu, 5 sub-brands, katering, hadiah,
                      opengraph-image, icon)
 components/          Reusable, typed UI (see Component library below)
 components/icons/    DAMA line icons (2px stroke, 24×24)
-content/             Typed content layer — the CMS-replaceable data source
+content/             Typed content layer — static fallback / seed data
+lib/cms/             Data layer: Sanity when configured, else /content fallback
+lib/sanity/          Sanity client + image URL builder (server-only)
+sanity/              CMS schemas, env, desk structure
+app/studio/          Embedded Sanity Studio (editor) at /studio
 lib/                 WhatsApp link builder, SEO helper, email adapter, utils
 messages/id.json     i18n-ready strings (ships `id` only)
 public/patterns/     Motif SVG placeholders (TODO: real assets)
