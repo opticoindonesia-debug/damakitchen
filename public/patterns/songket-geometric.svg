@@ -1,0 +1,9 @@
+<!-- TODO: replace with official DAMA "Songket Teal" motif asset. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <g fill="none" stroke="#1F4D4D" stroke-width="1.5">
+    <path d="M0 60 L60 0 L120 60 L60 120 Z" />
+    <path d="M30 60 L60 30 L90 60 L60 90 Z" />
+    <path d="M60 50 L70 60 L60 70 L50 60 Z" fill="#1F4D4D" stroke="none" />
+    <path d="M0 0 L20 20 M120 0 L100 20 M0 120 L20 100 M120 120 L100 100" />
+  </g>
+</svg>

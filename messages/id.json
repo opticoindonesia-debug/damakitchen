@@ -1,0 +1,43 @@
+{
+  "common": {
+    "skipToContent": "Lewati ke konten utama",
+    "menu": "Menu",
+    "close": "Tutup",
+    "openMenu": "Buka menu navigasi",
+    "byDama": "by DAMA"
+  },
+  "nav": {
+    "cerita": "Cerita",
+    "menu": "Menu",
+    "katering": "Katering",
+    "hadiah": "Hadiah",
+    "pesan": "Pesan"
+  },
+  "home": {
+    "heroHeadline": "Taraso Disayang.",
+    "heroSub": "Masakan Minang otentik yang membuat taraso disayang.",
+    "heroBrandLine": "Authentic Flavours. Made with Purpose.",
+    "ctaOrder": "Pesan",
+    "ctaMenu": "Lihat Menu",
+    "essence": "Masakan bukan sekadar makanan — ia sarana merawat hubungan.",
+    "subBrandsTitle": "Lima cara menikmati DAMA",
+    "founderLink": "Baca cerita kami",
+    "enjoyTitle": "Cara menikmati DAMA",
+    "whereToBuyTitle": "Di mana memesan"
+  },
+  "cta": {
+    "whatsapp": "Pesan lewat WhatsApp",
+    "shopee": "Lihat di Shopee",
+    "tiktok": "Lihat di TikTok Shop",
+    "gofood": "Pesan via GoFood",
+    "grab": "Pesan via GrabFood",
+    "catering": "Minta penawaran acara",
+    "gift": "Kirim sebagai hadiah"
+  },
+  "form": {
+    "thanks": "Terima kasih — pesanmu sudah kami terima, kami balas secepatnya.",
+    "required": "Bagian ini perlu diisi ya.",
+    "submitCatering": "Minta penawaran",
+    "submitGifting": "Kirim permintaan"
+  }
+}
