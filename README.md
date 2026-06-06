@@ -115,6 +115,29 @@ The script is **idempotent** (deterministic ids + createOrReplace) — re-run it
 time after editing the static files; it won't touch documents you create later in
 the Studio. Keep the write token out of version control.
 
+### Instant publish (Sanity → Vercel webhook)
+
+By default CMS edits appear within ~1h (ISR). To make them appear in **seconds**
+without a full redeploy, wire on-demand revalidation:
+
+1. Pick a random secret string. Add it to **Vercel → Environment Variables**:
+   ```
+   SANITY_REVALIDATE_SECRET=<random string>
+   ```
+   then redeploy.
+2. In **sanity.io/manage → API → Webhooks → Create webhook**:
+   - **URL**: `https://<your-domain>/api/revalidate`
+   - **Trigger on**: Create, Update, Delete
+   - **Filter**: (leave empty for all types)
+   - **Projection**: `{ "_type": _type, "slug": slug.current }`
+   - **HTTP method**: POST
+   - **Secret**: the same value as `SANITY_REVALIDATE_SECRET`
+3. Publish an edit in `/studio` — the affected pages refresh within seconds.
+
+The endpoint (`app/api/revalidate/route.ts`) verifies the Sanity signature, then
+calls `revalidatePath('/', 'layout')` (sub-brands live in the nav/footer on every
+page) plus the specific journal/page path so new slugs regenerate too.
+
 ## Project structure
 
 ```
