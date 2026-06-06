@@ -95,8 +95,25 @@ What you can manage from the CMS (editor lives at **`/studio`**):
 4. Redeploy (or `pnpm dev`). Visit **`/studio`**, log in, and start adding content.
    New/edited content appears on the site within ~1 hour (ISR) or instantly on redeploy.
 
-> Tip: to migrate the current placeholder copy into Sanity in one go, you can later
-> add an import script — the schema field names mirror the `/content` files.
+### Seed the CMS with the current content
+
+To start editing from the existing copy instead of a blank Studio, import all the
+`/content` placeholders into Sanity in one command:
+
+1. Create a write token at sanity.io/manage → **API → Tokens** (Editor role).
+2. Add to `.env.local` (alongside the `NEXT_PUBLIC_SANITY_*` vars):
+   ```
+   SANITY_API_WRITE_TOKEN=<your editor token>
+   ```
+3. Run:
+   ```
+   pnpm seed:sanity
+   ```
+
+It imports sub-brands, products, pillars, values, testimonials and site settings.
+The script is **idempotent** (deterministic ids + createOrReplace) — re-run it any
+time after editing the static files; it won't touch documents you create later in
+the Studio. Keep the write token out of version control.
 
 ## Project structure
 
