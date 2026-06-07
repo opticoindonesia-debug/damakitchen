@@ -5,8 +5,8 @@ import { ChannelButton } from '@/components/ChannelButton';
 import { Reveal } from '@/components/Reveal';
 import { PatternBand } from '@/components/PatternBand';
 import { buildMetadata } from '@/lib/seo';
-import { getProductsBySubBrand } from '@/lib/cms';
-import { seasonal, site, media } from '@/content/site';
+import { getProductsBySubBrand, getSiteSettings } from '@/lib/cms';
+import { site, media } from '@/content/site';
 
 export const metadata = buildMetadata({
   title: 'Hadiah',
@@ -22,7 +22,11 @@ const tierMeta: Record<string, string> = {
 };
 
 export default async function HadiahPage() {
-  const tiers = await getProductsBySubBrand('tando-mato');
+  const [tiers, settings] = await Promise.all([
+    getProductsBySubBrand('tando-mato'),
+    getSiteSettings(),
+  ]);
+  const seasonal = settings.seasonal;
   return (
     <>
       <section className="relative overflow-hidden border-b border-teal/10 bg-blush/30 py-section">

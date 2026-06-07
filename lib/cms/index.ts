@@ -13,6 +13,10 @@ import {
 } from '@/content/products';
 import { pillars as staticPillars, type Pillar } from '@/content/pillars';
 import { values as staticValues, type BrandValue } from '@/content/values';
+import { testimonials as staticTestimonials, type Testimonial } from '@/content/testimonials';
+import { site, seasonal as staticSeasonal, media } from '@/content/site';
+import { contact } from '@/content/channels';
+import { founder } from '@/content/story';
 
 /**
  * Content access layer. Each getter returns the same TypeScript shapes used
@@ -90,6 +94,95 @@ export async function getProductsBySubBrand(slug: SubBrandSlug): Promise<Product
   if (!sanityConfigured) return staticProductsBySubBrand(slug);
   const all = await getProducts();
   return all.filter((p) => p.subBrand === slug);
+}
+
+// ── Site settings (brand text, beranda, contact, seasonal, tampilan) ──
+export interface SiteSettings {
+  tagline: string;
+  brandLineEn: string;
+  umbrellaPromise: string;
+  heroHeadline: string;
+  essence: string;
+  founderQuote: string;
+  founderName: string;
+  founderRole: string;
+  heroImage?: string;
+  founderImage?: string;
+  heroStyle: 'cream' | 'teal' | 'blush';
+  email: string;
+  instagram: string;
+  tiktok: string;
+  threads: string;
+  coverage: string;
+  seasonal: { active: boolean; label: string; message: string };
+}
+
+const staticSettings: SiteSettings = {
+  tagline: site.tagline,
+  brandLineEn: site.brandLineEn,
+  umbrellaPromise: site.umbrellaPromise,
+  heroHeadline: `${site.tagline}.`,
+  essence: 'Masakan bukan sekadar makanan — ia sarana merawat hubungan.',
+  founderQuote: founder.pullQuote,
+  founderName: founder.name,
+  founderRole: founder.role,
+  heroImage: media.homeHero,
+  founderImage: media.founderPortrait,
+  heroStyle: 'cream',
+  email: contact.email,
+  instagram: contact.instagram.href,
+  tiktok: contact.tiktok.href,
+  threads: contact.threads.href,
+  coverage: contact.coverage,
+  seasonal: { active: staticSeasonal.active, label: staticSeasonal.label, message: staticSeasonal.message },
+};
+
+export async function getSiteSettings(): Promise<SiteSettings> {
+  if (!sanityConfigured) return staticSettings;
+  const d = await sanityClient.fetch<Record<string, unknown> | null>(
+    `*[_id=="siteSettings"][0]{
+      tagline, brandLineEn, umbrellaPromise, heroHeadline, essence,
+      founderQuote, founderName, founderRole, heroImage, founderImage, heroStyle,
+      email, instagram, tiktok, threads, coverage,
+      seasonalActive, seasonalLabel, seasonalMessage
+    }`,
+  );
+  if (!d) return staticSettings;
+  const str = (v: unknown, fb: string) => (typeof v === 'string' && v.trim() ? v : fb);
+  return {
+    tagline: str(d.tagline, staticSettings.tagline),
+    brandLineEn: str(d.brandLineEn, staticSettings.brandLineEn),
+    umbrellaPromise: str(d.umbrellaPromise, staticSettings.umbrellaPromise),
+    heroHeadline: str(d.heroHeadline, staticSettings.heroHeadline),
+    essence: str(d.essence, staticSettings.essence),
+    founderQuote: str(d.founderQuote, staticSettings.founderQuote),
+    founderName: str(d.founderName, staticSettings.founderName),
+    founderRole: str(d.founderRole, staticSettings.founderRole),
+    heroImage: urlForImage(d.heroImage as never) ?? staticSettings.heroImage,
+    founderImage: urlForImage(d.founderImage as never) ?? staticSettings.founderImage,
+    heroStyle: (['cream', 'teal', 'blush'].includes(d.heroStyle as string)
+      ? (d.heroStyle as SiteSettings['heroStyle'])
+      : 'cream'),
+    email: str(d.email, staticSettings.email),
+    instagram: str(d.instagram, staticSettings.instagram),
+    tiktok: str(d.tiktok, staticSettings.tiktok),
+    threads: str(d.threads, staticSettings.threads),
+    coverage: str(d.coverage, staticSettings.coverage),
+    seasonal: {
+      active: Boolean(d.seasonalActive),
+      label: str(d.seasonalLabel, staticSettings.seasonal.label),
+      message: str(d.seasonalMessage, staticSettings.seasonal.message),
+    },
+  };
+}
+
+// ── Testimonials ──────────────────────────────────────────────
+export async function getTestimonials(): Promise<Testimonial[]> {
+  if (!sanityConfigured) return staticTestimonials;
+  const docs = await sanityClient.fetch<Testimonial[]>(
+    `*[_type=="testimonial"]|order(order asc){name,context,quote}`,
+  );
+  return docs?.length ? docs : staticTestimonials;
 }
 
 // ── Pillars / values ──────────────────────────────────────────

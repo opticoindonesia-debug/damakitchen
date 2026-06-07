@@ -83,6 +83,8 @@ const siteSettings = defineType({
   icon: CogIcon,
   groups: [
     { name: 'brand', title: 'Brand' },
+    { name: 'beranda', title: 'Beranda' },
+    { name: 'tampilan', title: 'Tampilan' },
     { name: 'contact', title: 'Kontak & Sosial' },
     { name: 'channels', title: 'Kanal Jualan' },
     { name: 'seasonal', title: 'Perayaan' },
@@ -93,6 +95,57 @@ const siteSettings = defineType({
     defineField({ name: 'brandLineEn', type: 'string', title: 'Brand line (EN)', group: 'brand' }),
     defineField({ name: 'umbrellaPromise', type: 'text', rows: 2, title: 'Janji utama', group: 'brand' }),
     defineField({ name: 'rootProverb', type: 'string', title: 'Peribahasa akar', group: 'brand' }),
+
+    // ── Beranda ──
+    defineField({
+      name: 'heroHeadline',
+      type: 'string',
+      title: 'Judul besar hero',
+      description: 'Tulisan paling besar di Beranda. Contoh: "Taraso Disayang."',
+      group: 'beranda',
+    }),
+    defineField({
+      name: 'heroImage',
+      type: 'image',
+      title: 'Foto hero Beranda',
+      options: { hotspot: true },
+      group: 'beranda',
+    }),
+    defineField({
+      name: 'essence',
+      type: 'text',
+      rows: 2,
+      title: 'Kalimat inti (di bawah hero)',
+      group: 'beranda',
+    }),
+    defineField({ name: 'founderQuote', type: 'text', rows: 3, title: 'Kutipan pendiri', group: 'beranda' }),
+    defineField({ name: 'founderName', type: 'string', title: 'Nama pendiri', group: 'beranda' }),
+    defineField({ name: 'founderRole', type: 'string', title: 'Jabatan pendiri', group: 'beranda' }),
+    defineField({
+      name: 'founderImage',
+      type: 'image',
+      title: 'Foto pendiri / proses',
+      options: { hotspot: true },
+      group: 'beranda',
+    }),
+
+    // ── Tampilan (preset aman) ──
+    defineField({
+      name: 'heroStyle',
+      type: 'string',
+      title: 'Latar hero Beranda',
+      description: 'Pilihan aman yang tetap sesuai brand & terbaca.',
+      options: {
+        list: [
+          { title: 'Krem (default)', value: 'cream' },
+          { title: 'Teal (gelap)', value: 'teal' },
+          { title: 'Blush (lembut)', value: 'blush' },
+        ],
+        layout: 'radio',
+      },
+      initialValue: 'cream',
+      group: 'tampilan',
+    }),
     defineField({ name: 'whatsappNumber', type: 'string', title: 'Nomor WhatsApp (E.164 tanpa +)', group: 'contact' }),
     defineField({ name: 'email', type: 'string', title: 'Email', group: 'contact' }),
     defineField({ name: 'instagram', type: 'url', title: 'Instagram URL', group: 'contact' }),
