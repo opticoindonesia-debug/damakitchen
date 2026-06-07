@@ -2,9 +2,11 @@
 
 import { defineConfig } from 'sanity';
 import { structureTool } from 'sanity/structure';
+import { DownloadIcon } from '@sanity/icons';
 import { dataset, projectId } from '@/sanity/env';
 import { schemaTypes } from '@/sanity/schemaTypes';
 import { structure } from '@/sanity/structure';
+import { SeedTool } from '@/sanity/SeedTool';
 
 /**
  * Sanity Studio config, embedded at /studio.
@@ -25,6 +27,10 @@ export default defineConfig({
   dataset,
   schema: { types: schemaTypes },
   plugins: [structureTool({ structure })],
+  tools: (prev) => [
+    ...prev,
+    { name: 'impor-konten', title: 'Impor Konten', icon: DownloadIcon, component: SeedTool },
+  ],
   document: {
     // Lock the settings singleton: no duplicate / delete / unpublish.
     actions: (prev, { schemaType }) =>
