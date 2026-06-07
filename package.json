@@ -13,8 +13,8 @@
   "dependencies": {
     "@portabletext/react": "^3.2.4",
     "@sanity/client": "^6.29.1",
+    "@sanity/icons": "^3.7.4",
     "@sanity/image-url": "^1.2.0",
-    "@sanity/vision": "^3.99.0",
     "@sanity/webhook": "^4.0.4",
     "framer-motion": "^11.3.0",
     "lucide-react": "^0.400.0",

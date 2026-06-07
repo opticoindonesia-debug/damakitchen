@@ -1,4 +1,14 @@
 import { defineType, defineField, defineArrayMember, type SchemaTypeDefinition } from 'sanity';
+import {
+  CogIcon,
+  TagIcon,
+  PackageIcon,
+  DocumentTextIcon,
+  DocumentsIcon,
+  StarIcon,
+  HeartIcon,
+  CommentIcon,
+} from '@sanity/icons';
 
 /**
  * DAMA KITCHEN content model.
@@ -70,6 +80,7 @@ const siteSettings = defineType({
   name: 'siteSettings',
   title: 'Pengaturan Situs',
   type: 'document',
+  icon: CogIcon,
   groups: [
     { name: 'brand', title: 'Brand' },
     { name: 'contact', title: 'Kontak & Sosial' },
@@ -114,18 +125,31 @@ const subBrand = defineType({
   name: 'subBrand',
   title: 'Sub-brand',
   type: 'document',
+  icon: TagIcon,
   fields: [
     defineField({ name: 'name', type: 'string', title: 'Nama' }),
     defineField({
       name: 'slug',
       type: 'string',
       title: 'Pengenal lini',
+      description: 'Jangan diubah — menentukan alamat halaman & warna penanda lini.',
       options: subBrandSlugs,
       validation: (r) => r.required(),
     }),
     defineField({ name: 'shortName', type: 'string', title: 'Nama singkat (tag)' }),
-    defineField({ name: 'emotion', type: 'string', title: 'Emosi (jangan ditukar)' }),
-    defineField({ name: 'lead', type: 'text', rows: 2, title: 'Pesan utama' }),
+    defineField({
+      name: 'emotion',
+      type: 'string',
+      title: 'Emosi',
+      description: 'Emosi tetap tiap lini — jangan ditukar (Tenang/Bangga/Hangat/Lega/Berkesan).',
+    }),
+    defineField({
+      name: 'lead',
+      type: 'text',
+      rows: 2,
+      title: 'Pesan utama',
+      description: 'Kalimat hangat & jujur. Hindari huruf kapital berlebih, tanda seru beruntun, atau klaim "ternikmat/nomor satu".',
+    }),
     defineField({ name: 'about', type: 'text', rows: 4, title: 'Tentang lini ini' }),
     defineField({ name: 'howToOrder', type: 'text', rows: 3, title: 'Cara memesan' }),
     defineField({
@@ -153,6 +177,7 @@ const product = defineType({
   name: 'product',
   title: 'Produk / Menu',
   type: 'document',
+  icon: PackageIcon,
   fields: [
     defineField({ name: 'name', type: 'string', title: 'Nama' }),
     defineField({ name: 'slug', type: 'slug', title: 'Slug', options: { source: 'name' } }),
@@ -182,8 +207,19 @@ const product = defineType({
         },
       ],
     }),
-    defineField({ name: 'price', type: 'number', title: 'Harga (Rp, opsional)' }),
-    defineField({ name: 'image', type: 'image', title: 'Foto', options: { hotspot: true } }),
+    defineField({
+      name: 'price',
+      type: 'number',
+      title: 'Harga (Rp, opsional)',
+      description: 'Kosongkan bila belum ingin menampilkan harga.',
+    }),
+    defineField({
+      name: 'image',
+      type: 'image',
+      title: 'Foto',
+      description: 'Klik gambar lalu "Edit hotspot" untuk mengatur titik fokus/crop.',
+      options: { hotspot: true },
+    }),
     defineField({
       name: 'imageCategory',
       type: 'string',
@@ -204,6 +240,7 @@ const pillar = defineType({
   name: 'pillar',
   title: 'Pilar Brand',
   type: 'document',
+  icon: StarIcon,
   fields: [
     defineField({ name: 'title', type: 'string', title: 'Judul' }),
     defineField({ name: 'desc', type: 'text', rows: 2, title: 'Deskripsi' }),
@@ -222,6 +259,7 @@ const brandValue = defineType({
   name: 'brandValue',
   title: 'Nilai Brand',
   type: 'document',
+  icon: HeartIcon,
   fields: [
     defineField({ name: 'title', type: 'string', title: 'Judul' }),
     defineField({ name: 'desc', type: 'text', rows: 2, title: 'Deskripsi' }),
@@ -234,6 +272,7 @@ const testimonial = defineType({
   name: 'testimonial',
   title: 'Testimoni',
   type: 'document',
+  icon: CommentIcon,
   fields: [
     defineField({ name: 'name', type: 'string', title: 'Nama' }),
     defineField({ name: 'context', type: 'string', title: 'Konteks' }),
@@ -249,6 +288,7 @@ const journalPost = defineType({
   name: 'journalPost',
   title: 'Catatan Dapur (Artikel)',
   type: 'document',
+  icon: DocumentTextIcon,
   fields: [
     defineField({ name: 'title', type: 'string', title: 'Judul', validation: (r) => r.required() }),
     defineField({
@@ -274,12 +314,14 @@ const page = defineType({
   name: 'page',
   title: 'Halaman',
   type: 'document',
+  icon: DocumentsIcon,
   fields: [
     defineField({ name: 'title', type: 'string', title: 'Judul', validation: (r) => r.required() }),
     defineField({
       name: 'slug',
       type: 'slug',
       title: 'Slug (alamat halaman)',
+      description: 'Klik "Generate". Halaman akan hidup di /<slug>. Hindari kata yang sama dengan halaman bawaan (menu, cerita, pesan, dll).',
       options: { source: 'title' },
       validation: (r) => r.required(),
     }),
