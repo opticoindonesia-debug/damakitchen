@@ -1,7 +1,7 @@
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { OrganizationJsonLd } from '@/components/JsonLd';
-import { getSubBrands } from '@/lib/cms';
+import { getSubBrands, getSiteSettings } from '@/lib/cms';
 
 /** ISR: pages refresh ~hourly so CMS edits appear without a redeploy. */
 export const revalidate = 3600;
@@ -12,7 +12,7 @@ export const revalidate = 3600;
  * Sub-brands are fetched once here (CMS or static fallback) and shared.
  */
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const subBrands = await getSubBrands();
+  const [subBrands, settings] = await Promise.all([getSubBrands(), getSiteSettings()]);
 
   return (
     <>
@@ -25,7 +25,16 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       </a>
       <Navbar subBrands={subBrands} />
       <main id="main">{children}</main>
-      <Footer subBrands={subBrands} />
+      <Footer
+        subBrands={subBrands}
+        settings={{
+          umbrellaPromise: settings.umbrellaPromise,
+          email: settings.email,
+          instagram: settings.instagram,
+          tiktok: settings.tiktok,
+          threads: settings.threads,
+        }}
+      />
     </>
   );
 }

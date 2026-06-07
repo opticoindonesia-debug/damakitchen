@@ -10,6 +10,7 @@ import { values } from '../content/values';
 import { testimonials } from '../content/testimonials';
 import { site, seasonal } from '../content/site';
 import { WHATSAPP_NUMBER, contact, channels } from '../content/channels';
+import { founder } from '../content/story';
 
 export type SeedDoc = Record<string, unknown> & { _id: string; _type: string };
 
@@ -26,6 +27,12 @@ export function buildSeedDocs(): SeedDoc[] {
     brandLineEn: site.brandLineEn,
     umbrellaPromise: site.umbrellaPromise,
     rootProverb: site.rootProverb,
+    heroHeadline: `${site.tagline}.`,
+    essence: 'Masakan bukan sekadar makanan — ia sarana merawat hubungan.',
+    founderQuote: founder.pullQuote,
+    founderName: founder.name,
+    founderRole: founder.role,
+    heroStyle: 'cream',
     whatsappNumber: WHATSAPP_NUMBER,
     email: contact.email,
     instagram: contact.instagram.href,

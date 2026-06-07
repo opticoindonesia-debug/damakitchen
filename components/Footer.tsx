@@ -5,12 +5,31 @@ import { subBrandList, type SubBrand } from '@/content/subbrands';
 import { contact } from '@/content/channels';
 import { site } from '@/content/site';
 
+export interface FooterContact {
+  umbrellaPromise: string;
+  email: string;
+  instagram: string;
+  tiktok: string;
+  threads: string;
+}
+
 /**
  * Footer (§6): logo + tagline, sub-brand links, channel links, contact,
  * "by DAMA" endorsement, social, copyright. Calm, on a teal ground.
  */
-export function Footer({ subBrands = subBrandList }: { subBrands?: SubBrand[] }) {
+export function Footer({
+  subBrands = subBrandList,
+  settings,
+}: {
+  subBrands?: SubBrand[];
+  settings?: FooterContact;
+}) {
   const year = new Date().getFullYear();
+  const promise = settings?.umbrellaPromise ?? site.umbrellaPromise;
+  const email = settings?.email ?? contact.email;
+  const igHref = settings?.instagram ?? contact.instagram.href;
+  const ttHref = settings?.tiktok ?? contact.tiktok.href;
+  const thHref = settings?.threads ?? contact.threads.href;
 
   return (
     <footer className="relative mt-section overflow-hidden bg-teal text-cream">
@@ -18,7 +37,7 @@ export function Footer({ subBrands = subBrandList }: { subBrands?: SubBrand[] })
       <div className="container-dama relative grid gap-12 py-16 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-1">
           <Logo variant="stacked" color="cream" withTagline />
-          <p className="mt-5 max-w-xs text-caption text-cream/75">{site.umbrellaPromise}</p>
+          <p className="mt-5 max-w-xs text-caption text-cream/75">{promise}</p>
         </div>
 
         <nav aria-label="Sub-brand">
@@ -87,37 +106,22 @@ export function Footer({ subBrands = subBrandList }: { subBrands?: SubBrand[] })
           </h2>
           <ul className="space-y-2.5 text-caption text-cream/85">
             <li>
-              <a href={`mailto:${contact.email}`} className="hover:text-cream">
-                {contact.email}
+              <a href={`mailto:${email}`} className="hover:text-cream">
+                {email}
               </a>
             </li>
             <li>
-              <a
-                href={contact.instagram.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-cream"
-              >
+              <a href={igHref} target="_blank" rel="noopener noreferrer" className="hover:text-cream">
                 Instagram {contact.instagram.handle}
               </a>
             </li>
             <li>
-              <a
-                href={contact.tiktok.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-cream"
-              >
+              <a href={ttHref} target="_blank" rel="noopener noreferrer" className="hover:text-cream">
                 TikTok {contact.tiktok.handle}
               </a>
             </li>
             <li>
-              <a
-                href={contact.threads.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-cream"
-              >
+              <a href={thHref} target="_blank" rel="noopener noreferrer" className="hover:text-cream">
                 Threads {contact.threads.handle}
               </a>
             </li>

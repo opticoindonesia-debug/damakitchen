@@ -10,24 +10,38 @@ import { QuoteBlock } from '@/components/QuoteBlock';
 import { ChannelButton } from '@/components/ChannelButton';
 import { Reveal } from '@/components/Reveal';
 import { Placeholder } from '@/components/Placeholder';
-import { founder, enjoyModes } from '@/content/story';
-import { site, media } from '@/content/site';
-import { getSubBrands, getPillars } from '@/lib/cms';
+import { Testimonials } from '@/components/Testimonials';
+import { enjoyModes } from '@/content/story';
+import { cn } from '@/lib/utils';
+import { getSubBrands, getPillars, getSiteSettings, getTestimonials } from '@/lib/cms';
+
+// Curated, on-brand hero background presets (safe — contrast stays AA).
+const heroStyles = {
+  cream: { wrap: 'bg-cream', eyebrow: 'text-terracotta-deep', headline: 'text-teal', sub: 'text-ink-soft' },
+  teal: { wrap: 'bg-teal', eyebrow: 'text-gold', headline: 'text-cream', sub: 'text-cream/80' },
+  blush: { wrap: 'bg-blush/30', eyebrow: 'text-terracotta-deep', headline: 'text-teal', sub: 'text-ink-soft' },
+} as const;
 
 export default async function HomePage() {
-  const [subBrandList, pillars] = await Promise.all([getSubBrands(), getPillars()]);
+  const [subBrandList, pillars, settings, testimonials] = await Promise.all([
+    getSubBrands(),
+    getPillars(),
+    getSiteSettings(),
+    getTestimonials(),
+  ]);
+  const hero = heroStyles[settings.heroStyle] ?? heroStyles.cream;
   return (
     <>
       {/* ── Hero (LCP) ─────────────────────────────────────── */}
-      <section className="relative overflow-hidden">
+      <section className={cn('relative overflow-hidden', hero.wrap)}>
         <PatternBand motif="songket-geometric" opacity={0.05} />
         <div className="container-dama relative grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
           <div className="max-w-xl">
-            <p className="font-sans text-label font-semibold uppercase tracking-[0.2em] text-terracotta-deep">
-              {site.brandLineEn}
+            <p className={cn('font-sans text-label font-semibold uppercase tracking-[0.2em]', hero.eyebrow)}>
+              {settings.brandLineEn}
             </p>
-            <h1 className="mt-5 text-display-xl text-teal">{site.tagline}.</h1>
-            <p className="mt-6 text-body-lg text-ink-soft">{site.umbrellaPromise}</p>
+            <h1 className={cn('mt-5 text-display-xl', hero.headline)}>{settings.heroHeadline}</h1>
+            <p className={cn('mt-6 text-body-lg', hero.sub)}>{settings.umbrellaPromise}</p>
             <div className="mt-9 flex flex-wrap gap-4">
               <Button href="/pesan" size="lg">
                 Pesan
@@ -43,7 +57,7 @@ export default async function HomePage() {
             ratio="square"
             warmBorder
             priority
-            src={media.homeHero}
+            src={settings.heroImage}
             sizes="(max-width: 1024px) 100vw, 600px"
             alt="Sepiring rendang Minang yang dimasak perlahan, hangat dan menggugah selera di atas meja kayu."
             className="mx-auto w-full max-w-md lg:max-w-none"
@@ -54,9 +68,7 @@ export default async function HomePage() {
       {/* ── Essence strip ──────────────────────────────────── */}
       <section className="py-section">
         <div className="container-dama max-w-prose text-center">
-          <p className="font-display text-display-md italic text-teal">
-            Masakan bukan sekadar makanan — ia sarana merawat hubungan.
-          </p>
+          <p className="font-display text-display-md italic text-teal">{settings.essence}</p>
         </div>
         <DiamondDivider />
       </section>
@@ -94,12 +106,12 @@ export default async function HomePage() {
             category="process"
             ratio="landscape"
             warmBorder
-            src={media.founderPortrait}
+            src={settings.founderImage}
             alt="Tangan menakar bumbu dengan teliti di dapur DAMA, uap masakan mengepul hangat."
           />
           <div>
-            <QuoteBlock cite={`${founder.name}, ${founder.role}`}>
-              “{founder.pullQuote}”
+            <QuoteBlock cite={`${settings.founderName}, ${settings.founderRole}`}>
+              “{settings.founderQuote}”
             </QuoteBlock>
             <div className="mt-8">
               <Button href="/cerita" variant="ghost">
@@ -134,6 +146,9 @@ export default async function HomePage() {
           ))}
         </div>
       </Section>
+
+      {/* ── Testimonials ───────────────────────────────────── */}
+      <Testimonials items={testimonials} />
 
       {/* ── Where to buy ───────────────────────────────────── */}
       <Section

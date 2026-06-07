@@ -2,6 +2,7 @@ import { Section } from '@/components/Section';
 import { ChannelButton } from '@/components/ChannelButton';
 import { buildMetadata } from '@/lib/seo';
 import { contact } from '@/content/channels';
+import { getSiteSettings } from '@/lib/cms';
 
 export const metadata = buildMetadata({
   title: 'Kontak',
@@ -9,7 +10,8 @@ export const metadata = buildMetadata({
   path: '/kontak',
 });
 
-export default function KontakPage() {
+export default async function KontakPage() {
+  const settings = await getSiteSettings();
   return (
     <Section
       eyebrow="Kontak"
@@ -35,10 +37,10 @@ export default function KontakPage() {
             </h2>
             <p className="mt-2">
               <a
-                href={`mailto:${contact.email}`}
+                href={`mailto:${settings.email}`}
                 className="text-body text-teal underline underline-offset-4"
               >
-                {contact.email}
+                {settings.email}
               </a>
             </p>
           </div>
@@ -49,17 +51,17 @@ export default function KontakPage() {
             </h2>
             <ul className="mt-2 space-y-2 text-body text-teal">
               <li>
-                <a href={contact.instagram.href} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">
+                <a href={settings.instagram} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">
                   Instagram {contact.instagram.handle}
                 </a>
               </li>
               <li>
-                <a href={contact.tiktok.href} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">
+                <a href={settings.tiktok} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">
                   TikTok {contact.tiktok.handle}
                 </a>
               </li>
               <li>
-                <a href={contact.threads.href} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">
+                <a href={settings.threads} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4">
                   Threads {contact.threads.handle}
                 </a>
               </li>
@@ -69,7 +71,7 @@ export default function KontakPage() {
 
         <aside className="rounded-lg border border-teal/10 bg-cream-paper p-8">
           <h2 className="font-display text-heading text-teal">Area layanan</h2>
-          <p className="mt-3 text-body text-ink-soft">{contact.coverage}</p>
+          <p className="mt-3 text-body text-ink-soft">{settings.coverage}</p>
         </aside>
       </div>
     </Section>
