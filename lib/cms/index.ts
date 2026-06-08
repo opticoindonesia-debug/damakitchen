@@ -33,16 +33,22 @@ const subBrandTokens: Record<SubBrandSlug, Pick<SubBrand, 'marker' | 'markerHex'
   ) as Record<SubBrandSlug, Pick<SubBrand, 'marker' | 'markerHex'>>;
 
 // ── Sub-brands ────────────────────────────────────────────────
+/** Slugs marked disabled in code (business line not live yet) — hidden everywhere. */
+const disabledSlugs = new Set(staticSubBrands.filter((s) => s.disabled).map((s) => s.slug));
+const activeStaticSubBrands = staticSubBrands.filter((s) => !disabledSlugs.has(s.slug));
+
 export async function getSubBrands(): Promise<SubBrand[]> {
-  if (!sanityConfigured) return staticSubBrands;
+  if (!sanityConfigured) return activeStaticSubBrands;
   const docs = await sanityClient.fetch<Array<Record<string, unknown>>>(
     `*[_type=="subBrand"]|order(order asc){
       "slug":slug, name, shortName, emotion, lead, about, howToOrder,
       channels, faqs[]{q,a}, crossSell, heroImage
     }`,
   );
-  if (!docs?.length) return staticSubBrands;
-  return docs.map((d) => {
+  if (!docs?.length) return activeStaticSubBrands;
+  return docs
+    .filter((d) => !disabledSlugs.has(d.slug as SubBrandSlug))
+    .map((d) => {
     const slug = d.slug as SubBrandSlug;
     const base = staticSubBrandMap[slug]; // sensible defaults for empty fields
     return {

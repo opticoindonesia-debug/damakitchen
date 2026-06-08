@@ -18,7 +18,7 @@ export const testimonials: Testimonial[] = [
   },
   {
     name: 'Pak Hendra', // TODO: real testimonial
-    context: 'Acara keluarga, HIDANG BASAMO',
+    context: 'Acara keluarga, katering DAMA',
     quote:
       'Kami benar-benar bisa menemani tamu. Semua urusan masak dan beres-beres ditangani dengan rapi.',
   },

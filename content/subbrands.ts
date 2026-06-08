@@ -42,6 +42,11 @@ export interface SubBrand {
   crossSell: SubBrandSlug[];
   /** Real hero photo path. When set, renders via next/image. TODO: add asset. */
   heroImage?: string;
+  /**
+   * Business not live yet → hidden everywhere (site + Studio listings + seed).
+   * Set back to false (or remove) to launch the line.
+   */
+  disabled?: boolean;
 }
 
 export const subBrands: Record<SubBrandSlug, SubBrand> = {
@@ -149,6 +154,7 @@ export const subBrands: Record<SubBrandSlug, SubBrand> = {
       },
     ],
     crossSell: ['dama-kapau', 'tando-mato'],
+    disabled: true, // Belum live — disembunyikan dari website & Studio.
   },
 
   'dama-kapau': {
@@ -182,7 +188,7 @@ export const subBrands: Record<SubBrandSlug, SubBrand> = {
         a: 'Untuk format tertentu, sambal kami pisah agar tetap segar dan bisa Anda atur sendiri.',
       },
     ],
-    crossSell: ['hidang-basamo', 'lamak-dama'],
+    crossSell: ['lamak-dama', 'warisan-dama'],
   },
 
   'tando-mato': {
@@ -216,7 +222,7 @@ export const subBrands: Record<SubBrandSlug, SubBrand> = {
         a: 'Tergantung isi paket. Setiap hampers kami lengkapi keterangan masa simpan dan cara penyajiannya.',
       },
     ],
-    crossSell: ['hidang-basamo', 'warisan-dama'],
+    crossSell: ['warisan-dama', 'dama-kapau'],
   },
 };
 

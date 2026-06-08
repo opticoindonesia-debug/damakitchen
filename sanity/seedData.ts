@@ -50,7 +50,9 @@ export function buildSeedDocs(): SeedDoc[] {
     seasonalMessage: seasonal.message,
   });
 
-  subBrandList.forEach((sb, idx) => {
+  subBrandList
+    .filter((sb) => !sb.disabled)
+    .forEach((sb, idx) => {
     docs.push({
       _id: `subBrand.${sb.slug}`,
       _type: 'subBrand',
