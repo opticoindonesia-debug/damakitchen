@@ -1,5 +1,5 @@
 import type { SVGProps } from 'react';
-import { channels, type ChannelId } from '@/content/channels';
+import { channels, isChannelEnabled, type ChannelId } from '@/content/channels';
 import { cn } from '@/lib/utils';
 
 /**
@@ -75,6 +75,8 @@ export function ChannelButton({
   className?: string;
   fullWidth?: boolean;
 }) {
+  // Kanal yang dinonaktifkan tidak ditampilkan di mana pun.
+  if (!isChannelEnabled(channel)) return null;
   const cfg = channels[channel];
   return (
     <a

@@ -3,15 +3,17 @@ import { InfoIconRow } from './InfoIconRow';
 import { ChannelButton } from './ChannelButton';
 import { waOrder } from '@/lib/whatsapp';
 import { subBrands, type SubBrandSlug } from '@/content/subbrands';
+import { enabledChannels } from '@/content/channels';
 import type { Product } from '@/content/products';
 
 /**
  * ProductCard (§7.4): photo, name (Playfair), honest line, sub-brand tag,
- * info icons, and a channel CTA routing to the line's primary channel.
+ * info icons, and a channel CTA routing to the line's first available channel.
  */
 export function ProductCard({ product }: { product: Product }) {
   const sb = subBrands[product.subBrand as SubBrandSlug];
-  const primaryChannel = sb.channels[0];
+  // Use the first ENABLED channel; fall back to WhatsApp if none are active.
+  const primaryChannel = enabledChannels(sb.channels)[0] ?? 'whatsapp';
   // For WhatsApp-first lines, prefill a warm order message with the product name.
   const href =
     primaryChannel === 'whatsapp' ? waOrder(`${product.name} (${sb.name})`) : undefined;
