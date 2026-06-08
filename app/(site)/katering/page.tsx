@@ -8,7 +8,7 @@ import { media } from '@/content/site';
 export const metadata = buildMetadata({
   title: 'Katering & Acara',
   description:
-    'HIDANG BASAMO & DAMA KAPAU untuk acara Anda. Kami yang masak dan beres-beres, Anda yang hadir penuh.',
+    'Layanan katering & acara DAMA. Kami yang masak dan beres-beres, Anda yang hadir penuh.',
   path: '/katering',
 });
 
@@ -37,8 +37,8 @@ export default function KateringPage() {
               Kami yang masak & beres-beres, Anda yang hadir penuh
             </h1>
             <p className="mt-6 text-body-lg text-ink-soft">
-              Untuk acara di rumah maupun perayaan yang lebih besar — bersama HIDANG BASAMO dan
-              DAMA KAPAU, Anda bisa benar-benar menemani tamu tanpa repot urusan dapur.
+              Untuk acara di rumah maupun perayaan yang lebih besar, Anda bisa benar-benar menemani
+              tamu tanpa repot urusan dapur — kami yang masak dan beres-beres.
             </p>
           </div>
           <ImageWithScrim
