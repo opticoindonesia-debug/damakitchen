@@ -12,7 +12,8 @@ export const sanityClient = createClient({
   projectId: projectId || 'placeholder',
   dataset,
   apiVersion,
-  useCdn: true,
+  // Fetch fresh published content (no CDN lag) — pages are still cached by ISR.
+  useCdn: false,
   perspective: 'published',
 });
 
