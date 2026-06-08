@@ -3,8 +3,8 @@ import { Footer } from '@/components/Footer';
 import { OrganizationJsonLd } from '@/components/JsonLd';
 import { getSubBrands, getSiteSettings } from '@/lib/cms';
 
-/** ISR: pages refresh ~hourly so CMS edits appear without a redeploy. */
-export const revalidate = 3600;
+/** ISR: pages refresh ~every minute so CMS edits appear quickly without a redeploy. */
+export const revalidate = 60;
 
 /**
  * Site chrome (nav + footer + skip-link). Lives in the (site) route group so
