@@ -16,7 +16,7 @@ const channelNote: Record<string, string> = {
   'lamak-dama': 'Stok beku siap panas — paling praktis lewat Shopee atau TikTok Shop.',
   'warisan-dama': 'Dimasak fresh, jadi pre-order langsung lewat WhatsApp.',
   'hidang-basamo': 'Layanan acara — mulai dari obrolan penawaran di WhatsApp.',
-  'dama-kapau': 'Harian via GoFood/GrabFood; pesanan banyak lewat WhatsApp.',
+  'dama-kapau': 'Pesan harian maupun jumlah banyak lewat WhatsApp.',
   'tando-mato': 'Paket musiman di Shopee; hampers custom lewat WhatsApp.',
 };
 

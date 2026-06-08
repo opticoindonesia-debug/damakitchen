@@ -169,7 +169,7 @@ export const subBrands: Record<SubBrandSlug, SubBrand> = {
       'Nasi kapau dalam porsi individu — praktis untuk makan harian maupun acara. Setiap kotak tetap kami siapkan dengan niat, supaya Anda bisa makan dengan lega, kapan pun.',
     channels: ['gofood', 'grab', 'whatsapp'],
     howToOrder:
-      'Untuk pesanan harian, temukan kami di GoFood dan GrabFood. Untuk pesanan jumlah banyak atau acara, hubungi kami lewat WhatsApp.',
+      'Untuk pesanan harian maupun jumlah banyak, hubungi kami lewat WhatsApp.',
     faqs: [
       {
         q: 'Berapa porsi tiap kotak?',

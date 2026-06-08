@@ -14,6 +14,11 @@ export interface ChannelConfig {
   label: string;
   /** Destination URL. WhatsApp is built dynamically via lib/whatsapp. */
   href: string;
+  /**
+   * Saklar aktif/nonaktif kanal. Set `false` untuk menyembunyikan tombolnya
+   * di seluruh situs; ubah ke `true` untuk mengaktifkan kembali. Default aktif.
+   */
+  enabled?: boolean;
 }
 
 /**
@@ -46,14 +51,26 @@ export const channels: Record<ChannelId, ChannelConfig> = {
     label: 'Pesan via GoFood',
     // TODO: replace with real GoFood merchant URL.
     href: process.env.NEXT_PUBLIC_GOFOOD_URL ?? 'https://gofood.co.id/',
+    enabled: false, // Belum tersedia — ubah ke true untuk mengaktifkan.
   },
   grab: {
     id: 'grab',
     label: 'Pesan via GrabFood',
     // TODO: replace with real GrabFood merchant URL.
     href: process.env.NEXT_PUBLIC_GRAB_URL ?? 'https://food.grab.com/id/id/',
+    enabled: false, // Belum tersedia — ubah ke true untuk mengaktifkan.
   },
 };
+
+/** Apakah sebuah kanal aktif (default: aktif kecuali enabled === false). */
+export function isChannelEnabled(id: ChannelId): boolean {
+  return channels[id].enabled !== false;
+}
+
+/** Saring daftar kanal, hanya menyisakan yang aktif (urutan dipertahankan). */
+export function enabledChannels(ids: ChannelId[]): ChannelId[] {
+  return ids.filter(isChannelEnabled);
+}
 
 /** Social + direct contact handles. TODO: replace with real handles. */
 export const contact = {
