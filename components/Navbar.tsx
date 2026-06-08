@@ -12,7 +12,15 @@ import { cn } from '@/lib/utils';
  * Sticky cream navbar (§6). Condenses to the monogram on scroll; offers a
  * grouped sub-brand menu and a mobile drawer. Keyboard-operable throughout.
  */
-export function Navbar({ subBrands = subBrandList }: { subBrands?: SubBrand[] }) {
+export function Navbar({
+  subBrands = subBrandList,
+  logo,
+  monogram,
+}: {
+  subBrands?: SubBrand[];
+  logo?: string;
+  monogram?: string;
+}) {
   const [scrolled, setScrolled] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [subOpen, setSubOpen] = useState(false);
@@ -54,9 +62,9 @@ export function Navbar({ subBrands = subBrandList }: { subBrands?: SubBrand[] })
       >
         <Link href="/" aria-label="DAMA KITCHEN — beranda" className="rounded">
           {scrolled ? (
-            <Logo variant="monogram" color="teal" />
+            <Logo variant="monogram" color="teal" monogramUrl={monogram} imageUrl={logo} />
           ) : (
-            <Logo variant="primary" color="teal" />
+            <Logo variant="primary" color="teal" imageUrl={logo} />
           )}
         </Link>
 

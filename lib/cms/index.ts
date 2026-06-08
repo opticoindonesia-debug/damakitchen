@@ -109,6 +109,13 @@ export interface SiteSettings {
   heroImage?: string;
   founderImage?: string;
   heroStyle: 'cream' | 'teal' | 'blush';
+  logo?: string;
+  logoLight?: string;
+  monogram?: string;
+  backgroundMotif: 'songket-geometric' | 'bunga-floral' | 'daun-leaf' | 'geometric-gold' | 'none';
+  motifImage?: string;
+  /** Fraction 0–0.12 (already converted from the percent field). */
+  motifOpacity: number;
   email: string;
   instagram: string;
   tiktok: string;
@@ -129,6 +136,8 @@ const staticSettings: SiteSettings = {
   heroImage: media.homeHero,
   founderImage: media.founderPortrait,
   heroStyle: 'cream',
+  backgroundMotif: 'songket-geometric',
+  motifOpacity: 0.05,
   email: contact.email,
   instagram: contact.instagram.href,
   tiktok: contact.tiktok.href,
@@ -143,6 +152,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     `*[_id=="siteSettings"][0]{
       tagline, brandLineEn, umbrellaPromise, heroHeadline, essence,
       founderQuote, founderName, founderRole, heroImage, founderImage, heroStyle,
+      logo, logoLight, monogram, backgroundMotif, motifImage, motifOpacity,
       email, instagram, tiktok, threads, coverage,
       seasonalActive, seasonalLabel, seasonalMessage
     }`,
@@ -163,6 +173,19 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     heroStyle: (['cream', 'teal', 'blush'].includes(d.heroStyle as string)
       ? (d.heroStyle as SiteSettings['heroStyle'])
       : 'cream'),
+    logo: urlForImage(d.logo as never),
+    logoLight: urlForImage(d.logoLight as never),
+    monogram: urlForImage(d.monogram as never),
+    backgroundMotif: (
+      ['songket-geometric', 'bunga-floral', 'daun-leaf', 'geometric-gold', 'none'].includes(
+        d.backgroundMotif as string,
+      )
+        ? (d.backgroundMotif as SiteSettings['backgroundMotif'])
+        : 'songket-geometric'
+    ),
+    motifImage: urlForImage(d.motifImage as never),
+    motifOpacity:
+      typeof d.motifOpacity === 'number' ? Math.min(Math.max(d.motifOpacity, 0), 12) / 100 : 0.05,
     email: str(d.email, staticSettings.email),
     instagram: str(d.instagram, staticSettings.instagram),
     tiktok: str(d.tiktok, staticSettings.tiktok),

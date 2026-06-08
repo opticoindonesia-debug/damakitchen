@@ -33,6 +33,8 @@ export function buildSeedDocs(): SeedDoc[] {
     founderName: founder.name,
     founderRole: founder.role,
     heroStyle: 'cream',
+    backgroundMotif: 'songket-geometric',
+    motifOpacity: 5,
     whatsappNumber: WHATSAPP_NUMBER,
     email: contact.email,
     instagram: contact.instagram.href,

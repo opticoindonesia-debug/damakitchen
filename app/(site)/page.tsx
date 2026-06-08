@@ -34,7 +34,11 @@ export default async function HomePage() {
     <>
       {/* ── Hero (LCP) ─────────────────────────────────────── */}
       <section className={cn('relative overflow-hidden', hero.wrap)}>
-        <PatternBand motif="songket-geometric" opacity={0.05} />
+        <PatternBand
+          motif={settings.backgroundMotif}
+          src={settings.motifImage}
+          opacity={settings.motifOpacity}
+        />
         <div className="container-dama relative grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-24">
           <div className="max-w-xl">
             <p className={cn('font-sans text-label font-semibold uppercase tracking-[0.2em]', hero.eyebrow)}>

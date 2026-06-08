@@ -20,9 +20,12 @@ export interface FooterContact {
 export function Footer({
   subBrands = subBrandList,
   settings,
+  logo,
 }: {
   subBrands?: SubBrand[];
   settings?: FooterContact;
+  /** Light logo image for the dark footer; falls back to the typeset lockup. */
+  logo?: string;
 }) {
   const year = new Date().getFullYear();
   const promise = settings?.umbrellaPromise ?? site.umbrellaPromise;
@@ -36,7 +39,7 @@ export function Footer({
       <PatternBand motif="songket-geometric" opacity={0.05} />
       <div className="container-dama relative grid gap-12 py-16 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-1">
-          <Logo variant="stacked" color="cream" withTagline />
+          <Logo variant="stacked" color="cream" withTagline imageUrl={logo} />
           <p className="mt-5 max-w-xs text-caption text-cream/75">{promise}</p>
         </div>
 
