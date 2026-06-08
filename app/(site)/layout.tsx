@@ -23,10 +23,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       >
         Lewati ke konten utama
       </a>
-      <Navbar subBrands={subBrands} />
+      <Navbar subBrands={subBrands} logo={settings.logo} monogram={settings.monogram} />
       <main id="main">{children}</main>
       <Footer
         subBrands={subBrands}
+        logo={settings.logoLight}
         settings={{
           umbrellaPromise: settings.umbrellaPromise,
           email: settings.email,

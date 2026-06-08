@@ -22,15 +22,25 @@ export function Logo({
   color = 'teal',
   withTagline = false,
   className,
+  imageUrl,
+  monogramUrl,
 }: {
   variant?: LogoVariant;
   color?: LogoColor;
   withTagline?: boolean;
   className?: string;
+  /** Uploaded logo image (used for primary/stacked). Falls back to typeset. */
+  imageUrl?: string;
+  /** Uploaded monogram image (used for the monogram variant). */
+  monogramUrl?: string;
 }) {
   const tone = colorClass[color];
 
   if (variant === 'monogram') {
+    if (monogramUrl) {
+      // eslint-disable-next-line @next/next/no-img-element
+      return <img src={monogramUrl} alt="DAMA KITCHEN" className={cn('h-7 w-auto', className)} />;
+    }
     return (
       <span
         className={cn('inline-flex items-center font-display font-bold leading-none', tone, className)}
@@ -39,6 +49,12 @@ export function Logo({
         <span className="text-2xl tracking-tight">D</span>
       </span>
     );
+  }
+
+  if (imageUrl) {
+    const h = variant === 'stacked' ? 'h-12' : 'h-8 sm:h-9';
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={imageUrl} alt="DAMA KITCHEN" className={cn(h, 'w-auto', className)} />;
   }
 
   if (variant === 'stacked') {

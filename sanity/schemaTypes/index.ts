@@ -131,6 +131,27 @@ const siteSettings = defineType({
 
     // ── Tampilan (preset aman) ──
     defineField({
+      name: 'logo',
+      type: 'image',
+      title: 'Logo (header)',
+      description: 'Logo untuk header (latar krem). Kosongkan untuk memakai logo teks bawaan. PNG transparan disarankan.',
+      group: 'tampilan',
+    }),
+    defineField({
+      name: 'logoLight',
+      type: 'image',
+      title: 'Logo versi terang (footer)',
+      description: 'Logo untuk footer berlatar gelap (teal). Sebaiknya berwarna krem/putih.',
+      group: 'tampilan',
+    }),
+    defineField({
+      name: 'monogram',
+      type: 'image',
+      title: 'Monogram (header saat di-scroll)',
+      description: 'Ikon kecil "D" yang muncul saat halaman digulir. Kosongkan untuk memakai bawaan.',
+      group: 'tampilan',
+    }),
+    defineField({
       name: 'heroStyle',
       type: 'string',
       title: 'Latar hero Beranda',
@@ -144,6 +165,38 @@ const siteSettings = defineType({
         layout: 'radio',
       },
       initialValue: 'cream',
+      group: 'tampilan',
+    }),
+    defineField({
+      name: 'backgroundMotif',
+      type: 'string',
+      title: 'Motif latar (di belakang hero)',
+      options: {
+        list: [
+          { title: 'Songket Geometris', value: 'songket-geometric' },
+          { title: 'Bunga', value: 'bunga-floral' },
+          { title: 'Daun', value: 'daun-leaf' },
+          { title: 'Geometris Emas', value: 'geometric-gold' },
+          { title: 'Tanpa motif', value: 'none' },
+        ],
+      },
+      initialValue: 'songket-geometric',
+      group: 'tampilan',
+    }),
+    defineField({
+      name: 'motifImage',
+      type: 'image',
+      title: 'Motif kustom (opsional)',
+      description: 'Unggah motif sendiri untuk menggantikan pilihan di atas. Gunakan pola yang bisa diulang.',
+      group: 'tampilan',
+    }),
+    defineField({
+      name: 'motifOpacity',
+      type: 'number',
+      title: 'Kepekatan motif (%)',
+      description: 'Antara 0 dan 12 agar tetap halus dan tidak mengganggu teks.',
+      initialValue: 5,
+      validation: (r) => r.min(0).max(12),
       group: 'tampilan',
     }),
     defineField({ name: 'whatsappNumber', type: 'string', title: 'Nomor WhatsApp (E.164 tanpa +)', group: 'contact' }),
