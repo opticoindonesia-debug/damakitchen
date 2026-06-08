@@ -94,9 +94,10 @@ export default async function HomePage() {
         title="Lima cara menikmati DAMA"
         intro="Masing-masing membawa suasana yang berbeda, namun voice-nya satu: hangat dan tulus."
       >
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* One row on desktop (flex); stacks to 1–2 columns on smaller screens. */}
+        <div className="grid gap-6 sm:grid-cols-2 lg:flex lg:flex-row lg:flex-nowrap lg:items-stretch">
           {subBrandList.map((sb, i) => (
-            <Reveal key={sb.slug} delay={i * 0.06}>
+            <Reveal key={sb.slug} delay={i * 0.06} className="lg:min-w-0 lg:flex-1">
               <SubBrandCard subBrand={sb} />
             </Reveal>
           ))}
