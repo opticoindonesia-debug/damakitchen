@@ -1,15 +1,12 @@
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 /**
  * Art-directed image holder (§4.3).
  *
- * When `src` points at a real asset it renders next/image (responsive,
- * object-cover, LCP-priority aware). Until real photography lands it renders a
- * warm, correctly-proportioned placeholder — same aspect ratio, so dropping in
- * a photo causes no layout shift. Either way it carries a descriptive ID alt.
- *
- * Real photos drop in by setting `src` (e.g. "/images/food/rendang.jpg").
+ * When `src` is set it renders the photo (plain <img> straight from the source
+ * CDN). Until real photography lands it renders a warm, correctly-proportioned
+ * placeholder — same aspect ratio, so dropping in a photo causes no layout
+ * shift. Either way it carries a descriptive ID alt.
  */
 
 export type PlaceholderCategory =
@@ -43,9 +40,6 @@ const categoryLabel: Record<PlaceholderCategory, string> = {
   lifestyle: 'Foto suasana',
 };
 
-/** Sensible responsive sizes by aspect; overridable per instance. */
-const defaultSizes = '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px';
-
 export function Placeholder({
   category,
   alt,
@@ -53,7 +47,6 @@ export function Placeholder({
   className,
   priority = false,
   src,
-  sizes,
 }: {
   category: PlaceholderCategory;
   alt: string;
@@ -65,15 +58,17 @@ export function Placeholder({
   sizes?: string;
 }) {
   if (src) {
+    // Render straight from the source CDN (Sanity already serves optimized
+    // webp/avif via auto=format). Using a plain <img> avoids the Vercel image
+    // optimizer, which can fail to load remote CMS images.
     return (
-      <div className={cn('relative', ratioClass[ratio], className)}>
-        <Image
+      <div className={cn('relative overflow-hidden', ratioClass[ratio], className)}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={src}
           alt={alt}
-          fill
-          sizes={sizes ?? defaultSizes}
-          priority={priority}
-          className="object-cover"
+          loading={priority ? 'eager' : 'lazy'}
+          className="absolute inset-0 h-full w-full object-cover"
         />
       </div>
     );
