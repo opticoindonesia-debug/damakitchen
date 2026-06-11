@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { PortableText, type PortableTextComponents, type PortableTextProps } from '@portabletext/react';
 import { urlForImage } from '@/lib/sanity/image';
 
@@ -42,14 +41,8 @@ const components: PortableTextComponents = {
       if (!url) return null;
       return (
         <figure className="my-8 overflow-hidden rounded-lg">
-          <Image
-            src={url}
-            alt={value?.alt ?? ''}
-            width={1200}
-            height={800}
-            sizes="(max-width: 768px) 100vw, 768px"
-            className="h-auto w-full object-cover"
-          />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={url} alt={value?.alt ?? ''} loading="lazy" className="h-auto w-full object-cover" />
         </figure>
       );
     },
