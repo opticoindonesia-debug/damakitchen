@@ -2,6 +2,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { OrganizationJsonLd } from '@/components/JsonLd';
 import { getSubBrands, getSiteSettings } from '@/lib/cms';
+import { themeOverrideCss } from '@/lib/theme';
 
 /** ISR: pages refresh ~every minute so CMS edits appear quickly without a redeploy. */
 export const revalidate = 60;
@@ -13,9 +14,12 @@ export const revalidate = 60;
  */
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const [subBrands, settings] = await Promise.all([getSubBrands(), getSiteSettings()]);
+  // Built only from validated hex → numeric "r g b" triples; safe to inline.
+  const themeCss = themeOverrideCss(settings.theme);
 
   return (
     <>
+      {themeCss && <style id="dama-theme" dangerouslySetInnerHTML={{ __html: themeCss }} />}
       <OrganizationJsonLd />
       <a
         href="#main"
@@ -23,11 +27,18 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       >
         Lewati ke konten utama
       </a>
-      <Navbar subBrands={subBrands} logo={settings.logo} monogram={settings.monogram} />
+      <Navbar
+        subBrands={subBrands}
+        logo={settings.logo}
+        monogram={settings.monogram}
+        items={settings.nav}
+        cta={settings.navCta}
+      />
       <main id="main">{children}</main>
       <Footer
         subBrands={subBrands}
         logo={settings.logoLight}
+        text={settings.footerText}
         settings={{
           umbrellaPromise: settings.umbrellaPromise,
           email: settings.email,

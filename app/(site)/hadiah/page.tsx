@@ -2,31 +2,26 @@ import { Section } from '@/components/Section';
 import { InquiryForm } from '@/components/InquiryForm';
 import { ImageWithScrim } from '@/components/ImageWithScrim';
 import { ChannelButton } from '@/components/ChannelButton';
-import { Reveal } from '@/components/Reveal';
 import { PatternBand } from '@/components/PatternBand';
-import { buildMetadata } from '@/lib/seo';
-import { getProductsBySubBrand, getSiteSettings } from '@/lib/cms';
+import { builtInMetadata } from '@/lib/pageMeta';
+import { PageBuilder } from '@/components/builder/PageBuilder';
+import { getBuiltInPage } from '@/lib/cms';
+import { GiftTiers } from '@/components/blocks/GiftTiers';
+import { SeasonalBanner } from '@/components/blocks/SeasonalBanner';
 import { site, media } from '@/content/site';
 
-export const metadata = buildMetadata({
+export function generateMetadata() {
+  return builtInMetadata('hadiah', {
   title: 'Hadiah',
   description:
     'TANDO MATO — hampers masakan Minang untuk momen berkesan. Hadiah personal, corporate gifting, dengan kartu tulisan tangan.',
-  path: '/hadiah',
-});
-
-const tierMeta: Record<string, string> = {
-  'tando-si-ketek': '1 porsi',
-  'tando-si-sedang': '2–3 porsi',
-  'tando-si-gadang': '5–8 porsi',
-};
+  });
+}
 
 export default async function HadiahPage() {
-  const [tiers, settings] = await Promise.all([
-    getProductsBySubBrand('tando-mato'),
-    getSiteSettings(),
-  ]);
-  const seasonal = settings.seasonal;
+  const cms = await getBuiltInPage('hadiah');
+  if (cms) return <PageBuilder sections={cms.sections} />;
+
   return (
     <>
       <section className="relative overflow-hidden border-b border-teal/10 bg-blush/30 py-section">
@@ -54,41 +49,10 @@ export default async function HadiahPage() {
         </div>
       </section>
 
-      {seasonal.active && (
-        <div className="border-b border-songketRed/20 bg-songketRed/10">
-          <div className="container-dama flex flex-wrap items-center gap-x-3 gap-y-1 py-4">
-            <span className="text-label font-semibold uppercase tracking-[0.16em] text-songketRed">
-              {seasonal.label}
-            </span>
-            <span className="text-caption text-ink">{seasonal.message}</span>
-          </div>
-        </div>
-      )}
+      <SeasonalBanner />
 
       <Section eyebrow="Pilihan paket" title="Dari Si Ketek hingga Si Gadang">
-        <div className="grid gap-6 sm:grid-cols-3">
-          {tiers.map((t, i) => (
-            <Reveal key={t.id} delay={i * 0.07}>
-              <article className="flex h-full flex-col overflow-hidden rounded-lg border border-teal/10 bg-cream-paper shadow-soft">
-                <ImageWithScrim
-                  category="product"
-                  ratio="landscape"
-                  rounded={false}
-                  src={t.image}
-                  alt={`Hampers ${t.name} dari TANDO MATO — ${t.blurb}`}
-                />
-                <div className="flex flex-1 flex-col p-6">
-                  <span className="text-label uppercase tracking-[0.14em] text-ink-soft">
-                    {tierMeta[t.id] ?? ''}
-                  </span>
-                  <h3 className="mt-1 font-display text-heading text-teal">{t.name}</h3>
-                  <p className="mt-2 flex-1 text-caption text-ink-soft">{t.blurb}</p>
-                  {/* TODO: real price per tier. */}
-                </div>
-              </article>
-            </Reveal>
-          ))}
-        </div>
+        <GiftTiers />
       </Section>
 
       <section className="bg-cream-deep py-section">

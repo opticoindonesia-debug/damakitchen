@@ -1,15 +1,17 @@
 import { Section } from '@/components/Section';
 import { MenuExplorer } from '@/components/MenuExplorer';
 import { ProductListJsonLd } from '@/components/JsonLd';
-import { buildMetadata } from '@/lib/seo';
-import { getProducts, getSubBrands } from '@/lib/cms';
+import { builtInMetadata } from '@/lib/pageMeta';
+import { PageBuilder } from '@/components/builder/PageBuilder';
+import { getBuiltInPage, getProducts, getSubBrands } from '@/lib/cms';
 
-export const metadata = buildMetadata({
+export function generateMetadata() {
+  return builtInMetadata('menu', {
   title: 'Menu',
   description:
     'Jelajahi seluruh hidangan DAMA, dikelompokkan per lini — dari rendang beku hingga hampers.',
-  path: '/menu',
-});
+  });
+}
 
 export default async function MenuPage() {
   const [products, subBrands] = await Promise.all([getProducts(), getSubBrands()]);
@@ -19,6 +21,16 @@ export default async function MenuPage() {
     description: p.blurb,
     brand: nameBySlug[p.subBrand] ?? 'DAMA KITCHEN',
   }));
+
+  const cms = await getBuiltInPage('menu');
+  if (cms) {
+    return (
+      <>
+        <ProductListJsonLd products={jsonLdProducts} />
+        <PageBuilder sections={cms.sections} />
+      </>
+    );
+  }
 
   return (
     <>

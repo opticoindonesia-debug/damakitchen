@@ -2,6 +2,7 @@
 
 import { defineConfig } from 'sanity';
 import { structureTool } from 'sanity/structure';
+import { colorInput } from '@sanity/color-input';
 import { DownloadIcon } from '@sanity/icons';
 import { dataset, projectId } from '@/sanity/env';
 import { schemaTypes } from '@/sanity/schemaTypes';
@@ -26,10 +27,10 @@ export default defineConfig({
   projectId: projectId || 'placeholder',
   dataset,
   schema: { types: schemaTypes },
-  plugins: [structureTool({ structure })],
+  plugins: [structureTool({ structure }), colorInput()],
   tools: (prev) => [
     ...prev,
-    { name: 'impor-konten', title: 'Impor Konten', icon: DownloadIcon, component: SeedTool },
+    { name: 'alat-konten', title: 'Alat Konten', icon: DownloadIcon, component: SeedTool },
   ],
   document: {
     // Lock the settings singleton: no duplicate / delete / unpublish.

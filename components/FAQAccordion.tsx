@@ -11,9 +11,12 @@ import { cn } from '@/lib/utils';
 export function FAQAccordion({
   items,
   className,
+  idPrefix = 'faq',
 }: {
   items: { q: string; a: string }[];
   className?: string;
+  /** Unique per accordion so several can live on one page. */
+  idPrefix?: string;
 }) {
   const [open, setOpen] = useState<number | null>(0);
 
@@ -21,8 +24,8 @@ export function FAQAccordion({
     <div className={cn('divide-y divide-teal/10 border-y border-teal/10', className)}>
       {items.map((item, i) => {
         const isOpen = open === i;
-        const panelId = `faq-panel-${i}`;
-        const btnId = `faq-btn-${i}`;
+        const panelId = `${idPrefix}-panel-${i}`;
+        const btnId = `${idPrefix}-btn-${i}`;
         return (
           <div key={item.q}>
             <h3>

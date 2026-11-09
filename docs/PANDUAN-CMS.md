@@ -1,102 +1,142 @@
-# Panduan Mengelola Konten (Sanity Studio)
+# Panduan Mengelola Website (Sanity Studio)
 
-Panduan singkat untuk mengubah isi website DAMA KITCHEN tanpa menyentuh kode.
 Editor konten ada di **`/studio`** (mis. `https://damakitchen.vercel.app/studio`).
+Dari sana Anda bisa mengubah **teks apa pun, foto apa pun, susunan (layout) setiap halaman,
+dan warna-warna website** — tanpa menyentuh kode.
 
-> Analogi WordPress: `/studio` = `wp-admin`. Bedanya, di Sanity perubahan baru
-> tayang setelah Anda klik **Publish** (mirip tombol "Publish/Update" di WP).
-
----
-
-## A. Pertama kali: menyambungkan Studio (sekali saja)
-
-Jika `/studio` menampilkan pesan **CORS** atau project `placeholder`, lakukan ini:
-
-1. **Buat project** di [sanity.io/manage](https://www.sanity.io/manage) → *Create project*.
-   - Dataset: **`production`**, visibilitas **Public**.
-   - Catat **Project ID** (mis. `a1b2c3d4`).
-2. **Isi env di Vercel** → Settings → Environment Variables (centang Production, Preview, Development):
-   ```
-   NEXT_PUBLIC_SANITY_PROJECT_ID = <Project ID asli>
-   NEXT_PUBLIC_SANITY_DATASET    = production
-   NEXT_PUBLIC_SANITY_API_VERSION = 2024-10-01
-   ```
-3. **Redeploy** di Vercel (wajib, agar env terpasang).
-4. Buka `/studio` → **Add CORS origin** → masukkan `https://<domain-anda>` (tanpa `/studio`),
-   centang **Allow credentials**. Tambahkan juga `http://localhost:3000` untuk pengembangan.
-5. (Opsional) Isi konten awal: buat **write token** (API → Tokens → Editor),
-   taruh di `.env.local` sebagai `SANITY_API_WRITE_TOKEN`, lalu jalankan `pnpm seed:sanity`.
-
-> Pesan "Content Agent perlu Studio 5.1.0" boleh **diabaikan** — itu fitur AI opsional,
-> tidak diperlukan untuk mengelola konten.
+> Analogi WordPress: `/studio` = `wp-admin`, **Halaman Situs** = menu *Pages*,
+> **Pengaturan Situs** = *Customizer*. Perubahan tayang setelah Anda klik **Publish**.
 
 ---
 
-## B. Konsep dasar
+## 0. LANGKAH PERTAMA (wajib, sekali saja): Alat Konten
+
+Buka `/studio` → menu atas **Alat Konten**.
+
+1. **Periksa konten tersembunyi.** Jika muncul "Ditemukan X dokumen yang tidak terlihat oleh
+   website", klik **Perbaiki sekarang**. Ini memperbaiki masalah lama yang membuat sebagian
+   editan (mis. foto sub-brand) tidak pernah muncul di website. Semua teks & foto tetap utuh.
+2. **Impor konten awal.** Klik **Impor konten sekarang**. Studio terisi dengan seluruh isi website
+   saat ini — termasuk **susunan 7 halaman utama** — jadi Anda tinggal mengedit.
+   Aman diklik kapan saja: yang sudah ada tidak pernah ditimpa.
+
+---
+
+## 1. Konsep dasar
 
 - **Autosave** → tiap ketikan tersimpan sebagai *Draft* (belum tayang).
-- **Publish** (tombol hijau, kanan bawah) → menayangkan ke website.
+- **Publish** (tombol hijau, kanan bawah) → menayangkan ke website. *Paling sering terlupa!*
 - **History** (ikon jam) → lihat & kembalikan versi lama.
-- **⋮ (titik tiga)** → Duplicate / Delete.
-- Kolom wajib yang kosong ditandai merah dan memblok Publish.
+- **⋮ / ▾ di samping Publish** → Duplicate / Delete.
+- Perubahan tayang dalam **±1 menit** (atau seketika jika webhook aktif). Cek dengan refresh keras
+  (Ctrl/Cmd + Shift + R).
 
 ---
 
-## C. Tugas sehari-hari
+## 2. Mengubah susunan halaman (layout) — menu **Halaman Situs**
 
-### Mengubah teks sub-brand
-**Sub-brand** → pilih lini → edit *Pesan utama / Tentang / FAQ / Kanal* → **Publish**.
-> Jangan menukar **Emosi** antar lini. Warna penanda lini diatur dari kode (tidak ada di Studio).
+Berisi 7 halaman utama: **Beranda, Cerita, Menu, Katering & Acara, Hadiah, Di mana memesan, Kontak**.
+Setiap halaman adalah **daftar bagian (section)** yang bisa Anda atur bebas:
 
-### Menambah / mengubah produk menu
-**Produk / Menu** → pilih atau **＋ Create** → isi *Nama, Slug (Generate), Deskripsi, Lini,
-Info, Harga (opsional), Foto* → **Publish**.
+| Mau apa? | Caranya |
+|---|---|
+| Ubah teks/foto suatu bagian | Klik bagiannya → edit di tab **Konten** |
+| Pindahkan urutan | Seret ikon **⋮⋮** di kiri bagian |
+| Tambah bagian baru | Tombol **+ Add item** di bawah daftar → pilih jenis |
+| Sembunyikan sementara | Buka bagian → tab **Tampilan** → **Sembunyikan sementara** |
+| Hapus bagian | Menu ⋮ pada bagian → **Remove** |
+| Ubah warna latar, jarak, motif | Buka bagian → tab **Tampilan** |
+| Kembalikan halaman ke desain bawaan | Hapus dokumen halaman itu (⋮ → Delete) |
 
-### Upload & atur foto
-Di kolom gambar → **Upload** → klik gambar → **Edit hotspot** (atur fokus/crop) → **Publish**.
-Foto otomatis menggantikan placeholder.
+**Jenis bagian yang tersedia:**
 
-### Menulis artikel (Catatan Dapur)
-**Catatan Dapur** → **＋ Create** → isi *Judul, Slug, Ringkasan, Gambar sampul, Tanggal* →
-tulis di **Isi artikel** (teks kaya: judul, tebal, poin, kutipan, gambar) → **Publish**.
-Muncul di `/catatan-dapur` dan `/catatan-dapur/<slug>`.
+- **Hero (pembuka halaman)** — judul besar, teks, tombol, foto (kiri/kanan/tanpa foto).
+- **Teks** — tulisan bebas (judul, tebal, poin, kutipan, gambar, tautan), rata kiri/tengah.
+- **Foto + Teks** — foto di satu sisi, tulisan di sisi lain.
+- **Kutipan** — kutipan besar di tengah, atau dengan foto di samping.
+- **Kartu** — 1–4 kolom kartu (dengan foto, polos, atau bernomor), bisa diberi tautan.
+- **Daftar poin (dengan ikon)** — poin-poin dengan ikon pilihan (halal, pedas, porsi, dll).
+- **Ajakan (panel CTA)** — 1–3 panel berwarna dengan tombol.
+- **Tanya jawab (FAQ)** — otomatis juga dibaca Google sebagai FAQ.
+- **Galeri foto** — kumpulan foto 1–4 kolom dengan keterangan.
+- **Blok data otomatis** — menampilkan isi dari menu lain: kartu lini, pilar, nilai, testimoni,
+  tombol kanal, panduan kanal, menu lengkap, produk satu lini, paket hampers, banner perayaan,
+  artikel terbaru, info kontak. *(Edit isinya di menu asalnya, mis. Produk / Testimoni.)*
+- **Formulir permintaan** — form penawaran katering atau hadiah (+ kotak samping opsional).
+- **Pemisah / jarak** — garis berlian ◇ atau ruang kosong.
 
-### Membuat HALAMAN baru
-**Halaman** → **＋ Create** → *Judul* → *Slug* (Generate) → isi *Eyebrow, Pengantar, Foto hero,
-Isi halaman, Deskripsi SEO* → **Publish**. Halaman hidup di **`/<slug>`**.
+**Tautan pada tombol/kartu:** tulis `/pesan`, `/menu`, `https://…`, atau cukup **`whatsapp`**
+untuk membuka chat WhatsApp DAMA.
 
-### Pilar & Nilai
-**Pilar Brand** / **Nilai Brand** → edit *Judul/Deskripsi*, atur *Urutan* → **Publish**.
+**SEO tiap halaman:** tab **SEO** → *Judul SEO* & *Deskripsi SEO* (yang tampil di Google).
+
+### Membuat halaman BARU
+Menu **Halaman Tambahan** → **+ Create** → isi *Nama halaman* → *Slug* (klik Generate) →
+susun bagian-bagiannya → **Publish**. Halaman hidup di `/<slug>`.
 
 ---
 
-## D. Setelah Publish, kapan tayang?
+## 3. Mengubah warna website — Pengaturan Situs → tab **Warna**
 
-- Bila **webhook instant publish** aktif → **beberapa detik**.
-- Bila belum → maksimal **±1 jam** (ISR) atau langsung saat redeploy.
-- Cek dengan **refresh keras** (Ctrl/Cmd + Shift + R).
+Tujuh warna dasar mengatur seluruh website. Ubah satu, semua turunannya (versi terang/gelap)
+ikut menyesuaikan otomatis:
+
+- **Warna utama** — judul, menu, footer, latar gelap *(asli: teal)*
+- **Warna aksen** — tombol "Pesan" & sorotan *(asli: terakota)*
+- **Warna sorotan** — aksen kecil *(asli: emas)*
+- **Warna latar halaman** *(asli: krem)* · **Warna teks** *(asli: cokelat tua)*
+- **Warna lembut** *(asli: blush)* · **Warna perayaan** *(asli: merah songket)*
+
+**Kosongkan** sebuah warna untuk kembali ke warna asli DAMA.
+Studio akan memberi **peringatan kuning** bila kombinasi warna sulit dibaca — sangat disarankan
+untuk diikuti (warna latar bagian di halaman juga menyesuaikan warna teks secara otomatis).
+
+**Warna khas tiap lini:** Sub-brand → pilih lini → **Warna penanda lini**.
 
 ---
 
-## E. Aturan menulis (voice DAMA)
+## 4. Logo, motif, menu & footer — Pengaturan Situs
+
+| Tab | Isi |
+|---|---|
+| **Tampilan** | Logo header, logo footer (versi terang), monogram, motif latar |
+| **Navigasi & Footer** | Menu atas (isi, urutan, tulisan), tombol menu, judul kolom & tautan footer, kalimat bawah footer |
+| **Teks halaman lini** | Judul-judul yang sama di semua halaman lini ("Tentang lini ini", "Sejujurnya, begini", …). Tulis `{nama}` untuk menyisipkan nama lini |
+| **Kontak & Sosial** | Email, Instagram, TikTok, Threads, area layanan |
+| **Perayaan** | Banner Lebaran/Natal (nyalakan/matikan + teks) |
+| **Beranda / Brand** | Dipakai bila halaman Beranda di *Halaman Situs* belum dibuat |
+
+---
+
+## 5. Konten lain
+
+- **Sub-brand** — teks, FAQ, kanal, foto hero, warna lini, catatan di halaman Pesan, dan
+  **Bagian tambahan di halaman lini** (tambahkan foto, galeri, FAQ, dll. ke halaman lini).
+  > Jangan menukar **Emosi** antar lini.
+- **Produk / Menu** — nama, deskripsi, lini, info, harga, foto.
+- **Catatan Dapur** — artikel (judul, sampul, isi teks kaya).
+- **Pilar, Nilai, Testimoni** — tampil lewat *Blok data otomatis*.
+
+**Foto:** kolom gambar → **Upload** → klik foto → **Edit hotspot** (atur titik fokus) →
+isi *Deskripsi foto (alt)* → **Publish**.
+
+---
+
+## 6. Aturan menulis (voice DAMA)
 
 Hangat, tulus, jujur. **Hindari**: superlatif ("ternikmat/nomor satu"), HURUF KAPITAL &
 tanda seru beruntun, diskon palsu, emoji berlebihan (maksimal satu). Ajak, jangan mengejar.
+Testimoni hanya dari pelanggan sungguhan yang sudah memberi izin.
 
 ---
 
-## F. Catatan jujur
+## 7. Kalau bermasalah
 
-- **"Pengaturan Situs"** & **"Testimoni"** sudah ada di Studio tetapi **belum tampil di situs**
-  (bisa disambungkan kapan saja bila diperlukan).
-- **`pnpm seed:sanity`** menimpa dokumen hasil seed dengan teks awal — **jalankan sekali saja**;
-  setelah mulai mengedit di Studio, jangan dijalankan lagi.
-
----
-
-## G. Kalau bermasalah
-
-- Perubahan tak muncul → pastikan sudah **Publish**, lalu refresh keras / tunggu.
-- Studio tak terbuka / "not a member" → `NEXT_PUBLIC_SANITY_PROJECT_ID` belum benar atau belum redeploy.
-- Pesan CORS → tambahkan origin situs di sanity.io/manage (Allow credentials).
-- Foto tak muncul → pastikan sudah **Upload** (bukan menautkan) dan **Publish**.
+- **Perubahan tak muncul** → sudah **Publish**? Tunggu ±1 menit, refresh keras. Jalankan juga
+  **Alat Konten → Periksa konten tersembunyi**.
+- **Halaman tampil seperti dulu** → halaman itu belum ada di *Halaman Situs*, atau semua
+  bagiannya disembunyikan. Klik **Alat Konten → Impor**.
+- **Studio tak terbuka / "not a member"** → `NEXT_PUBLIC_SANITY_PROJECT_ID` di Vercel belum benar
+  atau belum redeploy.
+- **Pesan CORS** → tambahkan origin situs di sanity.io/manage → API → CORS (Allow credentials).
+- **Pesan "Content Agent perlu Studio 5.1.0"** → boleh diabaikan (fitur AI opsional).

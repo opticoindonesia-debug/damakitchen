@@ -13,7 +13,10 @@ import { Placeholder } from '@/components/Placeholder';
 import { Testimonials } from '@/components/Testimonials';
 import { enjoyModes } from '@/content/story';
 import { cn } from '@/lib/utils';
-import { getSubBrands, getPillars, getSiteSettings, getTestimonials } from '@/lib/cms';
+import { getBuiltInPage, getSubBrands, getPillars, getSiteSettings, getTestimonials } from '@/lib/cms';
+import { PageBuilder } from '@/components/builder/PageBuilder';
+import { builtInMetadata } from '@/lib/pageMeta';
+import { site } from '@/content/site';
 
 // Curated, on-brand hero background presets (safe — contrast stays AA).
 const heroStyles = {
@@ -22,7 +25,14 @@ const heroStyles = {
   blush: { wrap: 'bg-blush/30', eyebrow: 'text-terracotta-deep', headline: 'text-teal', sub: 'text-ink-soft' },
 } as const;
 
+export function generateMetadata() {
+  return builtInMetadata('beranda', { title: 'Beranda', description: site.umbrellaPromise });
+}
+
 export default async function HomePage() {
+  const cms = await getBuiltInPage('beranda');
+  if (cms) return <PageBuilder sections={cms.sections} />;
+
   const [subBrandList, pillars, settings, testimonials] = await Promise.all([
     getSubBrands(),
     getPillars(),
@@ -90,8 +100,8 @@ export default async function HomePage() {
       <Section
         id="lini"
         dividerAbove
-        eyebrow="Lima lini, satu hati"
-        title="Lima cara menikmati DAMA"
+        eyebrow="Lini DAMA"
+        title="Satu hati, beragam cara menikmati"
         intro="Masing-masing membawa suasana yang berbeda, namun voice-nya satu: hangat dan tulus."
       >
         {/* One row on desktop (flex); stacks to 1–2 columns on smaller screens. */}
@@ -182,31 +192,31 @@ export default async function HomePage() {
       <section className="container-dama pb-section">
         <div className="grid gap-6 md:grid-cols-2">
           <div className="rounded-lg bg-teal p-9 text-cream">
-            <h3 className="font-display text-display-md">Punya acara?</h3>
+            <h3 className="font-display text-display-md text-cream">Punya acara?</h3>
             <p className="mt-3 max-w-sm text-cream/80">
               Kami yang masak dan beres-beres, Anda yang hadir penuh bersama tamu.
             </p>
             <div className="mt-7">
-              <Button
+              <Link
                 href="/katering"
-                className="border border-cream/40 bg-transparent text-cream hover:bg-cream/10"
+                className="inline-flex min-h-[44px] items-center justify-center rounded px-5 py-2.5 font-medium transition-colors duration-300 border border-cream/40 text-cream hover:bg-cream/10"
               >
                 Minta penawaran acara
-              </Button>
+              </Link>
             </div>
           </div>
           <div className="rounded-lg bg-terracotta p-9 text-cream">
-            <h3 className="font-display text-display-md">Ingin memberi?</h3>
+            <h3 className="font-display text-display-md text-cream">Ingin memberi?</h3>
             <p className="mt-3 max-w-sm text-cream/85">
               Kirim rasa sayang lewat hampers yang dirangkai dengan hati.
             </p>
             <div className="mt-7">
-              <Button
+              <Link
                 href="/hadiah"
-                className="border border-cream/50 bg-cream text-terracotta-deep hover:bg-cream-paper"
+                className="inline-flex min-h-[44px] items-center justify-center rounded px-5 py-2.5 font-medium transition-colors duration-300 bg-cream text-terracotta-deep hover:bg-cream-paper"
               >
                 Kirim sebagai hadiah
-              </Button>
+              </Link>
             </div>
           </div>
         </div>

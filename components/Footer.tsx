@@ -4,6 +4,7 @@ import { PatternBand } from './PatternBand';
 import { subBrandList, type SubBrand } from '@/content/subbrands';
 import { contact } from '@/content/channels';
 import { site } from '@/content/site';
+import { DEFAULT_FOOTER_TEXT, type FooterText } from '@/lib/siteText';
 
 export interface FooterContact {
   umbrellaPromise: string;
@@ -21,11 +22,14 @@ export function Footer({
   subBrands = subBrandList,
   settings,
   logo,
+  text = DEFAULT_FOOTER_TEXT,
 }: {
   subBrands?: SubBrand[];
   settings?: FooterContact;
   /** Light logo image for the dark footer; falls back to the typeset lockup. */
   logo?: string;
+  /** Editable labels & links (Pengaturan Situs → Navigasi & Footer). */
+  text?: FooterText;
 }) {
   const year = new Date().getFullYear();
   const promise = settings?.umbrellaPromise ?? site.umbrellaPromise;
@@ -45,7 +49,7 @@ export function Footer({
 
         <nav aria-label="Sub-brand">
           <h2 className="mb-4 text-label font-semibold uppercase tracking-[0.18em] text-gold">
-            Sub-brand
+            {text.colSubBrand}
           </h2>
           <ul className="space-y-2.5">
             {subBrands.map((sb) => (
@@ -67,45 +71,28 @@ export function Footer({
 
         <nav aria-label="Tautan">
           <h2 className="mb-4 text-label font-semibold uppercase tracking-[0.18em] text-gold">
-            Jelajahi
+            {text.colExplore}
           </h2>
           <ul className="space-y-2.5 text-caption text-cream/85">
-            <li>
-              <Link href="/cerita" className="hover:text-cream">
-                Cerita
-              </Link>
-            </li>
-            <li>
-              <Link href="/menu" className="hover:text-cream">
-                Menu
-              </Link>
-            </li>
-            <li>
-              <Link href="/katering" className="hover:text-cream">
-                Katering
-              </Link>
-            </li>
-            <li>
-              <Link href="/hadiah" className="hover:text-cream">
-                Hadiah
-              </Link>
-            </li>
-            <li>
-              <Link href="/pesan" className="hover:text-cream">
-                Di mana memesan
-              </Link>
-            </li>
-            <li>
-              <Link href="/kontak" className="hover:text-cream">
-                Kontak
-              </Link>
-            </li>
+            {text.exploreLinks.map((l, i) => (
+              <li key={`${l.href}-${i}`}>
+                {/^https?:\/\//.test(l.href) ? (
+                  <a href={l.href} target="_blank" rel="noopener noreferrer" className="hover:text-cream">
+                    {l.label}
+                  </a>
+                ) : (
+                  <Link href={l.href} className="hover:text-cream">
+                    {l.label}
+                  </Link>
+                )}
+              </li>
+            ))}
           </ul>
         </nav>
 
         <div>
           <h2 className="mb-4 text-label font-semibold uppercase tracking-[0.18em] text-gold">
-            Sapa kami
+            {text.colContact}
           </h2>
           <ul className="space-y-2.5 text-caption text-cream/85">
             <li>
@@ -134,7 +121,7 @@ export function Footer({
 
       <div className="border-t border-cream/15">
         <div className="container-dama flex flex-col gap-2 py-6 text-caption text-cream/65 sm:flex-row sm:items-center sm:justify-between">
-          <p>Setiap lini disajikan {site.hashtag} — by DAMA.</p>
+          <p>{text.note}</p>
           <p>
             © {year} {site.name}. {site.tagline}.
           </p>

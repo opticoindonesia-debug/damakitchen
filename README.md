@@ -71,14 +71,24 @@ The site reads content through a small data layer (`lib/cms`) that fetches from
 `/content`. So the site works fully with **no CMS connected**, and switches to
 live, editable content the moment you set the Sanity env vars — no code changes.
 
-What you can manage from the CMS (editor lives at **`/studio`**):
+What you can manage from the CMS (editor lives at **`/studio`**) — the full
+editor guide in Bahasa Indonesia is **[`docs/PANDUAN-CMS.md`](docs/PANDUAN-CMS.md)**:
 
-- **Sub-brand** copy, FAQs, channels, hero photos (marker colours stay as code tokens)
-- **Produk / Menu** items — name, photo, info icons, price, lini
-- **Catatan Dapur** — write & publish articles (rich text + images)
-- **Halaman** — create brand-new pages with their own URL (`/<slug>`), rich text + hero
-- **Pilar, Nilai, Testimoni** reference content
-- **Pengaturan Situs** singleton (brand lines, contact, channels, seasonal banner)
+- **Page builder** — every main page (Beranda, Cerita, Menu, Katering, Hadiah,
+  Pesan, Kontak) plus any new page is a list of sections (hero, text, photo+text,
+  quote, cards, features, CTA panels, FAQ, gallery, live data blocks, inquiry
+  form, divider) that editors add, reorder, hide and restyle. A built-in page
+  renders its coded layout until its Studio document has visible sections
+  (`lib/pages.ts`, `components/builder/`), so deleting the document = reset.
+- **Theme colors** — seven base colors (Pengaturan Situs → Warna) drive every
+  palette token via CSS variables (`lib/theme.ts`); tints are derived, contrast
+  warnings shown in Studio. Per-line marker colors on each Sub-brand.
+- **Navigation, footer, sub-brand page labels** — Pengaturan Situs.
+- **Sub-brand, Produk, Catatan Dapur, Pilar, Nilai, Testimoni, logo, motif.**
+
+> **Document IDs must never contain a dot.** Sanity treats dotted IDs as
+> private paths that public reads cannot see. Studio → *Alat Konten* detects
+> and repairs any such legacy documents (`sanity/migrateIds.ts`).
 
 ### One-time Sanity setup
 
@@ -93,7 +103,9 @@ What you can manage from the CMS (editor lives at **`/studio`**):
 3. In sanity.io/manage → **API → CORS origins**, add your site origin(s):
    `http://localhost:3000` and your production domain (allow credentials).
 4. Redeploy (or `pnpm dev`). Visit **`/studio`**, log in, and start adding content.
-   New/edited content appears on the site within ~1 hour (ISR) or instantly on redeploy.
+   Then open **Alat Konten** in the Studio: repair hidden documents and import
+   the current content (including all page layouts). Edits appear within ~1 minute
+   (ISR), or instantly with the webhook below.
 
 ### Seed the CMS with the current content
 

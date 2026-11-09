@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { Section } from '@/components/Section';
+import { PageBuilder } from '@/components/builder/PageBuilder';
 import { ImageWithScrim } from '@/components/ImageWithScrim';
 import { PortableTextBody } from '@/components/PortableTextBody';
 import { buildMetadata } from '@/lib/seo';
@@ -21,12 +22,16 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     title: page.title,
     description: page.seoDescription ?? page.intro ?? page.title,
     path: `/${page.slug}`,
+    absoluteTitle: page.seoTitle,
   });
 }
 
 export default async function CmsPage({ params }: { params: { slug: string } }) {
   const page = await getPage(params.slug);
   if (!page) notFound();
+
+  const sections = page.sections.filter((s) => !s.hidden);
+  if (sections.length) return <PageBuilder sections={sections} />;
 
   return (
     <Section eyebrow={page.eyebrow} title={page.title} titleAs="h1" intro={page.intro}>

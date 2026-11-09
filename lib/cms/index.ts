@@ -1,5 +1,21 @@
 import { sanityClient, sanityConfigured } from '@/lib/sanity/client';
 import { urlForImage } from '@/lib/sanity/image';
+import { parseHex, type ThemeBase } from '@/lib/theme';
+import {
+  DEFAULT_FOOTER_TEXT,
+  DEFAULT_NAV,
+  DEFAULT_NAV_CTA,
+  DEFAULT_SUBBRAND_LABELS,
+  type FooterText,
+  type NavItem,
+  type SubBrandLabels,
+} from '@/lib/siteText';
+import {
+  BUILT_IN_PAGE_IDS,
+  RESERVED_SLUGS,
+  builtInPageId,
+  type BuiltInPageKey,
+} from '@/lib/pages';
 import {
   subBrandList as staticSubBrands,
   subBrands as staticSubBrandMap,
@@ -42,7 +58,7 @@ export async function getSubBrands(): Promise<SubBrand[]> {
   const docs = await sanityClient.fetch<Array<Record<string, unknown>>>(
     `*[_type=="subBrand"]|order(order asc){
       "slug":slug, name, shortName, emotion, lead, about, howToOrder,
-      channels, faqs[]{q,a}, crossSell, heroImage
+      channels, faqs[]{q,a}, crossSell, heroImage, "markerColor": markerColor.hex, channelNote
     }`,
   );
   if (!docs?.length) return activeStaticSubBrands;
@@ -65,6 +81,9 @@ export async function getSubBrands(): Promise<SubBrand[]> {
       crossSell: (d.crossSell as SubBrandSlug[]) ?? base?.crossSell ?? [],
       ...subBrandTokens[slug],
       heroImage: urlForImage(d.heroImage as never) ?? base?.heroImage,
+      channelNote: (d.channelNote as string) || base?.channelNote,
+      // Editor-chosen marker color overrides the code token when valid.
+      ...(parseHex(d.markerColor as string) ? { markerHex: d.markerColor as string } : {}),
     } satisfies SubBrand;
   });
 }
@@ -128,6 +147,12 @@ export interface SiteSettings {
   threads: string;
   coverage: string;
   seasonal: { active: boolean; label: string; message: string };
+  /** Base-color overrides from the Warna tab (undefined = original palette). */
+  theme: Partial<Record<ThemeBase, string>>;
+  nav: NavItem[];
+  navCta: { label: string; href: string };
+  footerText: FooterText;
+  subBrandLabels: SubBrandLabels;
 }
 
 const staticSettings: SiteSettings = {
@@ -150,7 +175,33 @@ const staticSettings: SiteSettings = {
   threads: contact.threads.href,
   coverage: contact.coverage,
   seasonal: { active: staticSeasonal.active, label: staticSeasonal.label, message: staticSeasonal.message },
+  theme: {},
+  nav: DEFAULT_NAV,
+  navCta: DEFAULT_NAV_CTA,
+  footerText: DEFAULT_FOOTER_TEXT,
+  subBrandLabels: DEFAULT_SUBBRAND_LABELS,
 };
+
+// ── Navigation helpers ────────────────────────────────────────
+const linkOk = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
+
+function mapNav(raw: unknown): NavItem[] {
+  if (!Array.isArray(raw) || raw.length === 0) return DEFAULT_NAV;
+  const items = raw.flatMap((it: Record<string, unknown>): NavItem[] => {
+    if (it?._type === 'navSubBrands') return [{ kind: 'subBrands', label: linkOk(it.label) ? it.label : 'Sub-brand' }];
+    if (linkOk(it?.label) && linkOk(it?.link)) return [{ kind: 'link', label: it.label, href: it.link.trim() }];
+    return [];
+  });
+  return items.length ? items : DEFAULT_NAV;
+}
+
+function mapLinks(raw: unknown): { label: string; href: string }[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const links = raw.flatMap((l: Record<string, unknown>) =>
+    linkOk(l?.label) && linkOk(l?.link) ? [{ label: l.label, href: l.link.trim() }] : [],
+  );
+  return links.length ? links : undefined;
+}
 
 export async function getSiteSettings(): Promise<SiteSettings> {
   if (!sanityConfigured) return staticSettings;
@@ -160,7 +211,15 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       founderQuote, founderName, founderRole, heroImage, founderImage, heroStyle,
       logo, logoLight, monogram, backgroundMotif, motifImage, motifOpacity,
       email, instagram, tiktok, threads, coverage,
-      seasonalActive, seasonalLabel, seasonalMessage
+      seasonalActive, seasonalLabel, seasonalMessage,
+      navItems[]{ _type, label, link }, navCtaLabel, navCtaLink,
+      footerColSubBrand, footerColExplore, footerColContact, footerLinks[]{ label, link }, footerNote,
+      subBrandLabels,
+      "theme": {
+        "primary": colorPrimary.hex, "accent": colorAccent.hex, "highlight": colorHighlight.hex,
+        "background": colorBackground.hex, "text": colorText.hex, "soft": colorSoft.hex,
+        "festive": colorFestive.hex
+      }
     }`,
   );
   if (!d) return staticSettings;
@@ -202,6 +261,29 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       label: str(d.seasonalLabel, staticSettings.seasonal.label),
       message: str(d.seasonalMessage, staticSettings.seasonal.message),
     },
+    nav: mapNav(d.navItems),
+    navCta: {
+      label: str(d.navCtaLabel, DEFAULT_NAV_CTA.label),
+      href: str(d.navCtaLink, DEFAULT_NAV_CTA.href),
+    },
+    footerText: {
+      colSubBrand: str(d.footerColSubBrand, DEFAULT_FOOTER_TEXT.colSubBrand),
+      colExplore: str(d.footerColExplore, DEFAULT_FOOTER_TEXT.colExplore),
+      colContact: str(d.footerColContact, DEFAULT_FOOTER_TEXT.colContact),
+      exploreLinks: mapLinks(d.footerLinks) ?? DEFAULT_FOOTER_TEXT.exploreLinks,
+      note: str(d.footerNote, DEFAULT_FOOTER_TEXT.note),
+    },
+    subBrandLabels: Object.fromEntries(
+      Object.entries(DEFAULT_SUBBRAND_LABELS).map(([k, fallback]) => [
+        k,
+        str((d.subBrandLabels as Record<string, unknown> | undefined)?.[k], fallback),
+      ]),
+    ) as unknown as SubBrandLabels,
+    theme: Object.fromEntries(
+      Object.entries((d.theme as Record<string, unknown>) ?? {}).filter(
+        ([, hex]) => typeof hex === 'string' && parseHex(hex),
+      ),
+    ) as SiteSettings['theme'],
   };
 }
 
@@ -278,41 +360,104 @@ export async function getJournalPost(slug: string): Promise<JournalPost | null> 
   };
 }
 
-// ── Free pages ────────────────────────────────────────────────
+// ── Pages & page-builder sections ─────────────────────────────
+
+/** A page-builder section as stored in Sanity, images resolved to `url`. */
+export type Section = Record<string, unknown> & { _type: string; _key: string };
+
+/**
+ * Walks section data and adds `url` to every uploaded image, so renderers
+ * never deal with Sanity asset references.
+ */
+function resolveImages<T>(value: T): T {
+  if (Array.isArray(value)) return value.map(resolveImages) as T;
+  if (value && typeof value === 'object') {
+    const obj = value as Record<string, unknown>;
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(obj)) out[k] = resolveImages(v);
+    if (obj._type === 'image' && obj.asset) out.url = urlForImage(obj as never, 1600);
+    return out as T;
+  }
+  return value;
+}
+
 export interface CmsPage {
   slug: string;
   title: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  /** Page-builder sections (empty → legacy single-block layout / coded page). */
+  sections: Section[];
+  // Legacy single-block fields:
   eyebrow?: string;
   intro?: string;
   heroImage?: string;
   body: unknown;
-  seoDescription?: string;
 }
 
-export async function getPageSlugs(): Promise<string[]> {
-  if (!sanityConfigured) return [];
-  const slugs = await sanityClient.fetch<string[]>(
-    `*[_type=="page" && defined(slug.current)].slug.current`,
-  );
-  return slugs ?? [];
-}
+const PAGE_PROJECTION = `{
+  "slug": slug.current, title, seoTitle, seoDescription, sections,
+  eyebrow, intro, heroImage, body
+}`;
 
-export async function getPage(slug: string): Promise<CmsPage | null> {
-  if (!sanityConfigured) return null;
-  const d = await sanityClient.fetch<Record<string, unknown> | null>(
-    `*[_type=="page" && slug.current==$slug][0]{
-      "slug":slug.current, title, eyebrow, intro, heroImage, body, seoDescription
-    }`,
-    { slug },
-  );
+function toCmsPage(d: Record<string, unknown> | null): CmsPage | null {
   if (!d) return null;
+  const sections = resolveImages(((d.sections as Section[]) ?? []).filter(Boolean));
   return {
-    slug: d.slug as string,
-    title: d.title as string,
+    slug: (d.slug as string) ?? '',
+    title: (d.title as string) ?? '',
+    seoTitle: d.seoTitle as string | undefined,
+    seoDescription: d.seoDescription as string | undefined,
+    sections,
     eyebrow: d.eyebrow as string | undefined,
     intro: d.intro as string | undefined,
     heroImage: urlForImage(d.heroImage as never),
     body: d.body,
-    seoDescription: d.seoDescription as string | undefined,
   };
+}
+
+/** Custom page slugs (built-in pages and reserved addresses excluded). */
+export async function getPageSlugs(): Promise<string[]> {
+  if (!sanityConfigured) return [];
+  const slugs = await sanityClient.fetch<string[]>(
+    `*[_type=="page" && defined(slug.current) && !(_id in $builtIn)].slug.current`,
+    { builtIn: BUILT_IN_PAGE_IDS },
+  );
+  return (slugs ?? []).filter((s) => !RESERVED_SLUGS.includes(s));
+}
+
+export async function getPage(slug: string): Promise<CmsPage | null> {
+  if (!sanityConfigured || RESERVED_SLUGS.includes(slug)) return null;
+  const d = await sanityClient.fetch<Record<string, unknown> | null>(
+    `*[_type=="page" && slug.current==$slug && !(_id in $builtIn)][0]${PAGE_PROJECTION}`,
+    { slug, builtIn: BUILT_IN_PAGE_IDS },
+  );
+  return toCmsPage(d);
+}
+
+/**
+ * A built-in page's Studio document (Beranda, Cerita, …). Returns null when it
+ * doesn't exist or has no visible sections — the route then renders its
+ * original coded layout.
+ */
+export async function getBuiltInPage(key: BuiltInPageKey): Promise<CmsPage | null> {
+  if (!sanityConfigured) return null;
+  const d = await sanityClient.fetch<Record<string, unknown> | null>(
+    `*[_id == $id][0]${PAGE_PROJECTION}`,
+    { id: builtInPageId(key) },
+  );
+  const page = toCmsPage(d);
+  return page && page.sections.some((s) => !s.hidden) ? page : null;
+}
+
+/** Sub-brand page extras that live only in the CMS. */
+export async function getSubBrandExtras(
+  slug: SubBrandSlug,
+): Promise<{ extraSections: Section[] }> {
+  if (!sanityConfigured) return { extraSections: [] };
+  const d = await sanityClient.fetch<{ extraSections?: Section[] } | null>(
+    `*[_type=="subBrand" && slug==$slug][0]{ extraSections }`,
+    { slug },
+  );
+  return { extraSections: resolveImages((d?.extraSections ?? []).filter(Boolean)) };
 }
