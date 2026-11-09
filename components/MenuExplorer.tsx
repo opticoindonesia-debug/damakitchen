@@ -53,13 +53,13 @@ export function MenuExplorer({
               )}
               style={
                 isActive
-                  ? { backgroundColor: sb.markerHex, borderColor: sb.markerHex, color: '#F7F1E3' }
+                  ? { backgroundColor: sb.markerHex, borderColor: sb.markerHex, color: 'rgb(var(--c-cream))' }
                   : undefined
               }
             >
               <span
                 className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: isActive ? '#F7F1E3' : sb.markerHex }}
+                style={{ backgroundColor: isActive ? 'rgb(var(--c-cream))' : sb.markerHex }}
                 aria-hidden="true"
               />
               {sb.shortName}

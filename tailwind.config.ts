@@ -5,6 +5,12 @@ import type { Config } from 'tailwindcss';
  * All design tokens from the brand system (§3) live here.
  * No raw hex should appear in components — reference these tokens only.
  */
+/**
+ * Palette colors are CSS variables ("r g b" triples) so they can be edited in
+ * Studio at runtime (see lib/theme.ts). Defaults live in app/globals.css.
+ */
+const v = (token: string) => `rgb(var(--c-${token}) / <alpha-value>)`;
+
 const config: Config = {
   content: [
     './app/**/*.{ts,tsx}',
@@ -17,52 +23,51 @@ const config: Config = {
         // ── Core palette (§3.1) ──────────────────────────────
         // ~60% canvas. Warm paper, never cold studio white.
         cream: {
-          DEFAULT: '#F7F1E3',
-          deep: '#EFE6D2', // subtle surface step
-          paper: '#FBF7EE',
+          DEFAULT: v('cream'),
+          deep: v('cream-deep'), // subtle surface step
+          paper: v('cream-paper'),
         },
         // 20% structure. Deep teal carries the architecture.
         teal: {
-          20: '#D2DEDB',
-          40: '#A6BDB8',
-          60: '#5E837D',
-          80: '#356159',
-          100: '#1F4D4D',
-          DEFAULT: '#1F4D4D',
+          20: v('teal-20'),
+          40: v('teal-40'),
+          60: v('teal-60'),
+          80: v('teal-80'),
+          100: v('teal-100'),
+          DEFAULT: v('teal-100'),
         },
         // 12% warmth. Core terracotta accent.
         terracotta: {
-          20: '#F0D7CE',
-          40: '#E2B0A1',
-          60: '#D4866F',
-          80: '#CB6B50',
-          100: '#C65B3E',
-          // AA-safe (≈5.2:1 on cream) for small terracotta TEXT on cream.
-          // The base #C65B3E is ~3.8:1 — fine for large text/icons only.
-          deep: '#A8472C',
-          DEFAULT: '#C65B3E',
+          20: v('terracotta-20'),
+          40: v('terracotta-40'),
+          60: v('terracotta-60'),
+          80: v('terracotta-80'),
+          100: v('terracotta-100'),
+          // Darker step for small terracotta TEXT on cream (AA).
+          deep: v('terracotta-deep'),
+          DEFAULT: v('terracotta-100'),
         },
         // 8% highlight. Gold — surfaces/accents, never body text on cream.
         gold: {
-          20: '#EFE2C2',
-          40: '#E0CA93',
-          60: '#D2B264',
-          80: '#CAA34B',
-          100: '#C39A3C',
-          DEFAULT: '#C39A3C',
+          20: v('gold-20'),
+          40: v('gold-40'),
+          60: v('gold-60'),
+          80: v('gold-80'),
+          100: v('gold-100'),
+          DEFAULT: v('gold-100'),
         },
         // Warm ink for body text on cream (heritage brown).
         ink: {
-          DEFAULT: '#33231C',
-          soft: '#5A463C',
+          DEFAULT: v('ink'),
+          soft: v('ink-soft'),
         },
         // Soft blush — surface/accent only (gifting). Never body text on cream.
         blush: {
-          DEFAULT: '#E8C7C2',
-          deep: '#D9A6A0',
+          DEFAULT: v('blush'),
+          deep: v('blush-deep'),
         },
         // Festive accent — perayaan only, never a permanent surface.
-        songketRed: '#C0392B',
+        songketRed: v('festive'),
 
         // ── Sub-brand markers (§3.2) ─────────────────────────
         // One marker per line; always sits on the shared cream/ink base.

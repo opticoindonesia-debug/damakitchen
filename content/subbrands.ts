@@ -47,11 +47,14 @@ export interface SubBrand {
    * Set back to false (or remove) to launch the line.
    */
   disabled?: boolean;
+  /** One-line "which channel for what" note shown on /pesan. */
+  channelNote?: string;
 }
 
 export const subBrands: Record<SubBrandSlug, SubBrand> = {
   'lamak-dama': {
     slug: 'lamak-dama',
+    channelNote: 'Stok beku siap panas — paling praktis lewat Shopee atau TikTok Shop.',
     name: 'LAMAK DAMA',
     shortName: 'LAMAK',
     emotion: 'Tenang',
@@ -90,6 +93,7 @@ export const subBrands: Record<SubBrandSlug, SubBrand> = {
 
   'warisan-dama': {
     slug: 'warisan-dama',
+    channelNote: 'Dimasak fresh, jadi pre-order langsung lewat WhatsApp.',
     name: 'WARISAN DAMA',
     shortName: 'WARISAN',
     emotion: 'Bangga',
@@ -124,6 +128,7 @@ export const subBrands: Record<SubBrandSlug, SubBrand> = {
 
   'hidang-basamo': {
     slug: 'hidang-basamo',
+    channelNote: 'Layanan acara — mulai dari obrolan penawaran di WhatsApp.',
     name: 'HIDANG BASAMO',
     shortName: 'HIDANG',
     emotion: 'Hangat',
@@ -159,6 +164,7 @@ export const subBrands: Record<SubBrandSlug, SubBrand> = {
 
   'dama-kapau': {
     slug: 'dama-kapau',
+    channelNote: 'Pesan harian maupun jumlah banyak lewat WhatsApp.',
     name: 'DAMA KAPAU',
     shortName: 'KAPAU',
     emotion: 'Lega',
@@ -193,6 +199,7 @@ export const subBrands: Record<SubBrandSlug, SubBrand> = {
 
   'tando-mato': {
     slug: 'tando-mato',
+    channelNote: 'Paket musiman di Shopee; hampers custom lewat WhatsApp.',
     name: 'TANDO MATO',
     shortName: 'TANDO MATO',
     emotion: 'Berkesan',

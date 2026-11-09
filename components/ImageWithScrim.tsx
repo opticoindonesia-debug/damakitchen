@@ -59,7 +59,7 @@ export function ImageWithScrim({
           className="absolute inset-0"
           style={{
             background:
-              'linear-gradient(to top, rgba(31,77,77,0.55) 0%, rgba(31,77,77,0.18) 45%, transparent 100%)',
+              'linear-gradient(to top, rgb(var(--c-teal-100) / 0.55) 0%, rgb(var(--c-teal-100) / 0.18) 45%, transparent 100%)',
           }}
         />
       )}

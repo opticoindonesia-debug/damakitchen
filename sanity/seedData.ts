@@ -11,12 +11,21 @@ import { testimonials } from '../content/testimonials';
 import { site, seasonal } from '../content/site';
 import { WHATSAPP_NUMBER, contact, channels } from '../content/channels';
 import { founder } from '../content/story';
+import { buildPageSeeds } from './seedPages';
 
+/**
+ * IMPORTANT: never use '.' in document IDs. Sanity treats dotted IDs as
+ * private "paths" that public (token-less) reads cannot see.
+ */
 export type SeedDoc = Record<string, unknown> & { _id: string; _type: string };
 
 const key = (prefix: string, i: number) => `${prefix}-${i}`;
 
-export function buildSeedDocs(): SeedDoc[] {
+/**
+ * @param existingSettings current siteSettings (if any) so the Beranda page
+ *   seed carries over headline/photos/style already edited in Studio.
+ */
+export function buildSeedDocs(existingSettings?: Record<string, unknown> | null): SeedDoc[] {
   const docs: SeedDoc[] = [];
 
   docs.push({
@@ -54,7 +63,7 @@ export function buildSeedDocs(): SeedDoc[] {
     .filter((sb) => !sb.disabled)
     .forEach((sb, idx) => {
     docs.push({
-      _id: `subBrand.${sb.slug}`,
+      _id: `subBrand-${sb.slug}`,
       _type: 'subBrand',
       name: sb.name,
       slug: sb.slug,
@@ -72,12 +81,12 @@ export function buildSeedDocs(): SeedDoc[] {
 
   products.forEach((p, idx) => {
     const doc: SeedDoc = {
-      _id: `product.${p.id}`,
+      _id: `product-${p.id}`,
       _type: 'product',
       name: p.name,
       slug: { _type: 'slug', current: p.id },
       blurb: p.blurb,
-      subBrand: { _type: 'reference', _ref: `subBrand.${p.subBrand}` },
+      subBrand: { _type: 'reference', _ref: `subBrand-${p.subBrand}` },
       info: p.info,
       imageCategory: p.imageCategory,
       order: idx,
@@ -87,16 +96,16 @@ export function buildSeedDocs(): SeedDoc[] {
   });
 
   pillars.forEach((p, i) => {
-    docs.push({ _id: `pillar.${i}`, _type: 'pillar', title: p.title, desc: p.desc, icon: p.icon, order: i });
+    docs.push({ _id: `pillar-${i}`, _type: 'pillar', title: p.title, desc: p.desc, icon: p.icon, order: i });
   });
 
   values.forEach((v, i) => {
-    docs.push({ _id: `brandValue.${i}`, _type: 'brandValue', title: v.title, desc: v.desc, order: i });
+    docs.push({ _id: `brandValue-${i}`, _type: 'brandValue', title: v.title, desc: v.desc, order: i });
   });
 
   testimonials.forEach((t, i) => {
     docs.push({
-      _id: `testimonial.${i}`,
+      _id: `testimonial-${i}`,
       _type: 'testimonial',
       name: t.name,
       context: t.context,
@@ -104,6 +113,8 @@ export function buildSeedDocs(): SeedDoc[] {
       order: i,
     });
   });
+
+  docs.push(...buildPageSeeds(existingSettings));
 
   return docs;
 }

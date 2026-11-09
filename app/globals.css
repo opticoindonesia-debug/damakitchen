@@ -4,8 +4,34 @@
 
 @layer base {
   :root {
-    /* Default page accent = core terracotta. Sub-brand pages override this. */
-    --accent: 198 91 62; /* terracotta #C65B3E */
+    /* Brand palette as "r g b" triples. Editable in Studio → Pengaturan Situs →
+       Warna; overrides are injected at runtime (lib/theme.ts). */
+    --c-teal-20:210 222 219;
+    --c-teal-40:166 189 184;
+    --c-teal-60:94 131 125;
+    --c-teal-80:53 97 89;
+    --c-teal-100:31 77 77;
+    --c-terracotta-20:240 215 206;
+    --c-terracotta-40:226 176 161;
+    --c-terracotta-60:212 134 111;
+    --c-terracotta-80:203 107 80;
+    --c-terracotta-100:198 91 62;
+    --c-terracotta-deep:168 71 44;
+    --c-gold-20:239 226 194;
+    --c-gold-40:224 202 147;
+    --c-gold-60:210 178 100;
+    --c-gold-80:202 163 75;
+    --c-gold-100:195 154 60;
+    --c-cream:247 241 227;
+    --c-cream-deep:239 230 210;
+    --c-cream-paper:251 247 238;
+    --c-ink:51 35 28;
+    --c-ink-soft:90 70 60;
+    --c-blush:232 199 194;
+    --c-blush-deep:217 166 160;
+    --c-festive:192 57 43;
+    --accent:198 91 62;
+    /* --accent: per-page accent (sub-brand pages override; defaults to terracotta). */
     --radius: 12px;
   }
 

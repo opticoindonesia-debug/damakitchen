@@ -5,19 +5,25 @@ import { ImageWithScrim } from '@/components/ImageWithScrim';
 import { PillarRow } from '@/components/PillarRow';
 import { Button } from '@/components/Button';
 import { Reveal } from '@/components/Reveal';
-import { buildMetadata } from '@/lib/seo';
+import { builtInMetadata } from '@/lib/pageMeta';
+import { PageBuilder } from '@/components/builder/PageBuilder';
+import { getBuiltInPage } from '@/lib/cms';
 import { founder, proverbMovements } from '@/content/story';
 import { site, media } from '@/content/site';
 import { getPillars, getValues } from '@/lib/cms';
 
-export const metadata = buildMetadata({
+export function generateMetadata() {
+  return builtInMetadata('cerita', {
   title: 'Cerita',
   description:
     'Cerita DAMA: dari dapur keluarga, warisan Minang, dan keyakinan bahwa masakan adalah cara merawat hubungan.',
-  path: '/cerita',
-});
+  });
+}
 
 export default async function CeritaPage() {
+  const cms = await getBuiltInPage('cerita');
+  if (cms) return <PageBuilder sections={cms.sections} />;
+
   const [pillars, values] = await Promise.all([getPillars(), getValues()]);
   return (
     <>

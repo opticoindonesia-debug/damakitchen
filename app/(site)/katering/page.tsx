@@ -2,15 +2,18 @@ import { Section } from '@/components/Section';
 import { InquiryForm } from '@/components/InquiryForm';
 import { ImageWithScrim } from '@/components/ImageWithScrim';
 import { Reveal } from '@/components/Reveal';
-import { buildMetadata } from '@/lib/seo';
+import { builtInMetadata } from '@/lib/pageMeta';
+import { PageBuilder } from '@/components/builder/PageBuilder';
+import { getBuiltInPage } from '@/lib/cms';
 import { media } from '@/content/site';
 
-export const metadata = buildMetadata({
+export function generateMetadata() {
+  return builtInMetadata('katering', {
   title: 'Katering & Acara',
   description:
     'Layanan katering & acara DAMA. Kami yang masak dan beres-beres, Anda yang hadir penuh.',
-  path: '/katering',
-});
+  });
+}
 
 const formats = [
   { title: 'Prasmanan', desc: 'Penyajian penuh untuk acara di rumah atau gedung, lengkap dengan peralatan saji.' },
@@ -24,7 +27,10 @@ const proof = [
   { title: 'Beres-beres', desc: 'Setelah acara, kami rapikan — Anda tinggal menikmati momennya.' },
 ];
 
-export default function KateringPage() {
+export default async function KateringPage() {
+  const cms = await getBuiltInPage('katering');
+  if (cms) return <PageBuilder sections={cms.sections} />;
+
   return (
     <>
       <section className="border-b border-teal/10 bg-cream-deep py-section">

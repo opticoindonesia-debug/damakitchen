@@ -9,7 +9,8 @@ import { FAQAccordion } from './FAQAccordion';
 import { Reveal } from './Reveal';
 import { hexToRgbTriple } from '@/lib/utils';
 import { type SubBrand } from '@/content/subbrands';
-import { getProductsBySubBrand, getSubBrands } from '@/lib/cms';
+import { getProductsBySubBrand, getSiteSettings, getSubBrandExtras, getSubBrands } from '@/lib/cms';
+import { PageBuilder } from './builder/PageBuilder';
 import { site } from '@/content/site';
 
 /**
@@ -17,10 +18,14 @@ import { site } from '@/content/site';
  * marker color (set on --accent); everything else stays in the core palette.
  */
 export async function SubBrandPage({ subBrand }: { subBrand: SubBrand }) {
-  const [lineProducts, allSubBrands] = await Promise.all([
+  const [lineProducts, allSubBrands, settings, extras] = await Promise.all([
     getProductsBySubBrand(subBrand.slug),
     getSubBrands(),
+    getSiteSettings(),
+    getSubBrandExtras(subBrand.slug),
   ]);
+  const L = settings.subBrandLabels;
+  const withName = (text: string) => text.replace(/\{nama\}/g, subBrand.name);
   const subBrandBySlug = Object.fromEntries(allSubBrands.map((s) => [s.slug, s]));
   const accentStyle = { '--accent': hexToRgbTriple(subBrand.markerHex) } as React.CSSProperties;
 
@@ -64,13 +69,13 @@ export async function SubBrandPage({ subBrand }: { subBrand: SubBrand }) {
       </section>
 
       {/* ── What it is / who it's for ───────────────────────── */}
-      <Section eyebrow="Tentang lini ini" title={`Apa itu ${subBrand.name}`}>
+      <Section eyebrow={withName(L.aboutEyebrow)} title={withName(L.aboutTitle)}>
         <p className="max-w-prose text-body-lg text-ink-soft">{subBrand.about}</p>
       </Section>
 
       {/* ── Product list ────────────────────────────────────── */}
       {lineProducts.length > 0 && (
-        <Section dividerAbove eyebrow="Pilihan hidangan" title="Yang bisa Anda nikmati">
+        <Section dividerAbove eyebrow={withName(L.productsEyebrow)} title={withName(L.productsTitle)}>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {lineProducts.map((p, i) => (
               <Reveal key={p.id} delay={i * 0.05}>
@@ -84,7 +89,7 @@ export async function SubBrandPage({ subBrand }: { subBrand: SubBrand }) {
       {/* ── How to order ────────────────────────────────────── */}
       <section className="bg-cream-deep py-section">
         <div className="container-dama max-w-prose">
-          <h2 className="text-display-md text-teal">Cara memesan</h2>
+          <h2 className="text-display-md text-teal">{withName(L.orderTitle)}</h2>
           <p className="mt-4 text-body-lg text-ink-soft">{subBrand.howToOrder}</p>
           <div className="mt-8 flex flex-wrap gap-4">
             {subBrand.slug === 'hidang-basamo' ? (
@@ -105,17 +110,20 @@ export async function SubBrandPage({ subBrand }: { subBrand: SubBrand }) {
       </section>
 
       {/* ── FAQ ─────────────────────────────────────────────── */}
-      <Section eyebrow="Hal yang sering ditanya" title="Sejujurnya, begini">
+      <Section eyebrow={withName(L.faqEyebrow)} title={withName(L.faqTitle)}>
         <div className="max-w-prose">
           <FAQAccordion items={subBrand.faqs} />
         </div>
       </Section>
 
+      {/* ── Extra sections added in Studio (optional) ───────── */}
+      {extras.extraSections.length > 0 && <PageBuilder sections={extras.extraSections} h1={false} />}
+
       {/* ── Cross-sell strip ────────────────────────────────── */}
       <section className="container-dama pb-section">
         <DiamondDivider />
         <p className="mb-6 text-label font-semibold uppercase tracking-[0.18em] text-terracotta-deep">
-          Mungkin juga cocok…
+          {withName(L.crossSell)}
         </p>
         <div className="grid gap-6 sm:grid-cols-2">
           {subBrand.crossSell.map((slug) => {

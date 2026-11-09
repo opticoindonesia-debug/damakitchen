@@ -1,7 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { site } from '@/content/site';
-import { subBrandList } from '@/content/subbrands';
-import { getJournalPosts, getPageSlugs } from '@/lib/cms';
+import { getJournalPosts, getPageSlugs, getSubBrands } from '@/lib/cms';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPaths = [
@@ -15,12 +14,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/catatan-dapur',
   ];
 
-  const [journal, pageSlugs] = await Promise.all([getJournalPosts(), getPageSlugs()]);
+  // Same filtered sources as the routes, so disabled lines never appear here.
+  const [journal, pageSlugs, subBrands] = await Promise.all([
+    getJournalPosts(),
+    getPageSlugs(),
+    getSubBrands(),
+  ]);
 
   const now = new Date();
   const paths = [
     ...staticPaths,
-    ...subBrandList.map((sb) => `/${sb.slug}`),
+    ...subBrands.map((sb) => `/${sb.slug}`),
     ...journal.map((p) => `/catatan-dapur/${p.slug}`),
     ...pageSlugs.map((s) => `/${s}`),
   ];

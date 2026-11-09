@@ -15,6 +15,9 @@ export const sanityClient = createClient({
   // Fetch fresh published content (no CDN lag) — pages are still cached by ISR.
   useCdn: false,
   perspective: 'published',
+  // Optional server-only read token. Not required (the dataset is public), but
+  // when set it also lets the site read documents with legacy dotted IDs.
+  token: process.env.SANITY_API_READ_TOKEN || undefined,
 });
 
 export { sanityConfigured };
