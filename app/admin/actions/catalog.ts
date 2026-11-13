@@ -123,9 +123,11 @@ export async function duplicateProduct(id: number) {
     if (!p) throw new UserError('Produk tidak ditemukan.');
     let slug = `${p.slug}-salinan`;
     for (let i = 2; (await db.select({ id: products.id }).from(products).where(eq(products.slug, slug))).length; i++) slug = `${p.slug}-salinan-${i}`;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id: _omit, createdAt, updatedAt, ...rest } = p;
-    const [res] = await db.insert(products).values({ ...rest, slug, name: `${p.name} (salinan)`, status: 'draft', sortOrder: p.sortOrder + 1 });
+    const rest: Partial<typeof p> = { ...p };
+    delete rest.id;
+    delete rest.createdAt;
+    delete rest.updatedAt;
+    const [res] = await db.insert(products).values({ ...(rest as typeof products.$inferInsert), slug, name: `${p.name} (salinan)`, status: 'draft', sortOrder: p.sortOrder + 1 });
     return { ok: true as const, data: { id: res.insertId }, message: 'Salinan dibuat sebagai draf.' };
   });
 }

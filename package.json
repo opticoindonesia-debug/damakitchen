@@ -6,9 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:standalone": "node .next/standalone/server.js",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
-    "seed:sanity": "tsx scripts/seed-sanity.ts"
+    "db:generate": "drizzle-kit generate && node scripts/embed-migrations.mjs",
+    "db:setup": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/db-setup.ts",
+    "backup": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/backup.ts",
+    "restore": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/restore.ts",
+    "import:sanity": "tsx --conditions=react-server --tsconfig tsconfig.json scripts/import-sanity.ts",
+    "postbuild": "node scripts/postbuild.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -49,5 +56,8 @@
     "tsx": "^4.22.4",
     "typescript": "^5.5.3"
   },
-  "packageManager": "pnpm@10.33.0"
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20.9.0"
+  }
 }

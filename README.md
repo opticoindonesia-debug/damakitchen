@@ -1,205 +1,84 @@
 # DAMA KITCHEN
 
-The official brand website for **DAMA KITCHEN** — masakan Minang otentik yang membuat _taraso disayang_.
+The official brand website for **DAMA KITCHEN** — masakan Minang otentik yang membuat _taraso disayang_ —
+with its own **self-hosted content management system** at `/admin`.
 
-A brand-led marketing + discovery site: it tells DAMA's story, showcases the five
-sub-brands, and routes buyers to existing commerce channels (Shopee, TikTok Shop,
-WhatsApp, GoFood/Grab). It is **not** a cart/checkout — there is no payment, inventory,
-or order database.
+A brand-led marketing + discovery site: it tells DAMA's story, showcases the sub-brands
+(LAMAK DAMA, WARISAN DAMA, HIDANG BASAMO, DAMA KAPAU, TANDO MATO) and routes buyers to existing
+channels (WhatsApp, Shopee, TikTok Shop, GoFood/Grab). It is **not** a shop/checkout.
 
 > The single test for every decision: _"Does this make someone taraso disayang?"_
 > If not, it isn't DAMA. **The restraint is the brand.**
 
+Everything runs on DAMA's own Hostinger account: no hosted CMS, no paid third-party database,
+media, auth or deployment service.
+
 ---
+
+## Documentation
+
+| Document | For |
+| --- | --- |
+| [docs/DAMA_CMS_OWNER_MANUAL.md](docs/DAMA_CMS_OWNER_MANUAL.md) | **Pemilik** — panduan admin (Bahasa Indonesia) |
+| [docs/DAMA_HOSTINGER_DEPLOYMENT_GUIDE.md](docs/DAMA_HOSTINGER_DEPLOYMENT_GUIDE.md) | Deploying to Hostinger (staging → production), rollback |
+| [docs/DAMA_DATABASE_AND_BACKUP_GUIDE.md](docs/DAMA_DATABASE_AND_BACKUP_GUIDE.md) | Database, migrations, backups & tested restore procedure |
+| [docs/DAMA_CMS_ARCHITECTURE.md](docs/DAMA_CMS_ARCHITECTURE.md) | Architecture, schema, security model, decisions |
+| [docs/DAMA_MIGRATION_REPORT.md](docs/DAMA_MIGRATION_REPORT.md) | Sanity → self-hosted migration report |
+| [docs/DAMA_PRODUCTION_LAUNCH_CHECKLIST.md](docs/DAMA_PRODUCTION_LAUNCH_CHECKLIST.md) | Go-live checklist + acceptance results |
+| [.env.example](.env.example) | Every environment variable |
 
 ## Tech stack
 
-- **Next.js 14** (App Router) + **TypeScript** (strict)
-- **Tailwind CSS** — full brand token theme in `tailwind.config.ts`
-- **next/font** — Playfair Display (display/quotes) + Poppins (body/UI)
-- **framer-motion** — calm entrances only, respects `prefers-reduced-motion`
-- **pnpm** · ESLint + Prettier (with Tailwind class sorting)
-- Deploy target: **Vercel** (static + edge; no server secrets required for v1)
+- **Next.js 14** (App Router, server rendering, `output: standalone`) + **TypeScript** (strict)
+- **MySQL / MariaDB** (Hostinger) via **Drizzle ORM** + `mysql2`; SQL migrations embedded in the build
+- **Admin CMS** in the same app (`/admin`): scrypt password hashing, database sessions, rate limiting
+- **Media** self-hosted (stored in MySQL by default, or a persistent folder), optimized with **sharp**
+- **Tailwind CSS** with runtime design tokens (colors, fonts, radius, spacing) editable in the admin
+- **TipTap** rich-text editor (sanitized HTML), **dnd-kit** drag & drop page builder
+- pnpm · ESLint · Prettier
 
-## Getting started
+## Getting started (local)
+
+Requires Node 20+ and a local MySQL 8 / MariaDB 10.6+.
 
 ```bash
 pnpm install
-cp .env.example .env.local   # optional — placeholders work in dev
-pnpm dev                     # http://localhost:3000
+cp .env.example .env.local      # set DATABASE_URL + ADMIN_SETUP_TOKEN
+pnpm dev                        # http://localhost:3000 (DB is migrated + seeded on first request)
+# open http://localhost:3000/admin/setup to create the owner account
 ```
 
-Other scripts:
+Scripts:
 
 ```bash
-pnpm build     # production build (all routes static except OG images + /api/inquiry)
-pnpm lint      # ESLint
-pnpm format    # Prettier
+pnpm build            # production build (no database needed at build time)
+pnpm start            # start the built app
+pnpm lint / pnpm typecheck
+pnpm db:generate      # after editing lib/db/schema.ts: new SQL migration + embed it
+pnpm db:setup         # apply migrations + initial content to DATABASE_URL
+pnpm backup [file]    # full backup (.json.gz)
+pnpm restore <file> --yes [--with-users]
+pnpm import:sanity <sanity-export.tar.gz> [--apply]   # one-time import of old Sanity content
 ```
-
-## Deploy (Vercel)
-
-This is a standard Next.js 14 app — **zero config**, and it builds with no required
-secrets (sensible defaults, including the real WhatsApp number, are baked in).
-
-One-time setup:
-
-1. Go to [vercel.com/new](https://vercel.com/new) and **Import** the GitHub repo
-   `opticoindonesia-debug/damakitchen`. Framework preset auto-detects as **Next.js**.
-2. Leave build settings as-is (`pnpm build`, output handled by Next). Click **Deploy**.
-3. (Optional) Add env vars under **Settings → Environment Variables** as they become
-   available — see the table below. None are required for the first deploy.
-4. Add your custom domain under **Settings → Domains** when ready, and set
-   `NEXT_PUBLIC_SITE_URL` to it (improves canonical/OG/sitemap URLs).
-
-After the first import, every push to `main` ships to production and every PR gets its
-own preview URL automatically.
-
-| Env var | Needed for | Required? |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | canonical/OG/sitemap URLs | recommended once domain is set |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | override default WA number | no (default set) |
-| `NEXT_PUBLIC_SHOPEE_URL` / `_TIKTOK_URL` / `_GOFOOD_URL` / `_GRAB_URL` | store links | follow later |
-| `NEXT_PUBLIC_CONTACT_EMAIL` | contact email | follow later |
-| `INQUIRY_EMAIL_API_KEY` / `INQUIRY_EMAIL_TO` | optional email on inquiries | no (WhatsApp-only) |
-| `NEXT_PUBLIC_SANITY_PROJECT_ID` / `_DATASET` | connect the Sanity CMS + `/studio` | no (static fallback) |
-
-## CMS (Sanity)
-
-The site reads content through a small data layer (`lib/cms`) that fetches from
-**Sanity** when configured and otherwise falls back to the static files in
-`/content`. So the site works fully with **no CMS connected**, and switches to
-live, editable content the moment you set the Sanity env vars — no code changes.
-
-What you can manage from the CMS (editor lives at **`/studio`**) — the full
-editor guide in Bahasa Indonesia is **[`docs/PANDUAN-CMS.md`](docs/PANDUAN-CMS.md)**:
-
-- **Page builder** — every main page (Beranda, Cerita, Menu, Katering, Hadiah,
-  Pesan, Kontak) plus any new page is a list of sections (hero, text, photo+text,
-  quote, cards, features, CTA panels, FAQ, gallery, live data blocks, inquiry
-  form, divider) that editors add, reorder, hide and restyle. A built-in page
-  renders its coded layout until its Studio document has visible sections
-  (`lib/pages.ts`, `components/builder/`), so deleting the document = reset.
-- **Theme colors** — seven base colors (Pengaturan Situs → Warna) drive every
-  palette token via CSS variables (`lib/theme.ts`); tints are derived, contrast
-  warnings shown in Studio. Per-line marker colors on each Sub-brand.
-- **Navigation, footer, sub-brand page labels** — Pengaturan Situs.
-- **Sub-brand, Produk, Catatan Dapur, Pilar, Nilai, Testimoni, logo, motif.**
-
-> **Document IDs must never contain a dot.** Sanity treats dotted IDs as
-> private paths that public reads cannot see. Studio → *Alat Konten* detects
-> and repairs any such legacy documents (`sanity/migrateIds.ts`).
-
-### One-time Sanity setup
-
-1. Create a free project at **[sanity.io/manage](https://www.sanity.io/manage)** →
-   note the **Project ID** and create a dataset named `production`.
-2. Set env vars (locally in `.env.local`, and in Vercel → Settings → Environment Variables):
-   ```
-   NEXT_PUBLIC_SANITY_PROJECT_ID=<your id>
-   NEXT_PUBLIC_SANITY_DATASET=production
-   NEXT_PUBLIC_SANITY_API_VERSION=2024-10-01
-   ```
-3. In sanity.io/manage → **API → CORS origins**, add your site origin(s):
-   `http://localhost:3000` and your production domain (allow credentials).
-4. Redeploy (or `pnpm dev`). Visit **`/studio`**, log in, and start adding content.
-   Then open **Alat Konten** in the Studio: repair hidden documents and import
-   the current content (including all page layouts). Edits appear within ~1 minute
-   (ISR), or instantly with the webhook below.
-
-### Seed the CMS with the current content
-
-To start editing from the existing copy instead of a blank Studio, import all the
-`/content` placeholders into Sanity in one command:
-
-1. Create a write token at sanity.io/manage → **API → Tokens** (Editor role).
-2. Add to `.env.local` (alongside the `NEXT_PUBLIC_SANITY_*` vars):
-   ```
-   SANITY_API_WRITE_TOKEN=<your editor token>
-   ```
-3. Run:
-   ```
-   pnpm seed:sanity
-   ```
-
-It imports sub-brands, products, pillars, values, testimonials and site settings.
-The script is **idempotent** (deterministic ids + createOrReplace) — re-run it any
-time after editing the static files; it won't touch documents you create later in
-the Studio. Keep the write token out of version control.
-
-### Instant publish (Sanity → Vercel webhook)
-
-By default CMS edits appear within ~1h (ISR). To make them appear in **seconds**
-without a full redeploy, wire on-demand revalidation:
-
-1. Pick a random secret string. Add it to **Vercel → Environment Variables**:
-   ```
-   SANITY_REVALIDATE_SECRET=<random string>
-   ```
-   then redeploy.
-2. In **sanity.io/manage → API → Webhooks → Create webhook**:
-   - **URL**: `https://<your-domain>/api/revalidate`
-   - **Trigger on**: Create, Update, Delete
-   - **Filter**: (leave empty for all types)
-   - **Projection**: `{ "_type": _type, "slug": slug.current }`
-   - **HTTP method**: POST
-   - **Secret**: the same value as `SANITY_REVALIDATE_SECRET`
-3. Publish an edit in `/studio` — the affected pages refresh within seconds.
-
-The endpoint (`app/api/revalidate/route.ts`) verifies the Sanity signature, then
-calls `revalidatePath('/', 'layout')` (sub-brands live in the nav/footer on every
-page) plus the specific journal/page path so new slugs regenerate too.
 
 ## Project structure
 
 ```
-app/                 Routes (home, cerita, menu, 5 sub-brands, katering, hadiah,
-                     pesan, kontak, catatan-dapur, api/inquiry, sitemap, robots,
-                     opengraph-image, icon)
-components/          Reusable, typed UI (see Component library below)
-components/icons/    DAMA line icons (2px stroke, 24×24)
-content/             Typed content layer — static fallback / seed data
-lib/cms/             Data layer: Sanity when configured, else /content fallback
-lib/sanity/          Sanity client + image URL builder (server-only)
-sanity/              CMS schemas, env, desk structure
-app/studio/          Embedded Sanity Studio (editor) at /studio
-lib/                 WhatsApp link builder, SEO helper, email adapter, utils
-messages/id.json     i18n-ready strings (ships `id` only)
-public/patterns/     Motif SVG placeholders (TODO: real assets)
-public/images/       Photography placeholders, structured by subject
+app/(site)/          Public website (server-rendered from published DB content)
+app/admin/           Admin CMS (login, setup, dashboard and all modules)
+app/api/admin/       Authenticated APIs (media upload, backup, preview)
+app/media/[key]/     Serves self-hosted media (responsive variants via ?w=)
+components/          Public UI + page-builder renderers (components/builder)
+components/admin/    Admin UI kit, page builder editor, media library, rich text
+lib/db/              Drizzle schema, connection pool, migration runner
+lib/cms/             Public data layer (published content, preview for admins)
+lib/sections/        Page-builder section definitions + server validation
+lib/auth/            Passwords, sessions, guards, rate limiting
+lib/media/, lib/backup.ts, lib/seed/   Media storage, backup/restore, initial content
+content/             Original content (used once to seed the database)
+drizzle/             Generated SQL migrations
+scripts/             CLI: db setup, backup, restore, Sanity import
 ```
-
-## Editing content
-
-All copy and catalog data live under `content/` as typed TS — no CMS yet, but the
-shape is CMS-ready. Common edits:
-
-| Want to change… | Edit |
-| --- | --- |
-| Sub-brand name, emotion, lead message, FAQs, channels | `content/subbrands.ts` |
-| Menu items / product blurbs | `content/products.ts` |
-| Channel URLs, WhatsApp number, socials, coverage | `content/channels.ts` (or env) |
-| Brand pillars / values / story / founder quote | `content/pillars.ts`, `values.ts`, `story.ts` |
-| Nav, taglines, seasonal gifting banner | `content/site.ts` |
-| WhatsApp message templates | `lib/whatsapp.ts` |
-
-> **Voice guardrails (§5):** no superlatives, no caps-lock urgency, no fake discounts,
-> at most one emoji, customers have names. These apply to outbound WhatsApp templates too.
-
-### Adding photography
-
-Image slots render a warm placeholder until you point them at a real asset — set a
-path and `next/image` takes over automatically (responsive, LCP-priority aware, same
-aspect ratio so there's no layout shift). No component edits needed:
-
-| Photo | Set |
-| --- | --- |
-| Product / menu cards | `image` on each item in `content/products.ts` (e.g. `image: '/images/food/rendang.jpg'`) |
-| Gifting hampers tiers | same `image` field (TANDO MATO products) |
-| Sub-brand page hero | `heroImage` on each line in `content/subbrands.ts` |
-| Home hero, founder portrait, katering & gifting heroes | `media` object in `content/site.ts` |
-
-Drop files under `public/images/{food,ingredients,product,process,lifestyle}/`.
 
 ## Brand system notes
 
