@@ -11,8 +11,10 @@ import { ContactDetails } from '@/components/blocks/ContactDetails';
 import { GiftTiers } from '@/components/blocks/GiftTiers';
 import { JournalGrid } from '@/components/blocks/JournalCards';
 import { ValuesList } from '@/components/blocks/ValuesList';
-import type { SubBrandSlug } from '@/content/subbrands';
+import { FAQAccordion } from '@/components/FAQAccordion';
+import { JsonLdScript } from '@/components/JsonLd';
 import {
+  getFaqs,
   getJournalPosts,
   getPillars,
   getProducts,
@@ -24,7 +26,19 @@ import { cn } from '@/lib/utils';
 import { SectionHeader, SectionShell, bgOf, toneOf, type HeadingTag, type SectionStyle } from './shell';
 
 /** Renders live data from other Studio collections (sub-brands, products, …). */
-async function DataContent({ source, subBrand, linkClass }: { source: string; subBrand?: string; linkClass: string }) {
+async function DataContent({
+  source,
+  subBrand,
+  category,
+  limit,
+  linkClass,
+}: {
+  source: string;
+  subBrand?: string;
+  category?: string;
+  limit?: number;
+  linkClass: string;
+}) {
   switch (source) {
     case 'subBrands': {
       const list = await getSubBrands();
@@ -65,25 +79,55 @@ async function DataContent({ source, subBrand, linkClass }: { source: string; su
       return <ChannelMatrix />;
     case 'menu': {
       const [products, subBrands] = await Promise.all([getProducts(), getSubBrands()]);
-      return <MenuExplorer products={products} subBrands={subBrands} />;
+      return <MenuExplorer products={products} subBrands={subBrands.filter((sb) => products.some((p) => p.subBrand === sb.slug))} />;
     }
     case 'products': {
       if (!subBrand) return null;
-      const products = await getProductsBySubBrand(subBrand as SubBrandSlug);
+      const [products, subBrands] = await Promise.all([getProductsBySubBrand(subBrand), getSubBrands()]);
       return (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((p, i) => (
             <Reveal key={p.id} delay={(i % 3) * 0.05}>
-              <ProductCard product={p} />
+              <ProductCard product={p} subBrand={subBrands.find((sb) => sb.slug === p.subBrand)} />
             </Reveal>
           ))}
+        </div>
+      );
+    }
+    case 'productGrid': {
+      const [all, subBrands] = await Promise.all([getProducts(), getSubBrands()]);
+      const products = all.filter((p) => !category || p.category?.slug === category).slice(0, limit ?? 6);
+      if (!products.length) return null;
+      return (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {products.map((p, i) => (
+            <Reveal key={p.id} delay={(i % 3) * 0.05}>
+              <ProductCard product={p} subBrand={subBrands.find((sb) => sb.slug === p.subBrand)} />
+            </Reveal>
+          ))}
+        </div>
+      );
+    }
+    case 'faqs': {
+      const items = await getFaqs();
+      if (!items.length) return null;
+      return (
+        <div className="max-w-prose rounded-lg bg-cream-paper px-6">
+          <JsonLdScript
+            data={{
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: items.map((x) => ({ '@type': 'Question', name: x.q, acceptedAnswer: { '@type': 'Answer', text: x.a } })),
+            }}
+          />
+          <FAQAccordion items={items} idPrefix="faq-db" />
         </div>
       );
     }
     case 'giftTiers':
       return <GiftTiers />;
     case 'journal': {
-      const posts = (await getJournalPosts()).slice(0, 3);
+      const posts = (await getJournalPosts()).slice(0, limit ?? 3);
       return posts.length ? <JournalGrid posts={posts} headingAs="h3" /> : null;
     }
     case 'contact':
@@ -105,6 +149,8 @@ export async function DataBlock({
   const content = await DataContent({
     source: s.source as string,
     subBrand: s.subBrand as string | undefined,
+    category: s.category as string | undefined,
+    limit: typeof s.limit === 'number' ? s.limit : undefined,
     linkClass: t.muted,
   });
   if (!content) return null;

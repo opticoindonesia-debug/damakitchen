@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { waCatering, waGifting } from '@/lib/whatsapp';
 import { sendInquiryEmail } from '@/lib/email';
+import { getSettings } from '@/lib/cms';
 
 /**
  * Single inquiry endpoint (§2). For v1 it (a) builds the prefilled WhatsApp
@@ -17,6 +18,7 @@ export async function POST(request: Request) {
   }
 
   const type = body.type;
+  const number = (await getSettings().catch(() => null))?.site.whatsappNumber;
 
   if (type === 'catering') {
     const data = {
@@ -28,7 +30,7 @@ export async function POST(request: Request) {
       budget: String(body.budget ?? ''),
       catatan: String(body.catatan ?? ''),
     };
-    const waLink = waCatering(data);
+    const waLink = waCatering(data, number);
     await sendInquiryEmail({
       subject: `Penawaran acara — ${data.jenis || 'tanpa judul'}`,
       text: [
@@ -53,7 +55,7 @@ export async function POST(request: Request) {
       pesan: String(body.pesan ?? ''),
       catatan: String(body.catatan ?? ''),
     };
-    const waLink = waGifting(data);
+    const waLink = waGifting(data, number);
     await sendInquiryEmail({
       subject: `Permintaan hadiah — ${data.paket || 'custom'}`,
       text: [

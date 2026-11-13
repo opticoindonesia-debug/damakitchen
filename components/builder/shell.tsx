@@ -2,7 +2,6 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { DiamondDivider } from '@/components/DiamondDivider';
 import { PatternBand } from '@/components/PatternBand';
-import { channels } from '@/content/channels';
 import { cn } from '@/lib/utils';
 
 /**
@@ -63,6 +62,7 @@ export interface SectionStyle {
   motifOpacity?: number;
   dividerAbove?: boolean;
   anchor?: string;
+  device?: string;
 }
 
 /** Section wrapper: background, spacing, optional motif wash and divider. */
@@ -74,7 +74,13 @@ export function SectionShell({ s, children }: { s: SectionStyle; children: React
   return (
     <section
       id={s.anchor || undefined}
-      className={cn('relative overflow-hidden', BG[bg].cls, SPACING[s.spacing ?? 'normal'] ?? SPACING.normal)}
+      className={cn(
+        'relative overflow-hidden',
+        BG[bg].cls,
+        SPACING[s.spacing ?? 'normal'] ?? SPACING.normal,
+        s.device === 'desktop' && 'hidden md:block',
+        s.device === 'mobile' && 'md:hidden',
+      )}
     >
       {(motif || motifSrc) && (
         <PatternBand motif={(motif ?? 'none') as never} src={motifSrc} opacity={opacity} />
@@ -123,14 +129,14 @@ export function SectionHeader({
   );
 }
 
-/** "whatsapp" → the configured WhatsApp chat link; everything else as typed. */
+/** "whatsapp" → the configured WhatsApp chat (via /go/whatsapp); everything else as typed. */
 export function resolveLink(link?: string): string | undefined {
   if (!link) return undefined;
-  return link.trim() === 'whatsapp' ? channels.whatsapp.href : link.trim();
+  return link.trim() === 'whatsapp' ? '/go/whatsapp' : link.trim();
 }
 
 const BTN_BASE =
-  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded px-7 py-3.5 font-sans text-body-lg font-medium transition-colors duration-300 ease-calm focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2';
+  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-btn px-7 py-3.5 font-sans text-body-lg font-medium transition-colors duration-300 ease-calm focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2';
 
 export function buttonClasses(style: string | undefined, bg: Bg) {
   if (style === 'secondary') {
@@ -158,8 +164,8 @@ export function SmartLink({
   className?: string;
   children: ReactNode;
 }) {
-  if (/^(https?:|mailto:|tel:)/.test(href)) {
-    const external = href.startsWith('http');
+  if (/^(https?:|mailto:|tel:)/.test(href) || href.startsWith('/go/')) {
+    const external = href.startsWith('http') || href.startsWith('/go/');
     return (
       <a href={href} className={className} {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
         {children}

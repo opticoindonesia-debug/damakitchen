@@ -1,5 +1,6 @@
 import { ImageWithScrim } from '@/components/ImageWithScrim';
-import { PortableTextBody } from '@/components/PortableTextBody';
+import { RichText } from '@/components/RichText';
+import { ContactDetails } from '@/components/blocks/ContactDetails';
 import { QuoteBlock } from '@/components/QuoteBlock';
 import { Reveal } from '@/components/Reveal';
 import { FAQAccordion } from '@/components/FAQAccordion';
@@ -40,6 +41,19 @@ interface Base extends SectionStyle {
   eyebrow?: string;
   heading?: string;
   intro?: string;
+}
+
+/** Mobile photo placement for hero (image is after the text in the DOM). */
+function mobileImageCls(v: unknown, left: boolean) {
+  if (v === 'hidden') return 'hidden lg:block';
+  if (v === 'before') return left ? 'order-first' : 'order-first lg:order-none';
+  return left ? 'order-last lg:order-first' : '';
+}
+/** Mobile photo placement for photo+text (image is before the text in the DOM). */
+function splitMobileCls(v: unknown, right: boolean) {
+  if (v === 'hidden') return 'hidden lg:block';
+  if (v === 'after') return right ? 'order-last' : 'order-last lg:order-none';
+  return ''; // default: photo above the text on phones (original layout)
 }
 
 // ── Hero ──────────────────────────────────────────────────────
@@ -84,7 +98,7 @@ export function HeroBlock({ s, headingAs }: { s: Base & Record<string, unknown>;
             src={image?.url}
             sizes="(max-width: 1024px) 100vw, 600px"
             alt={image?.alt || s.heading || 'Foto DAMA KITCHEN'}
-            className={cn('mx-auto w-full max-w-md lg:max-w-none', position === 'left' && 'lg:order-first')}
+            className={cn('mx-auto w-full max-w-md lg:max-w-none', position === 'left' && 'lg:order-first', mobileImageCls(s.mobileImage, position === 'left'))}
           />
         )}
       </div>
@@ -102,7 +116,7 @@ export function TextBlock({ s, headingAs }: { s: Base & Record<string, unknown>;
       <div className={cn('container-dama', align === 'center' && 'flex flex-col items-center')}>
         <SectionHeader eyebrow={s.eyebrow} heading={s.heading} as={headingAs} t={t} align={align} />
         <div className={cn('max-w-prose', align === 'center' && 'mx-auto')}>
-          <PortableTextBody value={s.body} tone={t.tone} align={align} />
+          <RichText html={s.body} tone={t.tone} align={align} />
         </div>
         <BuilderButtons
           buttons={s.buttons as ButtonValue[]}
@@ -128,11 +142,11 @@ export function SplitBlock({ s, headingAs }: { s: Base & Record<string, unknown>
           warmBorder
           src={image?.url}
           alt={image?.alt || s.heading || 'Foto DAMA KITCHEN'}
-          className={cn(s.imagePosition === 'right' && 'lg:order-last')}
+          className={cn(s.imagePosition === 'right' && 'lg:order-last', splitMobileCls(s.mobileImage, s.imagePosition === 'right'))}
         />
         <div>
           <SectionHeader eyebrow={s.eyebrow} heading={s.heading} as={headingAs} t={t} />
-          <PortableTextBody value={s.body} tone={t.tone} />
+          <RichText html={s.body} tone={t.tone} />
           <BuilderButtons buttons={s.buttons as ButtonValue[]} bg={bg} className="mt-6" />
         </div>
       </div>
@@ -327,7 +341,7 @@ export function CtaBlock({ s, headingAs }: { s: Base & Record<string, unknown>; 
                     <SmartLink
                       href={href}
                       className={cn(
-                        'inline-flex min-h-[44px] items-center justify-center rounded px-5 py-2.5 font-medium transition-colors duration-300',
+                        'inline-flex min-h-[44px] items-center justify-center rounded-btn px-5 py-2.5 font-medium transition-colors duration-300',
                         look.button,
                       )}
                     >
@@ -450,5 +464,53 @@ export function DividerBlock({ s }: { s: Record<string, unknown> }) {
     <div className="container-dama">
       <DiamondDivider />
     </div>
+  );
+}
+
+// ── Contact ───────────────────────────────────────────────────
+export function ContactBlock({ s, headingAs }: { s: Base & Record<string, unknown>; headingAs: HeadingTag }) {
+  const bg = bgOf(s.background);
+  const t = toneOf(bg);
+  return (
+    <SectionShell s={s}>
+      <div className="container-dama">
+        <SectionHeader eyebrow={s.eyebrow} heading={s.heading} intro={s.intro} as={headingAs} t={t} />
+        <div className={cn(t.dark && 'rounded-lg bg-cream p-6 sm:p-8')}>
+          <ContactDetails showChannels={s.showChannels !== false} />
+        </div>
+      </div>
+    </SectionShell>
+  );
+}
+
+// ── Custom block ──────────────────────────────────────────────
+const WIDTHS: Record<string, string> = { narrow: 'max-w-2xl', normal: 'max-w-4xl', full: 'max-w-none' };
+
+export function CustomBlock({ s, headingAs }: { s: Base & Record<string, unknown>; headingAs: HeadingTag }) {
+  const bg = bgOf(s.background);
+  const t = toneOf(bg);
+  const image = s.image as Img;
+  const center = s.align === 'center';
+  const boxed = s.boxed !== false;
+  return (
+    <SectionShell s={s}>
+      <div className="container-dama">
+        <div
+          className={cn(
+            'mx-auto',
+            WIDTHS[(s.width as string) ?? 'normal'] ?? WIDTHS.normal,
+            boxed && cn('rounded-lg border p-7 sm:p-10', t.card),
+            center && 'text-center',
+          )}
+        >
+          <SectionHeader eyebrow={s.eyebrow} heading={s.heading} as={headingAs} t={t} align={center ? 'center' : 'left'} />
+          {image?.url && (
+            <ImageWithScrim category="lifestyle" ratio="wide" src={image.url} alt={image.alt || s.heading || 'Foto DAMA KITCHEN'} className="mb-8" />
+          )}
+          <RichText html={s.body} tone={t.tone} align={center ? 'center' : 'left'} />
+          <BuilderButtons buttons={s.buttons as ButtonValue[]} bg={bg} className={cn('mt-6', center && 'justify-center')} />
+        </div>
+      </div>
+    </SectionShell>
   );
 }

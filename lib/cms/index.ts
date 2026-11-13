@@ -1,463 +1,497 @@
-import { sanityClient, sanityConfigured } from '@/lib/sanity/client';
-import { urlForImage } from '@/lib/sanity/image';
-import { parseHex, type ThemeBase } from '@/lib/theme';
+import 'server-only';
+import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
+import { draftMode } from 'next/headers';
+import { and, asc, desc, eq, isNotNull, or } from 'drizzle-orm';
+import { db } from '@/lib/db';
 import {
-  DEFAULT_FOOTER_TEXT,
-  DEFAULT_NAV,
-  DEFAULT_NAV_CTA,
-  DEFAULT_SUBBRAND_LABELS,
-  type FooterText,
-  type NavItem,
-  type SubBrandLabels,
-} from '@/lib/siteText';
+  articleCategories,
+  articles,
+  brandItems,
+  faqs,
+  pages,
+  productCategories,
+  products,
+  redirects,
+  settings,
+  subBrands,
+  tags,
+  articleTags,
+  testimonials,
+  type ImageRef,
+  type SeoFields,
+} from '@/lib/db/schema';
+import { ensureReady } from '@/lib/bootstrap';
+import { getSessionUser } from '@/lib/auth/session';
 import {
-  BUILT_IN_PAGE_IDS,
-  RESERVED_SLUGS,
-  builtInPageId,
-  type BuiltInPageKey,
-} from '@/lib/pages';
-import {
-  subBrandList as staticSubBrands,
-  subBrands as staticSubBrandMap,
-  type SubBrand,
-  type SubBrandSlug,
-} from '@/content/subbrands';
-import {
-  products as staticProducts,
-  productsBySubBrand as staticProductsBySubBrand,
-  type Product,
-} from '@/content/products';
-import { pillars as staticPillars, type Pillar } from '@/content/pillars';
-import { values as staticValues, type BrandValue } from '@/content/values';
-import { testimonials as staticTestimonials, type Testimonial } from '@/content/testimonials';
-import { site, seasonal as staticSeasonal, media } from '@/content/site';
-import { contact } from '@/content/channels';
-import { founder } from '@/content/story';
+  DEFAULT_NAVIGATION,
+  DEFAULT_SITE,
+  DEFAULT_THEME,
+  cleanNavigation,
+  cleanSiteSettings,
+  cleanTheme,
+  type NavigationData,
+  type SiteSettingsData,
+  type ThemeData,
+} from '@/lib/settings';
+import { BUILT_IN_PAGES, RESERVED_SLUGS, type BuiltInPageKey } from '@/lib/pages';
+import { subBrands as staticSubBrandMap, type SubBrand, type SubBrandSlug } from '@/content/subbrands';
+import type { Product } from '@/content/products';
+import type { Pillar } from '@/content/pillars';
+import type { BrandValue } from '@/content/values';
+import type { Testimonial } from '@/content/testimonials';
 
 /**
- * Content access layer. Each getter returns the same TypeScript shapes used
- * across the app. When Sanity isn't configured it returns the static /content
- * data, so the site works identically with or without the CMS connected.
+ * Public content access layer (MySQL). Every getter returns PUBLISHED
+ * content only. When a signed-in admin enables preview (draft mode), the
+ * same getters return working copies instead — never for anonymous visitors.
  *
- * Design tokens (sub-brand marker colors + slugs) stay in code; the CMS only
- * supplies editable copy, photos and prices, which we merge here.
+ * Published reads are cached under the 'cms' tag and invalidated on every
+ * publish/save in the admin (revalidateTag), so changes are live instantly.
  */
 
-const subBrandTokens: Record<SubBrandSlug, Pick<SubBrand, 'marker' | 'markerHex'>> =
-  Object.fromEntries(
-    staticSubBrands.map((s) => [s.slug, { marker: s.marker, markerHex: s.markerHex }]),
-  ) as Record<SubBrandSlug, Pick<SubBrand, 'marker' | 'markerHex'>>;
+const TAG = 'cms';
 
-// ── Sub-brands ────────────────────────────────────────────────
-/** Slugs marked disabled in code (business line not live yet) — hidden everywhere. */
-const disabledSlugs = new Set(staticSubBrands.filter((s) => s.disabled).map((s) => s.slug));
-const activeStaticSubBrands = staticSubBrands.filter((s) => !disabledSlugs.has(s.slug));
+/** True only for a signed-in admin who switched preview on. */
+export const isPreview = cache(async (): Promise<boolean> => {
+  if (!draftMode().isEnabled) return false;
+  return Boolean(await getSessionUser());
+});
 
-export async function getSubBrands(): Promise<SubBrand[]> {
-  if (!sanityConfigured) return activeStaticSubBrands;
-  const docs = await sanityClient.fetch<Array<Record<string, unknown>>>(
-    `*[_type=="subBrand"]|order(order asc){
-      "slug":slug, name, shortName, emotion, lead, about, howToOrder,
-      channels, faqs[]{q,a}, crossSell, heroImage, "markerColor": markerColor.hex, channelNote
-    }`,
-  );
-  if (!docs?.length) return activeStaticSubBrands;
-  return docs
-    .filter((d) => !disabledSlugs.has(d.slug as SubBrandSlug))
-    .map((d) => {
-    const slug = d.slug as SubBrandSlug;
-    const base = staticSubBrandMap[slug]; // sensible defaults for empty fields
-    return {
-      ...base,
-      slug,
-      name: (d.name as string) ?? base?.name,
-      shortName: (d.shortName as string) ?? base?.shortName,
-      emotion: (d.emotion as string) ?? base?.emotion,
-      lead: (d.lead as string) ?? base?.lead,
-      about: (d.about as string) ?? base?.about,
-      howToOrder: (d.howToOrder as string) ?? base?.howToOrder,
-      channels: (d.channels as SubBrand['channels']) ?? base?.channels,
-      faqs: (d.faqs as SubBrand['faqs']) ?? base?.faqs ?? [],
-      crossSell: (d.crossSell as SubBrandSlug[]) ?? base?.crossSell ?? [],
-      ...subBrandTokens[slug],
-      heroImage: urlForImage(d.heroImage as never) ?? base?.heroImage,
-      channelNote: (d.channelNote as string) || base?.channelNote,
-      // Editor-chosen marker color overrides the code token when valid.
-      ...(parseHex(d.markerColor as string) ? { markerHex: d.markerColor as string } : {}),
-    } satisfies SubBrand;
-  });
-}
-
-export async function getSubBrand(slug: SubBrandSlug): Promise<SubBrand | undefined> {
-  const all = await getSubBrands();
-  return all.find((s) => s.slug === slug);
-}
-
-// ── Products ──────────────────────────────────────────────────
-export async function getProducts(): Promise<Product[]> {
-  if (!sanityConfigured) return staticProducts;
-  const docs = await sanityClient.fetch<Array<Record<string, unknown>>>(
-    `*[_type=="product"]|order(order asc){
-      "id":coalesce(slug.current,_id), name, blurb,
-      "subBrand":subBrand->slug, info, price, imageCategory, image
-    }`,
-  );
-  if (!docs?.length) return staticProducts;
-  return docs.map((d) => ({
-    id: d.id as string,
-    name: d.name as string,
-    blurb: (d.blurb as string) ?? '',
-    subBrand: d.subBrand as SubBrandSlug,
-    info: (d.info as Product['info']) ?? [],
-    price: (d.price as number) ?? null,
-    imageCategory: (d.imageCategory as Product['imageCategory']) ?? 'food',
-    image: urlForImage(d.image as never),
-  }));
-}
-
-export async function getProductsBySubBrand(slug: SubBrandSlug): Promise<Product[]> {
-  if (!sanityConfigured) return staticProductsBySubBrand(slug);
-  const all = await getProducts();
-  return all.filter((p) => p.subBrand === slug);
-}
-
-// ── Site settings (brand text, beranda, contact, seasonal, tampilan) ──
-export interface SiteSettings {
-  tagline: string;
-  brandLineEn: string;
-  umbrellaPromise: string;
-  heroHeadline: string;
-  essence: string;
-  founderQuote: string;
-  founderName: string;
-  founderRole: string;
-  heroImage?: string;
-  founderImage?: string;
-  heroStyle: 'cream' | 'teal' | 'blush';
-  logo?: string;
-  logoLight?: string;
-  monogram?: string;
-  backgroundMotif: 'songket-geometric' | 'bunga-floral' | 'daun-leaf' | 'geometric-gold' | 'none';
-  motifImage?: string;
-  /** Fraction 0–0.12 (already converted from the percent field). */
-  motifOpacity: number;
-  email: string;
-  instagram: string;
-  tiktok: string;
-  threads: string;
-  coverage: string;
-  seasonal: { active: boolean; label: string; message: string };
-  /** Base-color overrides from the Warna tab (undefined = original palette). */
-  theme: Partial<Record<ThemeBase, string>>;
-  nav: NavItem[];
-  navCta: { label: string; href: string };
-  footerText: FooterText;
-  subBrandLabels: SubBrandLabels;
-}
-
-const staticSettings: SiteSettings = {
-  tagline: site.tagline,
-  brandLineEn: site.brandLineEn,
-  umbrellaPromise: site.umbrellaPromise,
-  heroHeadline: `${site.tagline}.`,
-  essence: 'Masakan bukan sekadar makanan — ia sarana merawat hubungan.',
-  founderQuote: founder.pullQuote,
-  founderName: founder.name,
-  founderRole: founder.role,
-  heroImage: media.homeHero,
-  founderImage: media.founderPortrait,
-  heroStyle: 'cream',
-  backgroundMotif: 'songket-geometric',
-  motifOpacity: 0.05,
-  email: contact.email,
-  instagram: contact.instagram.href,
-  tiktok: contact.tiktok.href,
-  threads: contact.threads.href,
-  coverage: contact.coverage,
-  seasonal: { active: staticSeasonal.active, label: staticSeasonal.label, message: staticSeasonal.message },
-  theme: {},
-  nav: DEFAULT_NAV,
-  navCta: DEFAULT_NAV_CTA,
-  footerText: DEFAULT_FOOTER_TEXT,
-  subBrandLabels: DEFAULT_SUBBRAND_LABELS,
-};
-
-// ── Navigation helpers ────────────────────────────────────────
-const linkOk = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
-
-function mapNav(raw: unknown): NavItem[] {
-  if (!Array.isArray(raw) || raw.length === 0) return DEFAULT_NAV;
-  const items = raw.flatMap((it: Record<string, unknown>): NavItem[] => {
-    if (it?._type === 'navSubBrands') return [{ kind: 'subBrands', label: linkOk(it.label) ? it.label : 'Sub-brand' }];
-    if (linkOk(it?.label) && linkOk(it?.link)) return [{ kind: 'link', label: it.label, href: it.link.trim() }];
-    return [];
-  });
-  return items.length ? items : DEFAULT_NAV;
-}
-
-function mapLinks(raw: unknown): { label: string; href: string }[] | undefined {
-  if (!Array.isArray(raw)) return undefined;
-  const links = raw.flatMap((l: Record<string, unknown>) =>
-    linkOk(l?.label) && linkOk(l?.link) ? [{ label: l.label, href: l.link.trim() }] : [],
-  );
-  return links.length ? links : undefined;
-}
-
-export async function getSiteSettings(): Promise<SiteSettings> {
-  if (!sanityConfigured) return staticSettings;
-  const d = await sanityClient.fetch<Record<string, unknown> | null>(
-    `*[_id=="siteSettings"][0]{
-      tagline, brandLineEn, umbrellaPromise, heroHeadline, essence,
-      founderQuote, founderName, founderRole, heroImage, founderImage, heroStyle,
-      logo, logoLight, monogram, backgroundMotif, motifImage, motifOpacity,
-      email, instagram, tiktok, threads, coverage,
-      seasonalActive, seasonalLabel, seasonalMessage,
-      navItems[]{ _type, label, link }, navCtaLabel, navCtaLink,
-      footerColSubBrand, footerColExplore, footerColContact, footerLinks[]{ label, link }, footerNote,
-      subBrandLabels,
-      "theme": {
-        "primary": colorPrimary.hex, "accent": colorAccent.hex, "highlight": colorHighlight.hex,
-        "background": colorBackground.hex, "text": colorText.hex, "soft": colorSoft.hex,
-        "festive": colorFestive.hex
-      }
-    }`,
-  );
-  if (!d) return staticSettings;
-  const str = (v: unknown, fb: string) => (typeof v === 'string' && v.trim() ? v : fb);
-  return {
-    tagline: str(d.tagline, staticSettings.tagline),
-    brandLineEn: str(d.brandLineEn, staticSettings.brandLineEn),
-    umbrellaPromise: str(d.umbrellaPromise, staticSettings.umbrellaPromise),
-    heroHeadline: str(d.heroHeadline, staticSettings.heroHeadline),
-    essence: str(d.essence, staticSettings.essence),
-    founderQuote: str(d.founderQuote, staticSettings.founderQuote),
-    founderName: str(d.founderName, staticSettings.founderName),
-    founderRole: str(d.founderRole, staticSettings.founderRole),
-    heroImage: urlForImage(d.heroImage as never) ?? staticSettings.heroImage,
-    founderImage: urlForImage(d.founderImage as never) ?? staticSettings.founderImage,
-    heroStyle: (['cream', 'teal', 'blush'].includes(d.heroStyle as string)
-      ? (d.heroStyle as SiteSettings['heroStyle'])
-      : 'cream'),
-    logo: urlForImage(d.logo as never),
-    logoLight: urlForImage(d.logoLight as never),
-    monogram: urlForImage(d.monogram as never),
-    backgroundMotif: (
-      ['songket-geometric', 'bunga-floral', 'daun-leaf', 'geometric-gold', 'none'].includes(
-        d.backgroundMotif as string,
-      )
-        ? (d.backgroundMotif as SiteSettings['backgroundMotif'])
-        : 'songket-geometric'
-    ),
-    motifImage: urlForImage(d.motifImage as never),
-    motifOpacity:
-      typeof d.motifOpacity === 'number' ? Math.min(Math.max(d.motifOpacity, 0), 12) / 100 : 0.05,
-    email: str(d.email, staticSettings.email),
-    instagram: str(d.instagram, staticSettings.instagram),
-    tiktok: str(d.tiktok, staticSettings.tiktok),
-    threads: str(d.threads, staticSettings.threads),
-    coverage: str(d.coverage, staticSettings.coverage),
-    seasonal: {
-      active: Boolean(d.seasonalActive),
-      label: str(d.seasonalLabel, staticSettings.seasonal.label),
-      message: str(d.seasonalMessage, staticSettings.seasonal.message),
+/**
+ * Wraps a loader: published reads go through the data cache; preview reads
+ * bypass it. The loader receives `preview` explicitly (never reads cookies
+ * inside the cache).
+ */
+function cached<A extends unknown[], R>(name: string, fn: (preview: boolean, ...args: A) => Promise<R>) {
+  const c = unstable_cache(
+    async (...args: A) => {
+      await ensureReady();
+      return fn(false, ...args);
     },
-    nav: mapNav(d.navItems),
-    navCta: {
-      label: str(d.navCtaLabel, DEFAULT_NAV_CTA.label),
-      href: str(d.navCtaLink, DEFAULT_NAV_CTA.href),
-    },
-    footerText: {
-      colSubBrand: str(d.footerColSubBrand, DEFAULT_FOOTER_TEXT.colSubBrand),
-      colExplore: str(d.footerColExplore, DEFAULT_FOOTER_TEXT.colExplore),
-      colContact: str(d.footerColContact, DEFAULT_FOOTER_TEXT.colContact),
-      exploreLinks: mapLinks(d.footerLinks) ?? DEFAULT_FOOTER_TEXT.exploreLinks,
-      note: str(d.footerNote, DEFAULT_FOOTER_TEXT.note),
-    },
-    subBrandLabels: Object.fromEntries(
-      Object.entries(DEFAULT_SUBBRAND_LABELS).map(([k, fallback]) => [
-        k,
-        str((d.subBrandLabels as Record<string, unknown> | undefined)?.[k], fallback),
-      ]),
-    ) as unknown as SubBrandLabels,
-    theme: Object.fromEntries(
-      Object.entries((d.theme as Record<string, unknown>) ?? {}).filter(
-        ([, hex]) => typeof hex === 'string' && parseHex(hex),
-      ),
-    ) as SiteSettings['theme'],
+    ['dama', name],
+    { tags: [TAG] },
+  );
+  return async (...args: A): Promise<R> => {
+    if (await isPreview()) {
+      await ensureReady();
+      return fn(true, ...args);
+    }
+    return c(...args);
   };
 }
 
-// ── Testimonials ──────────────────────────────────────────────
-export async function getTestimonials(): Promise<Testimonial[]> {
-  if (!sanityConfigured) return staticTestimonials;
-  const docs = await sanityClient.fetch<Testimonial[]>(
-    `*[_type=="testimonial"]|order(order asc){name,context,quote}`,
-  );
-  return docs?.length ? docs : staticTestimonials;
+const imgUrl = (i: ImageRef | null | undefined) => (i && i.url ? i.url : undefined);
+
+// ── Settings ──────────────────────────────────────────────────
+async function loadSetting(key: string, preview: boolean): Promise<Record<string, unknown> | null> {
+  const [row] = await db.select().from(settings).where(eq(settings.key, key)).limit(1);
+  if (!row) return null;
+  return (preview ? row.draft : row.published) ?? row.published ?? null;
 }
 
-// ── Pillars / values ──────────────────────────────────────────
+export interface PublicSettings {
+  site: SiteSettingsData;
+  theme: ThemeData;
+  nav: NavigationData;
+}
+
+const settingsPublished = unstable_cache(
+  async (): Promise<PublicSettings> => {
+    await ensureReady();
+    return buildSettings(false);
+  },
+  ['dama', 'settings'],
+  { tags: [TAG] },
+);
+
+async function buildSettings(preview: boolean): Promise<PublicSettings> {
+  const [site, theme, nav] = await Promise.all([
+    loadSetting('site', preview),
+    loadSetting('theme', preview),
+    loadSetting('navigation', preview),
+  ]);
+  return {
+    site: site ? cleanSiteSettings({ ...DEFAULT_SITE, ...site }).data : DEFAULT_SITE,
+    theme: theme ? cleanTheme(theme) : DEFAULT_THEME,
+    nav: nav ? cleanNavigation(nav).data : DEFAULT_NAVIGATION,
+  };
+}
+
+/** Site, theme and navigation settings (request-deduplicated). */
+export const getSettings = cache(async (): Promise<PublicSettings> => {
+  if (await isPreview()) {
+    await ensureReady();
+    return buildSettings(true);
+  }
+  return settingsPublished();
+});
+
+// ── Sub-brands ────────────────────────────────────────────────
+type SubBrandRow = typeof subBrands.$inferSelect;
+
+function toSubBrand(r: SubBrandRow): SubBrand {
+  const base = staticSubBrandMap[r.slug as SubBrandSlug];
+  return {
+    slug: r.slug as SubBrandSlug,
+    name: r.name,
+    shortName: r.shortName,
+    emotion: r.emotion,
+    lead: r.lead,
+    about: r.about,
+    howToOrder: r.howToOrder,
+    marker: base?.marker ?? 'lamak',
+    markerHex: r.markerHex,
+    channels: r.channels as SubBrand['channels'],
+    faqs: r.faqs ?? [],
+    crossSell: (r.crossSell ?? []) as SubBrandSlug[],
+    heroImage: imgUrl(r.heroImage),
+    heroAlt: r.heroImage?.alt,
+    channelNote: r.channelNote ?? undefined,
+    seo: r.seo ?? {},
+  } as SubBrand;
+}
+
+const loadSubBrands = cached('subBrands', async () => {
+  const rows = await db.select().from(subBrands).where(eq(subBrands.enabled, true)).orderBy(asc(subBrands.sortOrder), asc(subBrands.id));
+  return rows.map(toSubBrand);
+});
+
+export const getSubBrands = cache(() => loadSubBrands());
+
+export async function getSubBrand(slug: string): Promise<SubBrand | undefined> {
+  return (await getSubBrands()).find((s) => s.slug === slug);
+}
+
+export const getSubBrandExtras = cached('subBrandExtras', async (_p, slug: string) => {
+  const [r] = await db
+    .select({ extra: subBrands.extraSections })
+    .from(subBrands)
+    .where(and(eq(subBrands.slug, slug), eq(subBrands.enabled, true)))
+    .limit(1);
+  return { extraSections: ((r?.extra ?? []) as Section[]).filter(Boolean) };
+});
+
+// ── Products ──────────────────────────────────────────────────
+export interface PublicProduct extends Product {
+  slug: string;
+  description?: string;
+  priceNote?: string;
+  availability: 'available' | 'preorder' | 'seasonal' | 'unavailable';
+  gallery: ImageRef[];
+  imageAlt?: string;
+  category?: { slug: string; name: string };
+  orderLinks: { label: string; url: string }[];
+  seo: SeoFields;
+  updatedAt?: string;
+}
+
+const loadProducts = cached('products', async (): Promise<PublicProduct[]> => {
+  const rows = await db
+    .select({ p: products, sb: subBrands.slug, sbEnabled: subBrands.enabled, catSlug: productCategories.slug, catName: productCategories.name })
+    .from(products)
+    .leftJoin(subBrands, eq(subBrands.id, products.subBrandId))
+    .leftJoin(productCategories, eq(productCategories.id, products.categoryId))
+    .where(eq(products.status, 'published'))
+    .orderBy(asc(products.sortOrder), asc(products.id));
+  return rows
+    .filter((r) => r.sbEnabled !== false)
+    .map(({ p, sb, catSlug, catName }) => ({
+      id: p.slug,
+      slug: p.slug,
+      name: p.name,
+      blurb: p.blurb,
+      description: p.description ?? undefined,
+      subBrand: (sb ?? '') as SubBrandSlug,
+      info: (p.info ?? []) as Product['info'],
+      price: p.price,
+      priceNote: p.priceNote ?? undefined,
+      availability: p.availability,
+      imageCategory: (p.imageCategory as Product['imageCategory']) ?? 'food',
+      image: imgUrl(p.image),
+      imageAlt: p.image?.alt,
+      gallery: p.gallery ?? [],
+      category: catSlug && catName ? { slug: catSlug, name: catName } : undefined,
+      orderLinks: p.orderLinks ?? [],
+      seo: p.seo ?? {},
+      updatedAt: p.updatedAt?.toISOString(),
+    }));
+});
+
+export const getProducts = cache(() => loadProducts());
+
+export async function getProductsBySubBrand(slug: string): Promise<PublicProduct[]> {
+  return (await getProducts()).filter((p) => p.subBrand === slug);
+}
+
+export async function getProduct(slug: string): Promise<PublicProduct | undefined> {
+  return (await getProducts()).find((p) => p.slug === slug);
+}
+
+// ── Small collections ─────────────────────────────────────────
+export const getTestimonials = cached('testimonials', async (): Promise<Testimonial[]> =>
+  db
+    .select({ name: testimonials.name, context: testimonials.context, quote: testimonials.quote })
+    .from(testimonials)
+    .where(eq(testimonials.visible, true))
+    .orderBy(asc(testimonials.sortOrder), asc(testimonials.id)),
+);
+
+const loadBrandItems = cached('brandItems', async () =>
+  db.select().from(brandItems).where(eq(brandItems.visible, true)).orderBy(asc(brandItems.sortOrder), asc(brandItems.id)),
+);
+
 export async function getPillars(): Promise<Pillar[]> {
-  if (!sanityConfigured) return staticPillars;
-  const docs = await sanityClient.fetch<Pillar[]>(
-    `*[_type=="pillar"]|order(order asc){title,desc,icon}`,
-  );
-  return docs?.length ? docs : staticPillars;
+  return (await loadBrandItems())
+    .filter((i) => i.kind === 'pillar')
+    .map((i) => ({ title: i.title, desc: i.body, icon: (i.icon ?? 'recipe') as Pillar['icon'] }));
 }
 
 export async function getValues(): Promise<BrandValue[]> {
-  if (!sanityConfigured) return staticValues;
-  const docs = await sanityClient.fetch<BrandValue[]>(
-    `*[_type=="brandValue"]|order(order asc){title,desc}`,
-  );
-  return docs?.length ? docs : staticValues;
+  return (await loadBrandItems()).filter((i) => i.kind === 'value').map((i) => ({ title: i.title, desc: i.body }));
 }
 
-// ── Journal (Catatan Dapur) ───────────────────────────────────
+export const getFaqs = cached('faqs', async () =>
+  db
+    .select({ q: faqs.question, a: faqs.answer, group: faqs.groupKey })
+    .from(faqs)
+    .where(eq(faqs.visible, true))
+    .orderBy(asc(faqs.sortOrder), asc(faqs.id)),
+);
+
+// ── Articles (Catatan Dapur) ──────────────────────────────────
 export interface JournalCard {
   slug: string;
   title: string;
   excerpt?: string;
   coverImage?: string;
+  coverAlt?: string;
   publishedAt?: string;
+  category?: { slug: string; name: string } | null;
 }
 export interface JournalPost extends JournalCard {
-  body: unknown;
+  bodyHtml: string;
+  author?: string;
+  tags: { slug: string; name: string }[];
+  seo: SeoFields;
+  related: JournalCard[];
+  updatedAt?: string;
 }
 
+interface ArticleSnapshot {
+  title: string;
+  slug: string;
+  excerpt?: string;
+  bodyHtml: string;
+  featuredImage?: ImageRef | null;
+  author?: string;
+  publishedAt?: string;
+  category?: { slug: string; name: string } | null;
+  tags?: { slug: string; name: string }[];
+  seo?: SeoFields;
+  relatedIds?: number[];
+}
+
+/** Working copy of an article in the same shape as a published snapshot. */
+async function articleDraftSnapshot(a: typeof articles.$inferSelect): Promise<ArticleSnapshot> {
+  const cat = a.categoryId
+    ? (await db.select().from(articleCategories).where(eq(articleCategories.id, a.categoryId)).limit(1))[0]
+    : undefined;
+  const tagRows = await db
+    .select({ slug: tags.slug, name: tags.name })
+    .from(articleTags)
+    .innerJoin(tags, eq(tags.id, articleTags.tagId))
+    .where(eq(articleTags.articleId, a.id));
+  return {
+    title: a.title,
+    slug: a.slug,
+    excerpt: a.excerpt ?? undefined,
+    bodyHtml: a.bodyHtml,
+    featuredImage: a.featuredImage,
+    author: a.author ?? undefined,
+    publishedAt: a.publishedAt?.toISOString(),
+    category: cat ? { slug: cat.slug, name: cat.name } : null,
+    tags: tagRows,
+    seo: a.seo,
+    relatedIds: a.relatedIds,
+  };
+}
+
+const loadArticles = cached('articles', async (preview): Promise<{ id: number; snap: ArticleSnapshot; updatedAt: string }[]> => {
+  const rows = await db
+    .select()
+    .from(articles)
+    .where(preview ? undefined : and(eq(articles.status, 'published'), isNotNull(articles.published)))
+    .orderBy(desc(articles.publishedAt), desc(articles.id));
+  const out = [];
+  for (const r of rows) {
+    const snap = preview ? await articleDraftSnapshot(r) : (r.published as unknown as ArticleSnapshot);
+    if (snap) out.push({ id: r.id, snap, updatedAt: r.updatedAt.toISOString() });
+  }
+  return out;
+});
+
+const toCard = (s: ArticleSnapshot): JournalCard => ({
+  slug: s.slug,
+  title: s.title,
+  excerpt: s.excerpt,
+  coverImage: imgUrl(s.featuredImage),
+  coverAlt: s.featuredImage?.alt,
+  publishedAt: s.publishedAt,
+  category: s.category ?? null,
+});
+
 export async function getJournalPosts(): Promise<JournalCard[]> {
-  if (!sanityConfigured) return [];
-  const docs = await sanityClient.fetch<Array<Record<string, unknown>>>(
-    `*[_type=="journalPost" && defined(slug.current)]|order(publishedAt desc){
-      "slug":slug.current, title, excerpt, publishedAt, coverImage
-    }`,
-  );
-  return (docs ?? []).map((d) => ({
-    slug: d.slug as string,
-    title: d.title as string,
-    excerpt: d.excerpt as string | undefined,
-    publishedAt: d.publishedAt as string | undefined,
-    coverImage: urlForImage(d.coverImage as never, 800),
-  }));
+  return (await loadArticles()).map((a) => toCard(a.snap));
 }
 
 export async function getJournalPost(slug: string): Promise<JournalPost | null> {
-  if (!sanityConfigured) return null;
-  const d = await sanityClient.fetch<Record<string, unknown> | null>(
-    `*[_type=="journalPost" && slug.current==$slug][0]{
-      "slug":slug.current, title, excerpt, publishedAt, coverImage, body
-    }`,
-    { slug },
-  );
-  if (!d) return null;
+  const all = await loadArticles();
+  const hit = all.find((a) => a.snap.slug === slug);
+  if (!hit) return null;
+  const s = hit.snap;
+  const related = (s.relatedIds ?? [])
+    .map((id) => all.find((a) => a.id === id))
+    .filter(Boolean)
+    .map((a) => toCard(a!.snap));
+  // Fill up with same-category posts when fewer than 3 were picked.
+  if (related.length < 3) {
+    for (const a of all) {
+      if (related.length >= 3) break;
+      if (a.id === hit.id || related.some((r) => r.slug === a.snap.slug)) continue;
+      if (s.category && a.snap.category?.slug === s.category.slug) related.push(toCard(a.snap));
+    }
+  }
   return {
-    slug: d.slug as string,
-    title: d.title as string,
-    excerpt: d.excerpt as string | undefined,
-    publishedAt: d.publishedAt as string | undefined,
-    coverImage: urlForImage(d.coverImage as never),
-    body: d.body,
+    ...toCard(s),
+    bodyHtml: s.bodyHtml,
+    author: s.author,
+    tags: s.tags ?? [],
+    seo: s.seo ?? {},
+    related,
+    updatedAt: hit.updatedAt,
   };
 }
 
 // ── Pages & page-builder sections ─────────────────────────────
-
-/** A page-builder section as stored in Sanity, images resolved to `url`. */
+/** A page-builder section (validated JSON), images as { url, alt }. */
 export type Section = Record<string, unknown> & { _type: string; _key: string };
 
-/**
- * Walks section data and adds `url` to every uploaded image, so renderers
- * never deal with Sanity asset references.
- */
-function resolveImages<T>(value: T): T {
-  if (Array.isArray(value)) return value.map(resolveImages) as T;
-  if (value && typeof value === 'object') {
-    const obj = value as Record<string, unknown>;
-    const out: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(obj)) out[k] = resolveImages(v);
-    if (obj._type === 'image' && obj.asset) out.url = urlForImage(obj as never, 1600);
-    return out as T;
-  }
-  return value;
-}
-
 export interface CmsPage {
+  id: number;
   slug: string;
   title: string;
-  seoTitle?: string;
-  seoDescription?: string;
-  /** Page-builder sections (empty → legacy single-block layout / coded page). */
+  seo: SeoFields;
   sections: Section[];
-  // Legacy single-block fields:
-  eyebrow?: string;
-  intro?: string;
-  heroImage?: string;
-  body: unknown;
+  updatedAt?: string;
 }
 
-const PAGE_PROJECTION = `{
-  "slug": slug.current, title, seoTitle, seoDescription, sections,
-  eyebrow, intro, heroImage, body
-}`;
+interface PageDoc {
+  title?: string;
+  slug?: string;
+  sections?: Section[];
+  seo?: SeoFields;
+}
 
-function toCmsPage(d: Record<string, unknown> | null): CmsPage | null {
-  if (!d) return null;
-  const sections = resolveImages(((d.sections as Section[]) ?? []).filter(Boolean));
+function toCmsPage(r: typeof pages.$inferSelect, preview: boolean): CmsPage | null {
+  const doc = (preview ? r.draft : r.published) as PageDoc | null;
+  if (!doc) return null;
   return {
-    slug: (d.slug as string) ?? '',
-    title: (d.title as string) ?? '',
-    seoTitle: d.seoTitle as string | undefined,
-    seoDescription: d.seoDescription as string | undefined,
-    sections,
-    eyebrow: d.eyebrow as string | undefined,
-    intro: d.intro as string | undefined,
-    heroImage: urlForImage(d.heroImage as never),
-    body: d.body,
+    id: r.id,
+    slug: doc.slug ?? r.slug,
+    title: doc.title ?? r.title,
+    seo: doc.seo ?? {},
+    sections: (doc.sections ?? []).filter(Boolean),
+    updatedAt: (r.publishedAt ?? r.updatedAt)?.toISOString(),
   };
 }
 
-/** Custom page slugs (built-in pages and reserved addresses excluded). */
-export async function getPageSlugs(): Promise<string[]> {
-  if (!sanityConfigured) return [];
-  const slugs = await sanityClient.fetch<string[]>(
-    `*[_type=="page" && defined(slug.current) && !(_id in $builtIn)].slug.current`,
-    { builtIn: BUILT_IN_PAGE_IDS },
-  );
-  return (slugs ?? []).filter((s) => !RESERVED_SLUGS.includes(s));
-}
-
-export async function getPage(slug: string): Promise<CmsPage | null> {
-  if (!sanityConfigured || RESERVED_SLUGS.includes(slug)) return null;
-  const d = await sanityClient.fetch<Record<string, unknown> | null>(
-    `*[_type=="page" && slug.current==$slug && !(_id in $builtIn)][0]${PAGE_PROJECTION}`,
-    { slug, builtIn: BUILT_IN_PAGE_IDS },
-  );
-  return toCmsPage(d);
-}
+const loadBuiltIn = cached('builtInPage', async (preview, key: string) => {
+  const [r] = await db.select().from(pages).where(eq(pages.builtinKey, key)).limit(1);
+  if (!r || (!preview && r.status !== 'published')) return null;
+  return toCmsPage(r, preview);
+});
 
 /**
- * A built-in page's Studio document (Beranda, Cerita, …). Returns null when it
- * doesn't exist or has no visible sections — the route then renders its
- * original coded layout.
+ * A built-in page's builder layout. Null when it has no visible sections —
+ * the route then renders its original coded layout.
  */
 export async function getBuiltInPage(key: BuiltInPageKey): Promise<CmsPage | null> {
-  if (!sanityConfigured) return null;
-  const d = await sanityClient.fetch<Record<string, unknown> | null>(
-    `*[_id == $id][0]${PAGE_PROJECTION}`,
-    { id: builtInPageId(key) },
-  );
-  const page = toCmsPage(d);
+  const page = await loadBuiltIn(key);
   return page && page.sections.some((s) => !s.hidden) ? page : null;
 }
 
-/** Sub-brand page extras that live only in the CMS. */
-export async function getSubBrandExtras(
-  slug: SubBrandSlug,
-): Promise<{ extraSections: Section[] }> {
-  if (!sanityConfigured) return { extraSections: [] };
-  const d = await sanityClient.fetch<{ extraSections?: Section[] } | null>(
-    `*[_type=="subBrand" && slug==$slug][0]{ extraSections }`,
-    { slug },
-  );
-  return { extraSections: resolveImages((d?.extraSections ?? []).filter(Boolean)) };
+/** Built-in page record (for SEO) even when its sections are empty. */
+export async function getBuiltInPageMeta(key: BuiltInPageKey): Promise<CmsPage | null> {
+  return loadBuiltIn(key);
+}
+
+const loadCustomPage = cached('page', async (preview, slug: string) => {
+  const where = preview
+    ? and(or(eq(pages.slug, slug), eq(pages.publishedSlug, slug)))
+    : and(eq(pages.publishedSlug, slug), eq(pages.status, 'published'));
+  const rows = await db.select().from(pages).where(where).limit(2);
+  const r = rows.find((x) => !x.builtinKey);
+  return r ? toCmsPage(r, preview) : null;
+});
+
+export async function getPage(slug: string): Promise<CmsPage | null> {
+  if (RESERVED_SLUGS.includes(slug)) return null;
+  return loadCustomPage(slug);
+}
+
+export const getPageSlugs = cached('pageSlugs', async () => {
+  const rows = await db
+    .select({ slug: pages.publishedSlug, published: pages.published })
+    .from(pages)
+    .where(and(eq(pages.status, 'published'), isNotNull(pages.publishedSlug)));
+  return rows
+    .filter((r) => r.slug && !RESERVED_SLUGS.includes(r.slug) && !((r.published as PageDoc | null)?.seo?.noindex))
+    .map((r) => r.slug as string)
+    .filter((s) => !Object.values(BUILT_IN_PAGES).some((b) => b.path === `/${s}`));
+});
+
+// ── Redirects ─────────────────────────────────────────────────
+export const getRedirect = cached('redirect', async (_p, path: string) => {
+  const [r] = await db
+    .select({ to: redirects.toPath, code: redirects.statusCode })
+    .from(redirects)
+    .where(eq(redirects.fromPath, path))
+    .limit(1);
+  return r ?? null;
+});
+
+// ── Legacy settings shape (coded fallback layouts, sub-brand labels) ──
+export async function getSiteSettings() {
+  const { site } = await getSettings();
+  return {
+    tagline: site.tagline,
+    brandLineEn: site.brandLineEn,
+    umbrellaPromise: site.description,
+    heroHeadline: site.heroHeadline,
+    essence: site.essence,
+    founderQuote: site.founderQuote,
+    founderName: site.founderName,
+    founderRole: site.founderRole,
+    heroImage: undefined as string | undefined,
+    founderImage: undefined as string | undefined,
+    heroStyle: 'cream' as 'cream' | 'teal' | 'blush',
+    logo: site.logo?.url,
+    logoLight: site.logoLight?.url,
+    monogram: site.monogram?.url,
+    backgroundMotif: site.backgroundMotif as 'songket-geometric' | 'bunga-floral' | 'daun-leaf' | 'geometric-gold' | 'none',
+    motifImage: undefined as string | undefined,
+    motifOpacity: site.motifOpacity / 100,
+    email: site.email,
+    phone: site.phone,
+    whatsappNumber: site.whatsappNumber,
+    address: site.address,
+    operatingHours: site.operatingHours,
+    instagram: site.instagram,
+    tiktok: site.tiktok,
+    threads: site.threads,
+    coverage: site.serviceArea,
+    seasonal: site.seasonal,
+    subBrandLabels: site.subBrandLabels,
+  };
 }

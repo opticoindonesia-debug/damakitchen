@@ -47,6 +47,7 @@ export function Placeholder({
   className,
   priority = false,
   src,
+  sizes,
 }: {
   category: PlaceholderCategory;
   alt: string;
@@ -58,16 +59,18 @@ export function Placeholder({
   sizes?: string;
 }) {
   if (src) {
-    // Render straight from the source CDN (Sanity already serves optimized
-    // webp/avif via auto=format). Using a plain <img> avoids the Vercel image
-    // optimizer, which can fail to load remote CMS images.
+    // Self-hosted media (/media/…) is already WebP with 640/1280/full-width
+    // variants, so a responsive srcset is enough — no image-optimizer round trip.
+    const local = src.startsWith('/media/') && !/\.(gif|pdf)$/.test(src);
     return (
       <div className={cn('relative overflow-hidden', ratioClass[ratio], className)}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={src}
+          src={local ? `${src}?w=1280` : src}
+          {...(local ? { srcSet: `${src}?w=640 640w, ${src}?w=1280 1280w, ${src} 2400w`, sizes: sizes ?? '100vw' } : {})}
           alt={alt}
           loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
           className="absolute inset-0 h-full w-full object-cover"
         />
       </div>

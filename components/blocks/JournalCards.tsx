@@ -24,14 +24,12 @@ export function JournalGrid({ posts, headingAs = 'h2' }: { posts: JournalCard[];
               ratio="landscape"
               rounded={false}
               src={post.coverImage}
-              alt={`Sampul artikel: ${post.title}`}
+              alt={post.coverAlt || `Sampul artikel: ${post.title}`}
             />
             <div className="flex flex-1 flex-col p-6">
-              {post.publishedAt && (
-                <span className="text-label uppercase tracking-[0.14em] text-ink-soft">
-                  {formatJournalDate(post.publishedAt)}
-                </span>
-              )}
+              <span className="text-label uppercase tracking-[0.14em] text-ink-soft">
+                {[post.category?.name, formatJournalDate(post.publishedAt)].filter(Boolean).join(' · ')}
+              </span>
               <H className="mt-2 font-display text-heading text-teal">{post.title}</H>
               {post.excerpt && <p className="mt-2 flex-1 text-caption text-ink-soft">{post.excerpt}</p>}
               <span className="mt-4 text-caption font-medium text-terracotta-deep">Baca selengkapnya →</span>

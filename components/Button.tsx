@@ -12,7 +12,7 @@ type Variant = 'primary' | 'secondary' | 'ghost';
 type Size = 'md' | 'lg';
 
 const base =
-  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded font-sans text-body font-medium transition-colors duration-300 ease-calm focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:cursor-not-allowed disabled:opacity-50';
+  'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-btn font-sans text-body font-medium transition-colors duration-300 ease-calm focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:cursor-not-allowed disabled:opacity-50';
 
 const variants: Record<Variant, string> = {
   // Cream on terracotta — approved AA pairing.

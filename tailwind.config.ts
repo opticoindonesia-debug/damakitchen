@@ -83,8 +83,9 @@ const config: Config = {
         accent: 'rgb(var(--accent) / <alpha-value>)',
       },
       fontFamily: {
-        display: ['var(--font-playfair)', 'Georgia', 'serif'],
-        sans: ['var(--font-poppins)', 'Inter', 'system-ui', 'sans-serif'],
+        // Editable in Admin → Tampilan (fonts); defaults are Playfair + Poppins.
+        display: ['var(--font-heading, var(--font-playfair))', 'Georgia', 'serif'],
+        sans: ['var(--font-body, var(--font-poppins))', 'Inter', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         // Responsive type scale (§3.4) — fluid clamps, web-translated.
@@ -98,20 +99,22 @@ const config: Config = {
         'label': ['0.75rem', { lineHeight: '1.4', letterSpacing: '0.08em' }],
       },
       borderRadius: {
-        sm: '6px',
-        DEFAULT: '12px',
-        lg: '20px',
+        // Editable in Admin → Tampilan (sudut & bentuk tombol).
+        sm: 'var(--radius-sm, 6px)',
+        DEFAULT: 'var(--radius, 12px)',
+        lg: 'var(--radius-lg, 20px)',
+        btn: 'var(--btn-radius, 12px)',
       },
       boxShadow: {
         // Single soft, teal-tinted elevation token (§3.5).
         soft: '0 8px 30px -12px rgba(31,77,77,0.18)',
       },
       maxWidth: {
-        container: '1200px',
+        container: 'var(--container-max, 1200px)',
         prose: '68ch',
       },
       spacing: {
-        section: 'clamp(4rem, 10vw, 8rem)',
+        section: 'var(--section-py, clamp(4rem, 10vw, 8rem))',
         gutter: 'clamp(1.5rem, 5vw, 3rem)',
       },
       transitionTimingFunction: {

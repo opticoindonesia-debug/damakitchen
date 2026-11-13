@@ -199,7 +199,7 @@ export default async function HomePage() {
             <div className="mt-7">
               <Link
                 href="/katering"
-                className="inline-flex min-h-[44px] items-center justify-center rounded px-5 py-2.5 font-medium transition-colors duration-300 border border-cream/40 text-cream hover:bg-cream/10"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-btn px-5 py-2.5 font-medium transition-colors duration-300 border border-cream/40 text-cream hover:bg-cream/10"
               >
                 Minta penawaran acara
               </Link>
@@ -213,7 +213,7 @@ export default async function HomePage() {
             <div className="mt-7">
               <Link
                 href="/hadiah"
-                className="inline-flex min-h-[44px] items-center justify-center rounded px-5 py-2.5 font-medium transition-colors duration-300 bg-cream text-terracotta-deep hover:bg-cream-paper"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-btn px-5 py-2.5 font-medium transition-colors duration-300 bg-cream text-terracotta-deep hover:bg-cream-paper"
               >
                 Kirim sebagai hadiah
               </Link>

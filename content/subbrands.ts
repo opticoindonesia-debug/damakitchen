@@ -49,6 +49,10 @@ export interface SubBrand {
   disabled?: boolean;
   /** One-line "which channel for what" note shown on /pesan. */
   channelNote?: string;
+  /** Alt text for the hero photo (from the admin). */
+  heroAlt?: string;
+  /** Per-line SEO fields (from the admin). */
+  seo?: import('@/lib/db/schema').SeoFields;
 }
 
 export const subBrands: Record<SubBrandSlug, SubBrand> = {

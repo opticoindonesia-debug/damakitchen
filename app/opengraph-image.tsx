@@ -4,7 +4,7 @@ import { ImageResponse } from 'next/og';
  * Default OG image (§11): branded cream card with logo + tagline.
  * Applies site-wide via the file convention.
  */
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const alt = 'DAMA KITCHEN — Taraso Disayang';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';

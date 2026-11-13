@@ -96,7 +96,7 @@ export async function SubBrandPage({ subBrand }: { subBrand: SubBrand }) {
               <>
                 <Link
                   href="/katering"
-                  className="inline-flex min-h-[44px] items-center rounded bg-terracotta px-6 py-3 font-medium text-cream transition-colors duration-300 hover:bg-terracotta-80"
+                  className="inline-flex min-h-[44px] items-center rounded-btn bg-terracotta px-6 py-3 font-medium text-cream transition-colors duration-300 hover:bg-terracotta-80"
                 >
                   Minta penawaran acara
                 </Link>

@@ -1,5 +1,8 @@
+'use client';
+
 import type { SVGProps } from 'react';
-import { channels, isChannelEnabled, type ChannelId } from '@/content/channels';
+import type { ChannelId } from '@/content/channels';
+import { channelEnabled, channelHref, useSiteConfig } from './SiteConfig';
 import { cn } from '@/lib/utils';
 
 /**
@@ -75,22 +78,22 @@ export function ChannelButton({
   className?: string;
   fullWidth?: boolean;
 }) {
-  // Kanal yang dinonaktifkan tidak ditampilkan di mana pun.
-  if (!isChannelEnabled(channel)) return null;
-  const cfg = channels[channel];
+  const cfg = useSiteConfig();
+  // Kanal yang dinonaktifkan (Pengaturan Situs → Kanal) tidak ditampilkan di mana pun.
+  if (!channelEnabled(cfg, channel)) return null;
   return (
     <a
-      href={href ?? cfg.href}
+      href={href ?? channelHref(cfg, channel)}
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        'inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded border border-teal/20 bg-cream-paper px-5 py-2.5 text-body font-medium text-teal transition-colors duration-300 ease-calm hover:bg-teal/5 focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2 focus-visible:ring-offset-cream',
+        'inline-flex min-h-[44px] items-center justify-center gap-2.5 rounded-btn border border-teal/20 bg-cream-paper px-5 py-2.5 text-body font-medium text-teal transition-colors duration-300 ease-calm hover:bg-teal/5 focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-2 focus-visible:ring-offset-cream',
         fullWidth && 'w-full',
         className,
       )}
     >
       <span className="text-terracotta">{channelGlyph[channel]}</span>
-      {cfg.label}
+      {cfg.channels[channel].label}
     </a>
   );
 }

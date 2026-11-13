@@ -2,7 +2,9 @@ import type { Section } from '@/lib/cms';
 import { SeasonalBanner } from '@/components/blocks/SeasonalBanner';
 import {
   CardsBlock,
+  ContactBlock,
   CtaBlock,
+  CustomBlock,
   DividerBlock,
   FaqBlock,
   FeaturesBlock,
@@ -55,6 +57,10 @@ export function PageBuilder({ sections, h1 = true }: { sections: Section[]; h1?:
             return <GalleryBlock key={key} s={s} headingAs={headingAs} />;
           case 'formSection':
             return <FormBlock key={key} s={s} headingAs={headingAs} />;
+          case 'contactSection':
+            return <ContactBlock key={key} s={s} headingAs={headingAs} />;
+          case 'customBlock':
+            return <CustomBlock key={key} s={s} headingAs={headingAs} />;
           case 'dividerSection':
             return <DividerBlock key={key} s={s} />;
           case 'dataSection':

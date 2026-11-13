@@ -71,7 +71,7 @@ export function MenuExplorer({
       <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((p, i) => (
           <Reveal key={p.id} delay={(i % 3) * 0.06}>
-            <ProductCard product={p} />
+            <ProductCard product={p} subBrand={subBrands.find((s) => s.slug === p.subBrand)} />
           </Reveal>
         ))}
       </div>

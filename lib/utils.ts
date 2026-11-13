@@ -11,3 +11,20 @@ export function hexToRgbTriple(hex: string): string {
   const b = parseInt(h.slice(4, 6), 16);
   return `${r} ${g} ${b}`;
 }
+
+/** "Rp 85.000" — Indonesian Rupiah, no decimals. */
+export function formatRupiah(value: number): string {
+  return `Rp ${Math.round(value).toLocaleString('id-ID')}`;
+}
+
+/** "@damakitchen" from a social profile URL (falls back to the host). */
+export function socialHandle(url: string): string {
+  try {
+    const u = new URL(url);
+    const seg = u.pathname.split('/').filter(Boolean)[0];
+    if (!seg) return u.hostname.replace(/^www\./, '');
+    return seg.startsWith('@') ? seg : `@${seg}`;
+  } catch {
+    return url;
+  }
+}

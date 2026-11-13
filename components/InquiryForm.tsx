@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Button } from './Button';
 import { cn } from '@/lib/utils';
 import { waCatering, waGifting } from '@/lib/whatsapp';
+import { useSiteConfig } from './SiteConfig';
 
 /**
  * InquiryForm (§7.5, §7.6): client-validated, builds a prefilled WhatsApp
@@ -46,6 +47,7 @@ export function InquiryForm({ variant }: { variant: Variant }) {
   const [values, setValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [submitted, setSubmitted] = useState(false);
+  const { whatsappNumber } = useSiteConfig();
 
   function update(name: string, value: string) {
     setValues((v) => ({ ...v, [name]: value }));
@@ -62,7 +64,7 @@ export function InquiryForm({ variant }: { variant: Variant }) {
         lokasi: values.lokasi ?? '',
         budget: values.budget ?? '',
         catatan: values.catatan ?? '',
-      });
+      }, whatsappNumber);
     }
     return waGifting({
       paket: values.paket ?? '',
@@ -70,7 +72,7 @@ export function InquiryForm({ variant }: { variant: Variant }) {
       tanggal: values.tanggal ?? '',
       pesan: values.pesan ?? '',
       catatan: values.catatan ?? '',
-    });
+    }, whatsappNumber);
   }
 
   function handleSubmit(e: React.FormEvent) {

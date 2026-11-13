@@ -7,20 +7,19 @@ import { WHATSAPP_NUMBER } from '@/content/channels';
  * Templates stay warm and on-voice (§5 kill rules apply to outbound too):
  * at most one emoji, never caps-lock, never fake urgency.
  */
-export function buildWaLink(message: string, number: string = WHATSAPP_NUMBER): string {
-  return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+export function buildWaLink(message: string, number?: string): string {
+  const n = (number || WHATSAPP_NUMBER).replace(/[^0-9]/g, '');
+  return `https://wa.me/${n}?text=${encodeURIComponent(message)}`;
 }
 
 /** General product order. */
-export function waOrder(produk: string): string {
-  return buildWaLink(`Halo DAMA 🙂 saya ingin pesan ${produk}. Boleh dibantu?`);
+export function waOrder(produk: string, number?: string): string {
+  return buildWaLink(`Halo DAMA 🙂 saya ingin pesan ${produk}. Boleh dibantu?`, number);
 }
 
 /** WARISAN heritage pre-order. */
-export function waPreorder(hidangan: string, tanggal = '{tanggal}'): string {
-  return buildWaLink(
-    `Halo DAMA, saya mau pre-order ${hidangan} untuk tanggal ${tanggal}. Terima kasih.`,
-  );
+export function waPreorder(hidangan: string, tanggal = '{tanggal}', number?: string): string {
+  return buildWaLink(`Halo DAMA, saya mau pre-order ${hidangan} untuk tanggal ${tanggal}. Terima kasih.`, number);
 }
 
 export interface CateringInquiry {
@@ -34,7 +33,7 @@ export interface CateringInquiry {
 }
 
 /** Catering quotation built from the inquiry form (§7.5). */
-export function waCatering(i: CateringInquiry): string {
+export function waCatering(i: CateringInquiry, number?: string): string {
   const lines = [
     'Halo DAMA, saya ingin minta penawaran acara.',
     `Acara: ${i.jenis || '-'}`,
@@ -45,7 +44,7 @@ export function waCatering(i: CateringInquiry): string {
     `Budget: ${i.budget || '-'}`,
     `Catatan: ${i.catatan || '-'}`,
   ];
-  return buildWaLink(lines.join('\n'));
+  return buildWaLink(lines.join('\n'), number);
 }
 
 export interface GiftingInquiry {
@@ -57,7 +56,7 @@ export interface GiftingInquiry {
 }
 
 /** Gifting / corporate quotation built from the inquiry form (§7.6). */
-export function waGifting(i: GiftingInquiry): string {
+export function waGifting(i: GiftingInquiry, number?: string): string {
   const lines = [
     'Halo DAMA, saya ingin mengirim hadiah.',
     `Paket: ${i.paket || '-'}`,
@@ -66,5 +65,5 @@ export function waGifting(i: GiftingInquiry): string {
     `Pesan kartu: ${i.pesan || '-'}`,
     `Catatan: ${i.catatan || '-'}`,
   ];
-  return buildWaLink(lines.join('\n'));
+  return buildWaLink(lines.join('\n'), number);
 }

@@ -92,3 +92,24 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ── CMS rich text (articles, text sections) ───────────────── */
+@layer components {
+  .rich-text { @apply text-body-lg text-ink-soft; }
+  .rich-text > * + * { margin-top: 1.25rem; }
+  .rich-text h2 { @apply mt-12 font-display text-display-md text-teal; }
+  .rich-text h3 { @apply mt-8 font-display text-heading text-teal; }
+  .rich-text h4 { @apply mt-6 font-sans text-body-lg font-semibold text-ink; }
+  .rich-text strong { @apply font-semibold text-ink; }
+  .rich-text a { @apply text-teal underline underline-offset-4; }
+  .rich-text ul { @apply list-disc space-y-2 pl-6; }
+  .rich-text ol { @apply list-decimal space-y-2 pl-6; }
+  .rich-text blockquote { @apply my-8 border-l-2 border-terracotta pl-6 font-display text-display-md italic text-teal; }
+  .rich-text figure, .rich-text img { @apply my-8 h-auto w-full overflow-hidden rounded-lg object-cover; }
+  .rich-text figcaption { @apply mt-2 text-caption text-ink-soft; }
+  .rich-text hr { @apply my-10 border-teal/15; }
+  .rich-text-dark { @apply text-cream/90; }
+  .rich-text-dark h2, .rich-text-dark h3, .rich-text-dark strong, .rich-text-dark a { @apply text-cream; }
+  .rich-text-dark blockquote { @apply border-gold text-cream; }
+  .rich-text-center > * { text-align: center; }
+}

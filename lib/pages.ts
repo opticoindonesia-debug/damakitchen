@@ -1,10 +1,9 @@
 /**
- * Built-in site pages that can be fully rebuilt from Studio.
+ * Built-in site pages, fully editable in Admin → Halaman (page builder).
  *
- * Each has a fixed Sanity document ID (`page-<key>` — never use '.' in IDs).
- * If that document exists and has sections, the route renders those sections;
- * otherwise it renders the original coded layout. Deleting the document in
- * Studio therefore "resets" the page to its default design.
+ * Each is a row in `pages` with `builtin_key` set. If it is published and has
+ * visible sections, the route renders those sections; otherwise it renders the
+ * original coded layout (a safe fallback).
  */
 export const BUILT_IN_PAGES = {
   beranda: { path: '/', title: 'Beranda' },
@@ -40,6 +39,10 @@ export const RESERVED_SLUGS = [
   'dama-kapau',
   'tando-mato',
   'catatan-dapur',
-  'studio',
+  'admin',
   'api',
+  'media',
+  'go',
+  'sitemap.xml',
+  'robots.txt',
 ];

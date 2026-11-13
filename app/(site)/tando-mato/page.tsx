@@ -8,7 +8,7 @@ const SLUG = 'tando-mato' as const;
 export async function generateMetadata() {
   const sb = await getSubBrand(SLUG);
   if (!sb) return buildMetadata({ title: 'Lini', description: '', path: `/${SLUG}` });
-  return buildMetadata({ title: sb.name, description: sb.lead, path: `/${sb.slug}` });
+  return buildMetadata({ title: sb.name, description: sb.lead, path: `/${sb.slug}`, seo: sb.seo, image: sb.heroImage });
 }
 
 export default async function Page() {
