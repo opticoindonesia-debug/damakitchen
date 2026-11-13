@@ -1,6 +1,7 @@
 import { Section } from '@/components/Section';
 import { MenuExplorer } from '@/components/MenuExplorer';
 import { ProductListJsonLd } from '@/components/JsonLd';
+import { TrackOnView } from '@/components/AnalyticsTracker';
 import { builtInMetadata } from '@/lib/pageMeta';
 import { PageBuilder } from '@/components/builder/PageBuilder';
 import { getBuiltInPage, getProducts, getSubBrands } from '@/lib/cms';
@@ -15,18 +16,14 @@ export function generateMetadata() {
 
 export default async function MenuPage() {
   const [products, subBrands] = await Promise.all([getProducts(), getSubBrands()]);
-  const nameBySlug = Object.fromEntries(subBrands.map((s) => [s.slug, s.name]));
-  const jsonLdProducts = products.map((p) => ({
-    name: p.name,
-    description: p.blurb,
-    brand: nameBySlug[p.subBrand] ?? 'DAMA KITCHEN',
-  }));
+  const jsonLdProducts = products.map((p) => ({ name: p.name, description: p.blurb, url: `/menu/${p.slug}` }));
 
   const cms = await getBuiltInPage('menu');
   if (cms) {
     return (
       <>
         <ProductListJsonLd products={jsonLdProducts} />
+        <TrackOnView event="view_item_list" params={{ item_list_name: 'Menu', items: products.length }} />
         <PageBuilder sections={cms.sections} />
       </>
     );

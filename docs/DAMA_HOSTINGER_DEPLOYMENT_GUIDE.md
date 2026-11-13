@@ -76,6 +76,8 @@ Never commit these to GitHub. Never paste them in chat.
    | `BACKUP_CRON_TOKEN` | optional, from step 2 |
    | `BACKUP_KEEP` | `14` |
    | `NODE_ENV` | `production` (Hostinger normally sets it) |
+   | `SITE_INDEXING` | **leave empty on staging**; `true` only on production (section 6) |
+   | `GTM_ID` / `GA4_ID`, `CLARITY_ID`, `GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION` | production only, see `DAMA_ANALYTICS_SETUP.md` |
 
 7. **Deploy.** Watch the build log. It should end with the route table and `postbuild: copied public/ and .next/static…`.
 
@@ -102,7 +104,7 @@ Never commit these to GitHub. Never paste them in chat.
    - If it is registered elsewhere: set the nameservers (or A/AAAA records) shown in hPanel.
 2. **HTTPS.** hPanel → **Security → SSL** → install the free SSL certificate, then enable **Force HTTPS**.
 3. Set `NEXT_PUBLIC_SITE_URL=https://damakitchen.id` and **redeploy**. The value is baked in at build time, so a redeploy is required.
-4. Check `https://damakitchen.id/sitemap.xml` and `/robots.txt` show the production domain.
+4. Set `SITE_INDEXING=true` and restart. Check that `https://damakitchen.id/sitemap.xml`, `/robots.txt` and `/llms.txt` show the production domain and that `robots.txt` is no longer `Disallow: /`.
 5. Submit the sitemap in Google Search Console.
 
 ## 7. Import content from the old Sanity Studio (one time)
@@ -131,7 +133,7 @@ Do this on **staging** before launch, so the owner can review.
 
 ## 8. Acceptance on staging
 
-Run `DAMA_PRODUCTION_LAUNCH_CHECKLIST.md` end to end on staging. Switch the production domain only when every item passes.
+Run `DAMA_LAUNCH_CHECKLIST.md` end to end on staging. Switch the production domain only when every item passes.
 
 ## 9. Scheduled backups (recommended)
 

@@ -125,7 +125,9 @@ export async function seedIfEmpty(): Promise<string[]> {
 
   if (await isEmpty(testimonials)) {
     await db.insert(testimonials).values(
-      testimonialContent.map((t, i) => ({ name: t.name, context: t.context, quote: t.quote, sortOrder: i, visible: true })),
+      // Placeholder testimonials from the first build are kept but HIDDEN: only real,
+      // consented testimonials may be shown publicly.
+      testimonialContent.map((t, i) => ({ name: t.name, context: t.context, quote: t.quote, sortOrder: i, visible: false })),
     );
     done.push('testimonials');
   }

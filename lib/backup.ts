@@ -34,6 +34,7 @@ export const CONTENT_TABLES = [
   'faqs',
   'brand_items',
   'redirects',
+  'inquiries',
 ] as const;
 export const USER_TABLES = ['admin_users'] as const;
 

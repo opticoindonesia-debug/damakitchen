@@ -52,12 +52,17 @@ async function DataContent({
         </div>
       );
     }
-    case 'pillars':
-      return <PillarRow pillars={await getPillars()} />;
+    case 'pillars': {
+      const pillars = await getPillars();
+      return pillars.length ? <PillarRow pillars={pillars} /> : null;
+    }
     case 'values':
       return <ValuesList />;
-    case 'testimonials':
-      return <TestimonialsGrid items={await getTestimonials()} />;
+    case 'testimonials': {
+      // Only real, visible testimonials — the block disappears when there are none.
+      const items = await getTestimonials();
+      return items.length ? <TestimonialsGrid items={items} /> : null;
+    }
     case 'channels':
       return (
         <>

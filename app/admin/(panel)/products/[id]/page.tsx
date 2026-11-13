@@ -20,6 +20,10 @@ const EMPTY: ProductForm = {
   info: [],
   imageCategory: 'food',
   orderLinks: [],
+  ingredients: '',
+  serving: '',
+  storage: '',
+  preparation: '',
   seo: {},
 };
 
@@ -49,6 +53,10 @@ export default async function EditProduct({ params }: { params: { id: string } }
     info: p.info ?? [],
     imageCategory: p.imageCategory,
     orderLinks: p.orderLinks ?? [],
+    ingredients: p.ingredients ?? '',
+    serving: p.serving ?? '',
+    storage: p.storage ?? '',
+    preparation: p.preparation ?? '',
     seo: p.seo ?? {},
   };
   return <ProductEditor id={p.id} initial={initial} subBrands={sbs} categories={cats} />;

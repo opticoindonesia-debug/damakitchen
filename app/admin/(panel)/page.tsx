@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { desc, eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { articles, media, pages, products, settings, subBrands, testimonials } from '@/lib/db/schema';
+import { articles, inquiries, media, pages, products, settings, subBrands, testimonials } from '@/lib/db/schema';
+import { indexingEnabled } from '@/lib/indexing';
 import { Card, LinkButton, StatusBadge } from '@/components/admin/ui';
 import { setupTokenConfigured } from '@/lib/auth/setup';
 import { storageDriver } from '@/lib/media';
@@ -32,7 +33,9 @@ export default async function Dashboard() {
     db.select({ key: settings.key }).from(settings).where(eq(settings.hasChanges, true)),
   ]);
   const [home] = await db.select({ id: pages.id }).from(pages).where(eq(pages.builtinKey, 'beranda')).limit(1);
-  const placeholderTestimonials = await count(testimonials, sql`${testimonials.name} in ('Rina','Pak Hendra','Sari')`);
+  const placeholderTestimonials = await count(testimonials, sql`${testimonials.name} in ('Rina','Pak Hendra','Sari') and ${testimonials.visible} = true`);
+  const newLeads = await count(inquiries, eq(inquiries.status, 'new'));
+  const indexing = indexingEnabled();
 
   const recent = [
     ...recentPages.map((r) => ({ ...r, kind: 'Halaman', href: `/admin/pages/${r.id}` })),
@@ -57,9 +60,17 @@ export default async function Dashboard() {
         </LinkButton>
       </div>
 
-      {(setupTokenConfigured() || placeholderTestimonials > 0 || pending.length > 0 || pendingSettings.length > 0) && (
+      {(!indexing || newLeads > 0 || setupTokenConfigured() || placeholderTestimonials > 0 || pending.length > 0 || pendingSettings.length > 0) && (
         <Card title="Perlu perhatian">
           <ul className="space-y-2 text-sm">
+            {newLeads > 0 && (
+              <li>
+                📥 <Link className="font-medium underline" href="/admin/inquiries">{newLeads} permintaan baru</Link> menunggu ditindaklanjuti.
+              </li>
+            )}
+            {!indexing && (
+              <li className="text-amber-800">🔒 Mode staging: website <strong>tidak diindeks</strong> Google (noindex). Saat resmi tayang, atur <code>SITE_INDEXING=true</code> di server.</li>
+            )}
             {setupTokenConfigured() && (
               <li className="text-amber-800">⚠️ <strong>ADMIN_SETUP_TOKEN</strong> masih aktif di server. Hapus dari environment hPanel setelah akun dibuat (lihat Panduan, bab Keamanan).</li>
             )}
@@ -75,7 +86,7 @@ export default async function Dashboard() {
             ))}
             {placeholderTestimonials > 0 && (
               <li>
-                💬 {placeholderTestimonials} testimoni masih contoh (bukan pelanggan sungguhan). Ganti atau sembunyikan di{' '}
+                💬 {placeholderTestimonials} testimoni contoh (bukan pelanggan sungguhan) sedang TAMPIL. Ganti atau sembunyikan di{' '}
                 <Link className="font-medium underline" href="/admin/collections">Testimoni</Link>.
               </li>
             )}

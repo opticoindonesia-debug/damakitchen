@@ -2,11 +2,14 @@ import type { MetadataRoute } from 'next';
 import { site } from '@/content/site';
 import { getBuiltInPageMeta, getJournalPosts, getPageSlugs, getProducts, getSubBrands } from '@/lib/cms';
 import { BUILT_IN_PAGES, type BuiltInPageKey } from '@/lib/pages';
+import { indexingEnabled } from '@/lib/indexing';
 
 export const dynamic = 'force-dynamic';
 
 /** Dynamic sitemap: published, indexable content only. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Staging: publish no sitemap (robots.txt disallows everything there too).
+  if (!indexingEnabled()) return [];
   const [journal, pageSlugs, subBrands, products] = await Promise.all([
     getJournalPosts(),
     getPageSlugs(),
@@ -22,6 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter(({ meta }) => !meta?.seo?.noindex)
       .map(({ k, meta }) => ({ path: BUILT_IN_PAGES[k].path, lastModified: meta?.updatedAt, priority: k === 'beranda' ? 1 : 0.8 })),
     { path: '/catatan-dapur', lastModified: journal[0]?.publishedAt },
+    { path: '/faq', priority: 0.7 },
     ...subBrands.filter((sb) => !sb.seo?.noindex).map((sb) => ({ path: `/${sb.slug}`, priority: 0.8 })),
     ...products.filter((p) => !p.seo.noindex).map((p) => ({ path: `/menu/${p.slug}`, lastModified: p.updatedAt, priority: 0.6 })),
     ...journal.map((p) => ({ path: `/catatan-dapur/${p.slug}`, lastModified: p.publishedAt, priority: 0.6 })),

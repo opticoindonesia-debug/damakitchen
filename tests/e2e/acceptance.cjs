@@ -289,6 +289,9 @@ const assert = (c, msg) => {
     assert(r.status() === 302 && r.headers().location.startsWith('https://wa.me/6281181207201'), `wa redirect ${r.status()} ${r.headers().location}`);
     await page.goto(`${BASE}/admin/settings`);
     await page.fill('#s-whatsappNumber', '6281200000000');
+    // Marketplace buttons appear only once a real store URL is configured.
+    assert(!(await pub('/pesan')).html.includes('Lihat di Shopee</a>'), 'Shopee button shown without a store URL');
+    await page.getByLabel('Shopee: tautan toko').fill('https://shopee.co.id/toko-uji-dama');
     await publish();
     r = await anon.get('/go/whatsapp');
     assert(r.headers().location.startsWith('https://wa.me/6281200000000'), 'number change not applied');
@@ -299,19 +302,33 @@ const assert = (c, msg) => {
       window.open = (u) => { window.__opened.push(String(u)); return null; };
     });
     await vp.goto(`${BASE}/katering`);
+    await vp.fill('#inq-nama', 'Bu Uji');
+    await vp.fill('#inq-whatsapp', '081234567890');
     await vp.fill('#inq-jenis', 'Arisan keluarga');
     await vp.fill('#inq-tanggal', '2026-12-20');
     await vp.fill('#inq-pax', '40');
     await vp.fill('#inq-lokasi', 'Jakarta Selatan');
     await vp.locator('form').getByRole('button').last().click();
-    await vp.getByText('Terima kasih').waitFor();
+    await vp.getByText('permintaan Anda sudah tercatat').waitFor();
     const opened = await vp.evaluate(() => window.__opened);
     assert(opened[0] && opened[0].startsWith('https://wa.me/6281200000000?text=') && decodeURIComponent(opened[0]).includes('Arisan keluarga'), `inquiry link ${opened[0]}`);
     const pesan = await vp.goto(`${BASE}/pesan`).then((x) => x.text());
     assert(pesan.includes('wa.me/6281200000000'), 'channel WhatsApp button not updated');
     assert(!pesan.includes('Pesan via GoFood</a>'), 'disabled GoFood channel button rendered');
-    assert(pesan.includes('Lihat di Shopee</a>'), 'Shopee button missing');
+    assert(pesan.includes('Lihat di Shopee</a>') && pesan.includes('shopee.co.id/toko-uji-dama'), 'Shopee button missing after URL set');
+    // Corporate inquiry → stored lead visible in the admin
+    await vp.goto(`${BASE}/corporate`);
+    await vp.fill('#inq-perusahaan', 'PT Uji Sejahtera');
+    await vp.fill('#inq-nama', 'Pak PIC');
+    await vp.fill('#inq-whatsapp', '081298765432');
+    await vp.selectOption('#inq-kebutuhan', { index: 1 });
+    await vp.fill('#inq-jumlah', '120');
+    await vp.locator('form').getByRole('button').last().click();
+    await vp.getByText('permintaan Anda sudah tercatat').waitFor();
     await visitor.close();
+    await page.goto(`${BASE}/admin/inquiries`);
+    assert(await page.getByText('PT Uji Sejahtera — Pak PIC').isVisible(), 'corporate lead not in admin');
+    assert(await page.getByText('Bu Uji').isVisible(), 'catering lead not in admin');
     return opened[0].slice(0, 60);
   });
 

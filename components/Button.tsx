@@ -16,7 +16,7 @@ const base =
 
 const variants: Record<Variant, string> = {
   // Cream on terracotta — approved AA pairing.
-  primary: 'bg-terracotta text-cream hover:bg-terracotta-80',
+  primary: 'bg-terracotta-deep text-cream hover:bg-terracotta-deep/90',
   // Outline teal on cream — approved AA pairing.
   secondary: 'border border-teal/40 bg-transparent text-teal hover:bg-teal/5',
   ghost: 'bg-transparent text-teal hover:bg-teal/5',

@@ -11,6 +11,7 @@ import {
 } from 'next/font/google';
 import './globals.css';
 import { site } from '@/content/site';
+import { indexingEnabled } from '@/lib/indexing';
 
 // Brand fonts (default) — preloaded.
 const playfair = Playfair_Display({
@@ -33,16 +34,24 @@ const lato = Lato({ subsets: ['latin'], display: 'swap', weight: ['400', '700'],
 
 const fontVars = [playfair, poppins, lora, cormorant, dmserif, inter, nunito, lato].map((f) => f.variable).join(' ');
 
-export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
-  title: {
-    default: `${site.name} — ${site.tagline}`,
-    template: `%s · ${site.name}`,
-  },
-  description: site.umbrellaPromise,
-  applicationName: site.name,
-  manifest: '/manifest.webmanifest',
-};
+/**
+ * Site-wide defaults. Read at request time so staging protection and
+ * verification tags follow the server environment without a rebuild.
+ */
+export function generateMetadata(): Metadata {
+  return {
+    metadataBase: new URL(site.url),
+    title: { default: `${site.name} — ${site.tagline}`, template: `%s | ${site.name}` },
+    description: site.umbrellaPromise,
+    applicationName: site.name,
+    manifest: '/manifest.webmanifest',
+    ...(indexingEnabled() ? {} : { robots: { index: false, follow: false } }),
+    verification: {
+      ...(process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : {}),
+      ...(process.env.BING_SITE_VERIFICATION ? { other: { 'msvalidate.01': process.env.BING_SITE_VERIFICATION } } : {}),
+    },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: site.themeColor,

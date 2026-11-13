@@ -86,6 +86,15 @@ function beranda(s: Settings): SeedDoc {
     },
     {
       _key: k(),
+      _type: 'dataSection',
+      source: 'productGrid',
+      limit: 6,
+      eyebrow: 'Dari dapur DAMA',
+      heading: 'Hidangan pilihan',
+      intro: 'Sebagian hidangan yang bisa Anda pesan hari ini. Lihat semuanya di halaman Menu.',
+    },
+    {
+      _key: k(),
       _type: 'quoteSection',
       quote: str(s?.founderQuote, founder.pullQuote),
       attribution: `${str(s?.founderName, founder.name)}, ${str(s?.founderRole, founder.role)}`,
@@ -111,6 +120,14 @@ function beranda(s: Settings): SeedDoc {
       source: 'testimonials',
       eyebrow: 'Kata mereka',
       heading: 'Cerita dari yang sudah mencoba',
+    },
+    {
+      _key: k(),
+      _type: 'dataSection',
+      source: 'journal',
+      limit: 3,
+      eyebrow: 'Catatan Dapur',
+      heading: 'Cerita dan pengetahuan dari dapur kami',
     },
     {
       _key: k(),
@@ -367,7 +384,84 @@ function kontak(): SeedDoc {
   ]);
 }
 
+function corporate(): SeedDoc {
+  const k = keyed('corporate');
+  return page('corporate', [
+    {
+      _key: k(),
+      _type: 'heroSection',
+      eyebrow: 'Untuk perusahaan & instansi',
+      heading: 'Masakan Minang untuk acara kantor dan hadiah relasi',
+      text:
+        'Untuk rapat, acara kantor, dan hadiah bagi klien maupun karyawan, DAMA menyiapkan nasi kotak Minang lewat DAMA KAPAU dan hampers lewat TANDO MATO — dimasak dan dirangkai sepenuh hati.',
+      buttons: [btn(k, 'Minta penawaran', '#penawaran'), btn(k, 'Chat WhatsApp', 'whatsapp', 'secondary')],
+      imagePosition: 'none',
+      headingSize: 'large',
+    },
+    {
+      _key: k(),
+      _type: 'cardsSection',
+      eyebrow: 'Yang bisa kami siapkan',
+      heading: 'Layanan untuk perusahaan',
+      cards: [
+        {
+          _key: k(),
+          title: 'Nasi kotak Minang untuk acara kantor — DAMA KAPAU',
+          text: 'Besek, bento, dan box Minang dalam porsi individu, untuk rapat, acara internal, maupun kegiatan bersama.',
+          linkLabel: 'Kenali DAMA KAPAU',
+          link: '/dama-kapau',
+        },
+        {
+          _key: k(),
+          title: 'Hampers corporate — TANDO MATO',
+          text: 'Hampers masakan Minang yang dirangkai rapi dan dilengkapi kartu. Untuk pesanan dalam jumlah banyak, paket dan pengirimannya kami bantu rancang.',
+          linkLabel: 'Kenali TANDO MATO',
+          link: '/tando-mato',
+        },
+      ],
+      columns: '2',
+      cardStyle: 'plain',
+    },
+    {
+      _key: k(),
+      _type: 'cardsSection',
+      eyebrow: 'Cara memesan',
+      heading: 'Dari kebutuhan ke penawaran',
+      cards: [
+        { _key: k(), title: 'Ceritakan kebutuhan', text: 'Isi formulir di bawah atau chat WhatsApp: jenis kebutuhan, jumlah, tanggal, dan lokasi.' },
+        { _key: k(), title: 'Terima penawaran', text: 'Kami siapkan pilihan dan penawaran sesuai kebutuhan Anda.' },
+        { _key: k(), title: 'Kami siapkan', text: 'Setelah disepakati, pesanan kami masak dan siapkan sesuai jadwal.' },
+      ],
+      columns: '3',
+      cardStyle: 'numbered',
+      background: 'deep',
+    },
+    {
+      _key: k(),
+      _type: 'formSection',
+      variant: 'corporate',
+      anchor: 'penawaran',
+      eyebrow: 'Penawaran corporate',
+      heading: 'Minta penawaran untuk perusahaan Anda',
+      intro: 'Permintaan Anda tercatat di sistem kami, dan Anda bisa langsung melanjutkan lewat WhatsApp.',
+      asideHeading: 'Lebih suka mengobrol langsung?',
+      asideText: 'Tim kami siap membantu merancang pesanan lewat WhatsApp.',
+      asideChannels: ['whatsapp'],
+    },
+    {
+      _key: k(),
+      _type: 'faqSection',
+      eyebrow: 'Tanya jawab',
+      heading: 'Hal yang sering ditanyakan perusahaan',
+      items: [
+        { _key: k(), q: 'Apakah DAMA melayani corporate gifting?', a: 'Ya. Untuk pesanan corporate dalam jumlah banyak, kami bantu rancang paket hampers TANDO MATO dan pengirimannya.' },
+        { _key: k(), q: 'Bagaimana cara meminta penawaran?', a: 'Isi formulir di halaman ini atau chat WhatsApp DAMA. Sertakan kebutuhan, perkiraan jumlah, tanggal, dan lokasi agar penawaran bisa kami siapkan.' },
+      ],
+    },
+  ]);
+}
+
 /** All built-in page seeds. Pass the current siteSettings doc to carry over edits. */
 export function buildPageSeeds(settings?: Settings): SeedDoc[] {
-  return [beranda(settings), cerita(settings), menu(), katering(), hadiah(), pesan(), kontak()];
+  return [beranda(settings), cerita(settings), menu(), katering(), hadiah(), pesan(), kontak(), corporate()];
 }

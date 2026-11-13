@@ -24,7 +24,14 @@ media, auth or deployment service.
 | [docs/DAMA_DATABASE_AND_BACKUP_GUIDE.md](docs/DAMA_DATABASE_AND_BACKUP_GUIDE.md) | Database, migrations, backups & tested restore procedure |
 | [docs/DAMA_CMS_ARCHITECTURE.md](docs/DAMA_CMS_ARCHITECTURE.md) | Architecture, schema, security model, decisions |
 | [docs/DAMA_MIGRATION_REPORT.md](docs/DAMA_MIGRATION_REPORT.md) | Sanity → self-hosted migration report |
-| [docs/DAMA_PRODUCTION_LAUNCH_CHECKLIST.md](docs/DAMA_PRODUCTION_LAUNCH_CHECKLIST.md) | Go-live checklist + acceptance results |
+| [docs/DAMA_LAUNCH_CHECKLIST.md](docs/DAMA_LAUNCH_CHECKLIST.md) | Go-live checklist, readiness status, acceptance results |
+| [docs/DAMA_TECHNICAL_AUDIT.md](docs/DAMA_TECHNICAL_AUDIT.md) | Audit findings (SEO / GEO / conversion pass) |
+| [docs/DAMA_IMPLEMENTATION_REPORT.md](docs/DAMA_IMPLEMENTATION_REPORT.md) | What was implemented, simplified, deferred |
+| [docs/DAMA_SEO_IMPLEMENTATION.md](docs/DAMA_SEO_IMPLEMENTATION.md) | Metadata, canonicals, sitemap, robots, staging protection |
+| [docs/DAMA_GEO_AEO_IMPLEMENTATION.md](docs/DAMA_GEO_AEO_IMPLEMENTATION.md) | Entity graph, structured data, /faq, llms.txt, AI crawler policy |
+| [docs/DAMA_ANALYTICS_SETUP.md](docs/DAMA_ANALYTICS_SETUP.md) | GA4/GTM/Clarity, events, Search Console, Bing |
+| [docs/DAMA_CONTENT_BACKLOG.md](docs/DAMA_CONTENT_BACKLOG.md) | Catatan Dapur topics and content gaps |
+| [docs/DAMA_SANITY_SETUP.md](docs/DAMA_SANITY_SETUP.md) | Why Sanity is not used; content-type mapping |
 | [.env.example](.env.example) | Every environment variable |
 
 ## Tech stack

@@ -47,7 +47,10 @@ export function SiteSettingsEditor({ initial, hasChanges }: { initial: SiteSetti
                 {text('brandLineEn', 'Kalimat brand (Inggris)')}
                 {text('hashtag', 'Tagar')}
               </div>
-              <div className="mt-4">{text('description', 'Deskripsi singkat situs', { area: true, help: 'Tampil di footer dan dipakai sebagai deskripsi bawaan.' })}</div>
+              <div className="mt-4 space-y-4">
+                {text('description', 'Deskripsi singkat situs', { area: true, help: 'Tampil di footer dan dipakai sebagai deskripsi bawaan.' })}
+                {text('organizationDescription', 'Siapa DAMA KITCHEN (paragraf faktual)', { area: true, help: 'Dipakai di halaman Tanya Jawab, data terstruktur (Google), dan llms.txt untuk asisten AI. Tulis fakta, tanpa superlatif.' })}
+              </div>
             </Card>
             <Card title="Logo & ikon">
               <div className="grid gap-6 sm:grid-cols-2">
@@ -94,6 +97,10 @@ export function SiteSettingsEditor({ initial, hasChanges }: { initial: SiteSetti
                 {text('facebook', 'Facebook (URL)')}
                 {text('youtube', 'YouTube (URL)')}
               </div>
+            </Card>
+            <Card title="Mesin pencari & asisten AI">
+              <Toggle checked={s.allowAiTraining} onChange={(allowAiTraining) => set({ ...s, allowAiTraining })} label="Izinkan crawler pelatihan AI (GPTBot, ClaudeBot, Google-Extended, CCBot…)" />
+              <p className="mt-2 text-xs text-stone-500">Crawler mesin pencari dan asisten AI yang mencari jawaban (Googlebot, Bingbot, OAI-SearchBot, PerplexityBot, Claude-SearchBot) selalu diizinkan. Pengaturan ini hanya untuk crawler yang mengumpulkan data pelatihan model AI.</p>
             </Card>
             <Card title="SEO bawaan (Beranda)">
               <div className="space-y-4">

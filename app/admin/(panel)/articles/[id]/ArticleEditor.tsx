@@ -23,10 +23,13 @@ interface Form {
   publishedAt: string;
   tags: string[];
   relatedIds: number[];
+  shortAnswer: string;
+  sources: { title: string; url: string }[];
+  relatedProducts: string[];
   seo: SeoFields;
 }
 
-export function ArticleEditor({ id, initial, status: s0, hasChanges, categories, others, tagSuggestions }: { id: number; initial: Form; status: string; hasChanges: boolean; categories: { id: number; name: string }[]; others: { id: number; title: string }[]; tagSuggestions: string[] }) {
+export function ArticleEditor({ id, initial, status: s0, hasChanges, categories, others, tagSuggestions, products }: { id: number; initial: Form; status: string; hasChanges: boolean; categories: { id: number; name: string }[]; others: { id: number; title: string }[]; tagSuggestions: string[]; products: { slug: string; name: string }[] }) {
   const router = useRouter();
   const [f, setF] = useState<Form>(initial);
   const [status, setStatus] = useState(s0);
@@ -71,12 +74,27 @@ export function ArticleEditor({ id, initial, status: s0, hasChanges, categories,
           <Card>
             <div className="space-y-4">
               <Field label="Judul" htmlFor="a-title"><Input id="a-title" value={f.title} onChange={(e) => set({ title: e.target.value })} /></Field>
+              <Field label="Jawaban singkat (tampil paling atas)" htmlFor="a-answer" help="1–3 kalimat yang langsung menjawab pertanyaan di judul. Membantu pembaca, Google, dan asisten AI.">
+                <Textarea id="a-answer" value={f.shortAnswer} onChange={(e) => set({ shortAnswer: e.target.value })} rows={3} maxLength={600} />
+              </Field>
               <Field label="Ringkasan (tampil di kartu artikel)" htmlFor="a-excerpt"><Textarea id="a-excerpt" value={f.excerpt} onChange={(e) => set({ excerpt: e.target.value })} rows={2} maxLength={600} /></Field>
               <div className="space-y-1.5">
                 <p className="text-sm font-medium text-stone-800">Isi artikel</p>
                 <RichTextEditor value={f.bodyHtml} onChange={(bodyHtml) => set({ bodyHtml })} label="Isi artikel" />
                 <p className="text-xs text-stone-500">Gunakan “Judul bagian” untuk sub-judul. Untuk tautan ke halaman lain di website, tulis alamat seperti /menu atau /lamak-dama.</p>
               </div>
+            </div>
+          </Card>
+          <Card title="Sumber & rujukan" description="Wajib untuk fakta sejarah, budaya, atau kesehatan. Hanya tautan https://.">
+            <div className="space-y-2">
+              {f.sources.map((src, i) => (
+                <div key={i} className="grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+                  <Input value={src.title} onChange={(e) => set({ sources: f.sources.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)) })} placeholder="Judul sumber" aria-label={`Sumber ${i + 1}: judul`} />
+                  <Input value={src.url} onChange={(e) => set({ sources: f.sources.map((x, j) => (j === i ? { ...x, url: e.target.value } : x)) })} placeholder="https://…" aria-label={`Sumber ${i + 1}: tautan`} />
+                  <Button size="sm" variant="ghost" onClick={() => set({ sources: f.sources.filter((_, j) => j !== i) })} aria-label="Hapus sumber">✕</Button>
+                </div>
+              ))}
+              <Button size="sm" onClick={() => set({ sources: [...f.sources, { title: '', url: '' }] })}>+ Tambah sumber</Button>
             </div>
           </Card>
           <Card title="SEO">
@@ -109,6 +127,16 @@ export function ArticleEditor({ id, initial, status: s0, hasChanges, categories,
                 <label key={o.id} className="flex items-center gap-2 text-sm">
                   <input type="checkbox" checked={f.relatedIds.includes(o.id)} onChange={(e) => set({ relatedIds: e.target.checked ? [...f.relatedIds, o.id] : f.relatedIds.filter((x) => x !== o.id) })} />
                   {o.title}
+                </label>
+              ))}
+            </div>
+          </Card>
+          <Card title="Produk terkait" description="Artikel ini tampil di halaman produk yang dipilih, dan produknya tampil di bawah artikel.">
+            <div className="max-h-56 space-y-1.5 overflow-y-auto">
+              {products.map((p) => (
+                <label key={p.slug} className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={f.relatedProducts.includes(p.slug)} onChange={(e) => set({ relatedProducts: e.target.checked ? [...f.relatedProducts, p.slug] : f.relatedProducts.filter((x) => x !== p.slug) })} />
+                  {p.name}
                 </label>
               ))}
             </div>

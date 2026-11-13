@@ -205,9 +205,9 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="rounded-lg bg-terracotta p-9 text-cream">
+          <div className="rounded-lg bg-terracotta-deep p-9 text-cream">
             <h3 className="font-display text-display-md text-cream">Ingin memberi?</h3>
-            <p className="mt-3 max-w-sm text-cream/85">
+            <p className="mt-3 max-w-sm text-cream">
               Kirim rasa sayang lewat hampers yang dirangkai dengan hati.
             </p>
             <div className="mt-7">

@@ -1,134 +1,105 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from './Button';
 import { cn } from '@/lib/utils';
-import { waCatering, waGifting } from '@/lib/whatsapp';
+import { buildWaLink } from '@/lib/whatsapp';
+import { INQUIRY_FIELDS, inquiryMessage, validateInquiry, type InquiryType } from '@/lib/inquiry';
+import { getSource, track } from '@/lib/analytics';
 import { useSiteConfig } from './SiteConfig';
 
 /**
- * InquiryForm (§7.5, §7.6): client-validated, builds a prefilled WhatsApp
- * quotation link. It posts to /api/inquiry (for the optional email adapter)
- * but always builds the WA link client-side so the redirect is reliable.
- * Labels are human; the confirmation is warm, never saccharine (§5.4).
+ * Inquiry form (catering, gifting, corporate). On submit it:
+ *  1. validates on the client (same rules as the server),
+ *  2. opens WhatsApp with a prefilled summary (primary channel),
+ *  3. stores the inquiry in the CMS (Admin → Permintaan masuk) so no lead is lost.
+ * The confirmation copy only claims what actually happened.
  */
-
-type Variant = 'catering' | 'gifting';
-
-interface Field {
-  name: string;
-  label: string;
-  type?: 'text' | 'date' | 'number' | 'textarea';
-  required?: boolean;
-  placeholder?: string;
-  help?: string;
-}
-
-const cateringFields: Field[] = [
-  { name: 'jenis', label: 'Jenis acara', required: true, placeholder: 'mis. arisan keluarga' },
-  { name: 'tanggal', label: 'Tanggal acara', type: 'date', required: true },
-  { name: 'pax', label: 'Perkiraan jumlah tamu (pax)', type: 'number', required: true, placeholder: '50' },
-  { name: 'kemasan', label: 'Kemasan yang diinginkan', placeholder: 'prasmanan / besek / bento / box' },
-  { name: 'lokasi', label: 'Lokasi acara', required: true, placeholder: 'kota / area' },
-  { name: 'budget', label: 'Kisaran budget', placeholder: 'opsional, membantu kami menyiapkan opsi' },
-  { name: 'catatan', label: 'Catatan tambahan', type: 'textarea', placeholder: 'preferensi menu, alergi, dll.' },
-];
-
-const giftingFields: Field[] = [
-  { name: 'paket', label: 'Paket yang diminati', required: true, placeholder: 'Si Ketek / Si Sedang / Si Gadang / custom' },
-  { name: 'jumlah', label: 'Jumlah paket', type: 'number', required: true, placeholder: '10' },
-  { name: 'tanggal', label: 'Tanggal pengiriman', type: 'date' },
-  { name: 'pesan', label: 'Pesan untuk kartu', type: 'textarea', placeholder: 'pesan tulisan tangan yang ingin disertakan' },
-  { name: 'catatan', label: 'Catatan tambahan', type: 'textarea', placeholder: 'alamat tujuan, preferensi, corporate, dll.' },
-];
-
-export function InquiryForm({ variant }: { variant: Variant }) {
-  const fields = variant === 'catering' ? cateringFields : giftingFields;
+export function InquiryForm({ variant }: { variant: InquiryType }) {
+  const fields = INQUIRY_FIELDS[variant] ?? INQUIRY_FIELDS.catering;
   const [values, setValues] = useState<Record<string, string>>({});
-  const [errors, setErrors] = useState<Record<string, boolean>>({});
-  const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [state, setState] = useState<'idle' | 'sending' | 'saved' | 'unsaved'>('idle');
+  const [waLink, setWaLink] = useState('');
+  const started = useRef(false);
+  const hp = useRef<HTMLInputElement>(null);
   const { whatsappNumber } = useSiteConfig();
 
   function update(name: string, value: string) {
-    setValues((v) => ({ ...v, [name]: value }));
-    if (errors[name]) setErrors((e) => ({ ...e, [name]: false }));
-  }
-
-  function buildLink(): string {
-    if (variant === 'catering') {
-      return waCatering({
-        jenis: values.jenis ?? '',
-        tanggal: values.tanggal ?? '',
-        pax: values.pax ?? '',
-        kemasan: values.kemasan ?? '',
-        lokasi: values.lokasi ?? '',
-        budget: values.budget ?? '',
-        catatan: values.catatan ?? '',
-      }, whatsappNumber);
+    if (!started.current) {
+      started.current = true;
+      track('form_start', { form_name: variant });
     }
-    return waGifting({
-      paket: values.paket ?? '',
-      jumlah: values.jumlah ?? '',
-      tanggal: values.tanggal ?? '',
-      pesan: values.pesan ?? '',
-      catatan: values.catatan ?? '',
-    }, whatsappNumber);
+    setValues((v) => ({ ...v, [name]: value }));
+    if (errors[name]) setErrors((e) => ({ ...e, [name]: '' }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const nextErrors: Record<string, boolean> = {};
-    fields.forEach((f) => {
-      if (f.required && !values[f.name]?.trim()) nextErrors[f.name] = true;
-    });
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors);
+    const { values: clean, errors: errs } = validateInquiry(variant, values);
+    if (Object.values(errs).some(Boolean)) {
+      setErrors(errs);
+      document.getElementById(`inq-${Object.keys(errs).find((k) => errs[k])}`)?.focus();
       return;
     }
-
-    const waLink = buildLink();
-
-    // Fire-and-forget to the email adapter; never block the redirect on it.
-    void fetch('/api/inquiry', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: variant, ...values }),
-    }).catch(() => {});
-
-    setSubmitted(true);
-    window.open(waLink, '_blank', 'noopener,noreferrer');
+    const link = buildWaLink(inquiryMessage(variant, clean), whatsappNumber);
+    setWaLink(link);
+    // Open WhatsApp right away (inside the click) so pop-up blockers allow it.
+    window.open(link, '_blank', 'noopener,noreferrer');
+    setState('sending');
+    try {
+      const res = await fetch('/api/inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: variant, values: clean, website: hp.current?.value ?? '', page: window.location.pathname, source: getSource() }),
+      });
+      if (res.ok) {
+        track('generate_lead', { form_name: variant });
+        setState('saved');
+      } else setState('unsaved');
+    } catch {
+      setState('unsaved');
+    }
   }
 
-  if (submitted) {
+  if (state === 'saved' || state === 'unsaved') {
     return (
-      <div
-        role="status"
-        className="rounded-lg border border-teal/15 bg-cream-paper p-8 text-center shadow-soft"
-      >
+      <div role="status" className="rounded-lg border border-teal/15 bg-cream-paper p-8 text-center shadow-soft">
         <p className="font-display text-heading text-teal">
-          Terima kasih — pesanmu sudah kami terima.
+          {state === 'saved' ? 'Terima kasih — permintaan Anda sudah tercatat.' : 'Satu langkah lagi: kirim lewat WhatsApp.'}
         </p>
         <p className="mt-3 text-body text-ink-soft">
-          Kami membuka WhatsApp dengan ringkasan permintaanmu. Jika tidak terbuka otomatis,{' '}
-          <button
-            type="button"
-            onClick={() => window.open(buildLink(), '_blank', 'noopener,noreferrer')}
-            className="text-teal underline underline-offset-4"
-          >
-            buka di sini
-          </button>
-          . Kami balas secepatnya.
+          {state === 'saved'
+            ? 'Kami juga membuka WhatsApp berisi ringkasan permintaan Anda — kirim pesannya agar kami bisa membalas lebih cepat. '
+            : 'Permintaan belum tersimpan di sistem kami, jadi mohon kirim ringkasannya lewat WhatsApp. '}
+          <a href={waLink} target="_blank" rel="noopener noreferrer" className="text-teal underline underline-offset-4">
+            Buka WhatsApp
+          </a>
         </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-6">
+    <form onSubmit={handleSubmit} noValidate className="space-y-6" aria-label="Formulir permintaan">
+      {/* Honeypot: hidden from people, filled by spam bots. */}
+      <div aria-hidden="true" className="absolute left-[-9999px] h-0 w-0 overflow-hidden">
+        <label>
+          Website <input ref={hp} type="text" name="website" tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
       {fields.map((f) => {
         const id = `inq-${f.name}`;
-        const hasError = errors[f.name];
+        const err = errors[f.name];
         const errId = `${id}-err`;
+        const common = {
+          id,
+          value: values[f.name] ?? '',
+          'aria-required': f.required,
+          'aria-invalid': err ? true : undefined,
+          'aria-describedby': err ? errId : undefined,
+          className: cn(inputClass, err && errorClass),
+        };
         return (
           <div key={f.name}>
             <label htmlFor={id} className="block text-caption font-medium text-teal">
@@ -136,33 +107,30 @@ export function InquiryForm({ variant }: { variant: Variant }) {
               {f.required && <span className="text-terracotta-deep"> *</span>}
             </label>
             {f.type === 'textarea' ? (
-              <textarea
-                id={id}
-                rows={3}
-                value={values[f.name] ?? ''}
-                onChange={(e) => update(f.name, e.target.value)}
-                placeholder={f.placeholder}
-                aria-required={f.required}
-                aria-invalid={hasError || undefined}
-                aria-describedby={hasError ? errId : undefined}
-                className={cn(inputClass, hasError && errorClass)}
-              />
+              <textarea {...common} rows={3} maxLength={f.max} placeholder={f.placeholder} onChange={(e) => update(f.name, e.target.value)} />
+            ) : f.type === 'select' ? (
+              <select {...common} onChange={(e) => update(f.name, e.target.value)}>
+                <option value="">— pilih —</option>
+                {f.options?.map((o) => (
+                  <option key={o} value={o}>
+                    {o}
+                  </option>
+                ))}
+              </select>
             ) : (
               <input
-                id={id}
+                {...common}
                 type={f.type ?? 'text'}
-                value={values[f.name] ?? ''}
-                onChange={(e) => update(f.name, e.target.value)}
+                inputMode={f.type === 'number' ? 'numeric' : undefined}
+                maxLength={f.type === 'number' ? undefined : f.max}
+                autoComplete={f.autoComplete}
                 placeholder={f.placeholder}
-                aria-required={f.required}
-                aria-invalid={hasError || undefined}
-                aria-describedby={hasError ? errId : undefined}
-                className={cn(inputClass, hasError && errorClass)}
+                onChange={(e) => update(f.name, e.target.value)}
               />
             )}
-            {hasError && (
+            {err && (
               <p id={errId} className="mt-1.5 text-caption text-songketRed">
-                Bagian ini perlu diisi ya.
+                {err === 'Wajib diisi' ? 'Bagian ini perlu diisi ya.' : err}
               </p>
             )}
           </div>
@@ -170,11 +138,11 @@ export function InquiryForm({ variant }: { variant: Variant }) {
       })}
 
       <p className="text-caption text-ink-soft">
-        Setelah dikirim, kami membuka WhatsApp dengan ringkasan permintaanmu untuk dilanjutkan.
+        Setelah dikirim, kami mencatat permintaan Anda dan membuka WhatsApp berisi ringkasannya. Data hanya dipakai untuk menindaklanjuti permintaan ini.
       </p>
 
-      <Button type="submit" size="lg">
-        {variant === 'catering' ? 'Minta penawaran' : 'Kirim permintaan'}
+      <Button type="submit" size="lg" disabled={state === 'sending'}>
+        {variant === 'gifting' ? 'Kirim permintaan' : 'Minta penawaran'}
       </Button>
     </form>
   );
@@ -182,5 +150,4 @@ export function InquiryForm({ variant }: { variant: Variant }) {
 
 const inputClass =
   'mt-2 block min-h-[44px] w-full rounded border border-teal/25 bg-cream-paper px-4 py-2.5 text-body text-ink placeholder:text-ink/40 focus-visible:border-teal focus-visible:ring-2 focus-visible:ring-teal focus-visible:ring-offset-1 focus-visible:ring-offset-cream';
-
-const errorClass = 'border-songketRed focus-visible:ring-songketRed';
+const errorClass = 'border-songketRed/60';

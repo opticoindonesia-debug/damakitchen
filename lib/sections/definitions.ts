@@ -458,6 +458,7 @@ export const SECTION_DEFS: SectionDef[] = [
         options: [
           { value: 'catering', label: 'Penawaran katering / acara' },
           { value: 'gifting', label: 'Hadiah / hampers' },
+          { value: 'corporate', label: 'Corporate (perusahaan)' },
         ],
         default: 'catering',
         required: true,

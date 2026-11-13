@@ -13,6 +13,7 @@ export const BUILT_IN_PAGES = {
   hadiah: { path: '/hadiah', title: 'Hadiah' },
   pesan: { path: '/pesan', title: 'Di mana memesan' },
   kontak: { path: '/kontak', title: 'Kontak' },
+  corporate: { path: '/corporate', title: 'Corporate' },
 } as const;
 
 export type BuiltInPageKey = keyof typeof BUILT_IN_PAGES;
@@ -45,4 +46,6 @@ export const RESERVED_SLUGS = [
   'go',
   'sitemap.xml',
   'robots.txt',
+  'faq',
+  'llms.txt',
 ];

@@ -59,7 +59,7 @@ export function ProductCard({ product, subBrand }: { product: CardProduct; subBr
 
         <h3 className="mt-2 font-display text-heading text-teal">
           {detailHref ? (
-            <Link href={detailHref} className="hover:underline hover:underline-offset-4">
+            <Link href={detailHref} className="hover:underline hover:underline-offset-4" data-track-select="1" data-track-item={product.name} data-track-list={sb?.name}>
               {product.name}
             </Link>
           ) : (

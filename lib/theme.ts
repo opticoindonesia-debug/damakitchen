@@ -40,7 +40,7 @@ const ORIGINAL_SHADES: Record<string, string> = {
   'terracotta-60': '#D4866F',
   'terracotta-80': '#CB6B50',
   'terracotta-100': '#C65B3E',
-  'terracotta-deep': '#A8472C',
+  'terracotta-deep': '#9A4730',
   'gold-20': '#EFE2C2',
   'gold-40': '#E0CA93',
   'gold-60': '#D2B264',
@@ -91,7 +91,7 @@ function deriveFamily(base: ThemeBase, c: RGB): Record<string, RGB> {
         'terracotta-60': mix(c, WHITE, 0.3),
         'terracotta-80': mix(c, WHITE, 0.1),
         'terracotta-100': c,
-        'terracotta-deep': mix(c, BLACK, 0.16),
+        'terracotta-deep': mix(c, BLACK, 0.22),
       };
     case 'highlight':
       return {

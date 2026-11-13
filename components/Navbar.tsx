@@ -141,7 +141,7 @@ export function Navbar({
       )}
     >
       <nav aria-label="Navigasi utama" className="container-dama flex items-center justify-between gap-6 py-4">
-        <Link href="/" aria-label="DAMA KITCHEN — beranda" className="rounded">
+        <Link href="/" className="rounded">
           {scrolled && sticky ? (
             <Logo variant="monogram" color={dark ? 'cream' : 'teal'} monogramUrl={monogram} imageUrl={logo} />
           ) : (
@@ -163,7 +163,7 @@ export function Navbar({
           {cta && (
             <NavLink
               href={cta.href}
-              className="min-h-[44px] rounded-btn bg-terracotta px-5 py-2.5 text-body font-medium text-cream transition-colors duration-300 hover:bg-terracotta-80"
+              className="min-h-[44px] rounded-btn bg-terracotta-deep px-5 py-2.5 text-body font-medium text-cream transition-colors duration-300 hover:bg-terracotta-deep/90"
             >
               {cta.label}
             </NavLink>
@@ -217,7 +217,7 @@ export function Navbar({
               <li className="px-2 pt-2">
                 <NavLink
                   href={cta.href}
-                  className="block min-h-[44px] rounded-btn bg-terracotta px-5 py-3 text-center text-body font-medium text-cream"
+                  className="block min-h-[44px] rounded-btn bg-terracotta-deep px-5 py-3 text-center text-body font-medium text-cream"
                 >
                   {cta.label}
                 </NavLink>

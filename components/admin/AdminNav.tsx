@@ -10,6 +10,7 @@ import {
   FileText,
   Home,
   ImageIcon,
+  Inbox,
   LayoutList,
   Menu,
   MessagesSquare,
@@ -25,7 +26,7 @@ import { logoutAction } from '@/app/admin/actions/auth';
 import { cn } from '@/lib/utils';
 
 const GROUPS: { title: string; items: { href: string; label: string; icon: LucideIcon }[] }[] = [
-  { title: '', items: [{ href: '/admin', label: 'Dasbor', icon: Home }] },
+  { title: '', items: [{ href: '/admin', label: 'Dasbor', icon: Home }, { href: '/admin/inquiries', label: 'Permintaan masuk', icon: Inbox }] },
   {
     title: 'Konten',
     items: [

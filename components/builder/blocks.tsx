@@ -303,22 +303,22 @@ const PANEL: Record<string, { box: string; heading: string; text: string; button
     button: 'border border-cream/40 bg-transparent text-cream hover:bg-cream/10',
   },
   accent: {
-    box: 'bg-terracotta text-cream',
+    box: 'bg-terracotta-deep text-cream',
     heading: 'text-cream',
-    text: 'text-cream/85',
+    text: 'text-cream',
     button: 'border border-cream/50 bg-cream text-terracotta-deep hover:bg-cream-paper',
   },
   soft: {
     box: 'bg-blush/50',
     heading: 'text-teal',
     text: 'text-ink-soft',
-    button: 'bg-terracotta text-cream hover:bg-terracotta-80',
+    button: 'bg-terracotta-deep text-cream hover:bg-terracotta-deep/90',
   },
   paper: {
     box: 'border border-teal/10 bg-cream-paper',
     heading: 'text-teal',
     text: 'text-ink-soft',
-    button: 'bg-terracotta text-cream hover:bg-terracotta-80',
+    button: 'bg-terracotta-deep text-cream hover:bg-terracotta-deep/90',
   },
 };
 
@@ -425,7 +425,7 @@ export function GalleryBlock({ s, headingAs }: { s: Base & Record<string, unknow
 export function FormBlock({ s, headingAs }: { s: Base & Record<string, unknown>; headingAs: HeadingTag }) {
   const bg = bgOf(s.background);
   const t = toneOf(bg);
-  const variant = s.variant === 'gifting' ? 'gifting' : 'catering';
+  const variant = s.variant === 'gifting' || s.variant === 'corporate' ? s.variant : 'catering';
   const asideChannels = ((s.asideChannels as string[]) ?? []) as ChannelId[];
   const hasAside = Boolean(s.asideHeading || s.asideText || asideChannels.length);
   return (

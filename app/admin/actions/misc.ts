@@ -2,7 +2,7 @@
 
 import { and, eq, ne, sql } from 'drizzle-orm';
 import { db } from '@/lib/db';
-import { adminUsers, brandItems, faqs, redirects, testimonials } from '@/lib/db/schema';
+import { adminUsers, brandItems, faqs, inquiries, redirects, testimonials } from '@/lib/db/schema';
 import { adminAction, UserError } from '@/lib/admin/action';
 import { hashPassword, passwordProblem, verifyPassword } from '@/lib/auth/password';
 import { destroyUserSessions } from '@/lib/auth/session';
@@ -147,4 +147,22 @@ export async function resetUserPassword(id: number, password: string) {
     await destroyUserSessions(id);
     return { ok: true as const, message: 'Kata sandi pengguna diatur ulang.' };
   }, { role: 'owner', revalidate: false });
+}
+
+// ── Inquiries (leads) ─────────────────────────────────────────
+const LEAD_STATUS = ['new', 'contacted', 'quoted', 'won', 'lost', 'spam'] as const;
+
+export async function updateInquiry(id: number, input: { status: string; note: string }) {
+  return adminAction(async () => {
+    const status = (LEAD_STATUS as readonly string[]).includes(input.status) ? (input.status as (typeof LEAD_STATUS)[number]) : 'new';
+    await db.update(inquiries).set({ status, note: cleanText(input.note, 2000).trim() || null }).where(eq(inquiries.id, id));
+    return { ok: true as const, message: 'Disimpan.' };
+  }, { revalidate: false });
+}
+
+export async function deleteInquiry(id: number) {
+  return adminAction(async () => {
+    await db.delete(inquiries).where(eq(inquiries.id, id));
+    return { ok: true as const, message: 'Permintaan dihapus.' };
+  }, { revalidate: false });
 }

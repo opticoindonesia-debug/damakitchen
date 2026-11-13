@@ -7,7 +7,7 @@ import type { SeoFields } from '@/lib/db/schema';
  * robots and OpenGraph/Twitter from the page's SEO fields (Admin → SEO tab),
  * falling back to sensible defaults.
  *
- * The title is emitted as `absolute` so the root layout's "%s · DAMA KITCHEN"
+ * The title is emitted as `absolute` so the root layout's "%s | DAMA KITCHEN"
  * template is not applied a second time.
  */
 
@@ -52,7 +52,7 @@ export function buildMetadata({
   const fullTitle =
     seo?.title?.trim() ||
     absoluteTitle?.trim() ||
-    (path === '/' ? `${siteName} — ${site.tagline}` : `${title} · ${siteName}`);
+    (path === '/' ? `${siteName} — ${site.tagline}` : `${title} | ${siteName}`);
   const desc = seo?.description?.trim() || description;
   const url = canonicalFor(path, seo?.canonical);
   const ogImage = seo?.ogImage?.url || image;

@@ -26,7 +26,7 @@ export function ProductOrderButtons({
           href={l.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-[44px] items-center justify-center rounded-btn bg-terracotta px-5 py-2.5 font-medium text-cream hover:bg-terracotta-80"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-btn bg-terracotta-deep px-5 py-2.5 font-medium text-cream hover:bg-terracotta-deep/90"
         >
           {l.label}
         </a>

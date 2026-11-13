@@ -39,6 +39,22 @@ Security checks also passed:
 - security headers present;
 - login lockout after repeated failures.
 
+## A2. SEO / GEO / conversion readiness
+
+| Area | Status | Notes |
+| --- | --- | --- |
+| Website (pages, responsive, navigation) | **READY** | QA crawl: 0 issues across 36 sitemap URLs; mobile and desktop checked |
+| Brand accuracy | **READY WITH CONFIGURATION** | Unverified placeholders removed or hidden; owner must confirm katering capacity/prasmanan copy and service area |
+| Technical SEO | **READY WITH CONFIGURATION** | Needs `NEXT_PUBLIC_SITE_URL` (at build) + `SITE_INDEXING=true` on production |
+| Structured data / entities | **READY** | Valid JSON-LD on all pages; richer with logo/photos once uploaded |
+| GEO / AEO (`/faq`, `llms.txt`, crawler policy) | **READY** | AI visibility itself is post-launch validation |
+| Conversion (WhatsApp, inquiries, corporate) | **READY** | Leads stored + WhatsApp; marketplace buttons appear once real store URLs are set |
+| Marketplace links | **BLOCKED on owner input** | No verified Shopee/TikTok store URLs yet. Buttons stay hidden (not broken). |
+| Analytics | **READY WITH CONFIGURATION** | Needs GTM/GA4 IDs + GSC/Bing verification |
+| Performance | **READY** | Lighthouse mobile 93–97, CLS 0; field Core Web Vitals post-launch |
+| Content (photos, prices, articles, testimonials) | **READY WITH CONFIGURATION** | Site works without them; quality improves as they are added |
+| Location pages / author profiles | **DEFERRED** | Need verified data |
+
 ## B. Before launch (on Hostinger staging)
 
 - [ ] B1. Node.js app created from the GitHub branch; Node 20/22; build log OK.
@@ -59,15 +75,20 @@ Security checks also passed:
 - [ ] B11. Palette reviewed by the owner (brief palette vs previous shades).
 - [ ] B12. Mobile check on a real phone: menu, WhatsApp buttons, inquiry form, product page.
 - [ ] B13. Lighthouse (mobile) on Beranda and a product page: Performance ≥ 85, SEO ≥ 95, Accessibility ≥ 95.
+- [ ] B14. Staging stays **unindexed**: `SITE_INDEXING` **not** set. Check `/robots.txt` shows `Disallow: /` and responses carry `X-Robots-Tag: noindex`.
+- [ ] B15. Submit a test catering form and a test corporate form. Both appear in Admin → Permintaan masuk and WhatsApp opens with the summary. Then delete the test inquiries.
+- [ ] B16. Pengaturan situs: verified email/socials entered (or left empty); Shopee/TikTok store URLs entered if available; organization description reviewed; AI-training crawler choice made.
+- [ ] B17. Review copy flagged in `DAMA_TECHNICAL_AUDIT.md` §4: katering "prasmanan" and "10–200 pax", service area.
 
 ## C. Launch (cut-over)
 
 - [ ] C1. Download a fresh backup from staging and store it off-site.
 - [ ] C2. Point `damakitchen.id` to Hostinger; SSL installed; **Force HTTPS** on.
 - [ ] C3. `NEXT_PUBLIC_SITE_URL=https://damakitchen.id`, then **redeploy**.
-- [ ] C4. Check `https://damakitchen.id/sitemap.xml`, `/robots.txt` and a canonical tag all use the production domain.
+- [ ] C4. Set **`SITE_INDEXING=true`** on production and restart. Check `https://damakitchen.id/sitemap.xml`, `/robots.txt` (Allow + Sitemap line), `/llms.txt` and a canonical tag all use the production domain, and that pages have **no** `X-Robots-Tag: noindex`.
+- [ ] C4b. Set `GTM_ID` (or `GA4_ID`), `GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION` (see `DAMA_ANALYTICS_SETUP.md`). Check GA4 Realtime shows page_view and click_whatsapp.
 - [ ] C5. Disconnect the Vercel project and remove the domain there; then merge to `main` / production branch (deployment guide §10).
-- [ ] C6. Google Search Console: verify the domain and submit the sitemap.
+- [ ] C6. Google Search Console + Bing Webmaster Tools: verify the domain and submit the sitemap. Validate a product and an article URL with Google's Rich Results Test.
 - [ ] C7. Remove old Sanity env vars everywhere; keep the Sanity export file as an archive.
 
 ## D. After launch
@@ -76,3 +97,9 @@ Security checks also passed:
 - [ ] D2. Weekly: owner downloads a backup (Admin → Cadangan) and stores it off-site.
 - [ ] D3. Monthly: confirm the scheduled backups exist; test-restore one into a scratch DB (database guide §4C).
 - [ ] D4. Before every code update: backup, deploy to staging, check, then production.
+- [ ] D5. Weekly: work through new inquiries (Admin → Permintaan masuk) and update their status (contacted / quoted / won / lost).
+- [ ] D6. Monthly: AI-visibility check (`DAMA_GEO_AEO_IMPLEMENTATION.md` §7), Search Console coverage, publish 2–4 articles from `DAMA_CONTENT_BACKLOG.md`.
+
+## E. Post-launch validation (cannot be verified before launch)
+
+Google and Bing indexing; rich-result eligibility; AI assistant mentions and accuracy; Google Business Profile (owner to create; no address or hours invented); live analytics data; marketplace conversions; field Core Web Vitals (CrUX).

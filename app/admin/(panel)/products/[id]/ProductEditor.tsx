@@ -28,6 +28,10 @@ export interface ProductForm {
   info: string[];
   imageCategory: string;
   orderLinks: { label: string; url: string }[];
+  ingredients: string;
+  serving: string;
+  storage: string;
+  preparation: string;
   seo: SeoFields;
 }
 
@@ -105,6 +109,23 @@ export function ProductEditor({ id, initial, subBrands, categories }: { id: numb
               </Field>
               <Field label="Deskripsi lengkap (halaman produk)" htmlFor="p-desc" help="Pisahkan paragraf dengan baris kosong.">
                 <Textarea id="p-desc" value={f.description} onChange={(e) => set({ description: e.target.value })} rows={6} />
+              </Field>
+            </div>
+          </Card>
+
+          <Card title="Detail produk" description="Isi HANYA dengan informasi yang sudah pasti (sesuai SOP/label). Kosongkan bila belum dikonfirmasi — bagian kosong tidak ditampilkan.">
+            <div className="space-y-4">
+              <Field label="Porsi / berat" htmlFor="p-serving" help='mis. "500 gr, ±4 porsi"'>
+                <Input id="p-serving" value={f.serving} onChange={(e) => set({ serving: e.target.value })} maxLength={160} />
+              </Field>
+              <Field label="Bahan" htmlFor="p-ingr">
+                <Textarea id="p-ingr" value={f.ingredients} onChange={(e) => set({ ingredients: e.target.value })} rows={3} />
+              </Field>
+              <Field label="Cara penyimpanan" htmlFor="p-storage">
+                <Textarea id="p-storage" value={f.storage} onChange={(e) => set({ storage: e.target.value })} rows={3} />
+              </Field>
+              <Field label="Cara penyajian / memanaskan" htmlFor="p-prep">
+                <Textarea id="p-prep" value={f.preparation} onChange={(e) => set({ preparation: e.target.value })} rows={3} />
               </Field>
             </div>
           </Card>

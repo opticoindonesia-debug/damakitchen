@@ -4,7 +4,7 @@
  * navigation (header + footer). Shared by the admin (client) and the server.
  */
 import { site as siteContent, seasonal as seasonalContent } from '@/content/site';
-import { contact, WHATSAPP_NUMBER, channels as channelContent } from '@/content/channels';
+import { WHATSAPP_NUMBER, channels as channelContent } from '@/content/channels';
 import { founder } from '@/content/story';
 import { THEME_DEFAULTS, parseHex, type ThemeBase } from '@/lib/theme';
 import {
@@ -32,6 +32,10 @@ export interface SiteSettingsData {
   hashtag: string;
   brandLineEn: string;
   description: string;
+  /** Factual "who is DAMA" paragraph used for structured data, llms.txt and the about block. */
+  organizationDescription: string;
+  /** Allow AI model-training crawlers (GPTBot, ClaudeBot, Google-Extended, CCBot…). Search/answer crawlers are always allowed. */
+  allowAiTraining: boolean;
   logo?: ImageValue;
   logoLight?: ImageValue;
   monogram?: ImageValue;
@@ -70,27 +74,35 @@ export const DEFAULT_SITE: SiteSettingsData = {
   hashtag: siteContent.hashtag,
   brandLineEn: siteContent.brandLineEn,
   description: siteContent.umbrellaPromise,
-  email: contact.email,
+  organizationDescription:
+    'DAMA KITCHEN adalah dapur masakan Minang yang menghadirkan hidangan autentik dengan sepenuh hati, untuk membantu orang menikmati, berbagi, dan merawat hubungan melalui masakan.',
+  allowAiTraining: true,
+  // Unverified placeholders from the first build are NOT used as defaults:
+  // email, social profiles and marketplace store URLs stay empty (and their
+  // buttons hidden) until the owner fills in the real ones.
+  email: '',
   phone: '',
   whatsappNumber: WHATSAPP_NUMBER,
   whatsappMessage: 'Halo DAMA 🙂 saya ingin bertanya. Boleh dibantu?',
-  instagram: contact.instagram.href,
-  tiktok: contact.tiktok.href,
-  threads: contact.threads.href,
+  instagram: '',
+  tiktok: '',
+  threads: '',
   facebook: '',
   youtube: '',
   channels: {
-    shopee: { label: channelContent.shopee.label, url: channelContent.shopee.href, enabled: channelContent.shopee.enabled !== false },
-    tiktok: { label: channelContent.tiktok.label, url: channelContent.tiktok.href, enabled: channelContent.tiktok.enabled !== false },
+    shopee: { label: channelContent.shopee.label, url: '', enabled: true },
+    tiktok: { label: channelContent.tiktok.label, url: '', enabled: true },
     whatsapp: { label: channelContent.whatsapp.label, url: '', enabled: true },
-    gofood: { label: channelContent.gofood.label, url: channelContent.gofood.href, enabled: channelContent.gofood.enabled !== false },
-    grab: { label: channelContent.grab.label, url: channelContent.grab.href, enabled: channelContent.grab.enabled !== false },
+    gofood: { label: channelContent.gofood.label, url: '', enabled: false },
+    grab: { label: channelContent.grab.label, url: '', enabled: false },
   },
   address: '',
-  serviceArea: contact.coverage,
+  // Only the confirmed primary market; delivery beyond it must be confirmed first.
+  serviceArea: 'Melayani area Jabodetabek.',
   operatingHours: '',
   seoTitle: `${siteContent.name} — ${siteContent.tagline}`,
-  seoDescription: siteContent.umbrellaPromise,
+  seoDescription:
+    'Dapur masakan Minang di Jabodetabek: hidangan rumahan siap saji, hidangan warisan, nasi kotak Kapau untuk acara, dan hampers — dimasak sepenuh hati.',
   seasonal: { active: seasonalContent.active, label: seasonalContent.label, message: seasonalContent.message },
   subBrandLabels: DEFAULT_SUBBRAND_LABELS,
   heroHeadline: `${siteContent.tagline}.`,
@@ -141,6 +153,8 @@ export function cleanSiteSettings(input: unknown): { data: SiteSettingsData; pro
     hashtag: opt(d.hashtag, 80),
     brandLineEn: opt(d.brandLineEn, 200),
     description: txt(d.description, DEFAULT_SITE.description, 400),
+    organizationDescription: txt(d.organizationDescription, DEFAULT_SITE.organizationDescription, 1200),
+    allowAiTraining: d.allowAiTraining !== false,
     logo: cleanImage(d.logo),
     logoLight: cleanImage(d.logoLight),
     monogram: cleanImage(d.monogram),

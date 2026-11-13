@@ -192,6 +192,10 @@ export interface PublicProduct extends Product {
   imageAlt?: string;
   category?: { slug: string; name: string };
   orderLinks: { label: string; url: string }[];
+  ingredients?: string;
+  serving?: string;
+  storage?: string;
+  preparation?: string;
   seo: SeoFields;
   updatedAt?: string;
 }
@@ -223,6 +227,10 @@ const loadProducts = cached('products', async (): Promise<PublicProduct[]> => {
       gallery: p.gallery ?? [],
       category: catSlug && catName ? { slug: catSlug, name: catName } : undefined,
       orderLinks: p.orderLinks ?? [],
+      ingredients: p.ingredients ?? undefined,
+      serving: p.serving ?? undefined,
+      storage: p.storage ?? undefined,
+      preparation: p.preparation ?? undefined,
       seo: p.seo ?? {},
       updatedAt: p.updatedAt?.toISOString(),
     }));
@@ -281,6 +289,10 @@ export interface JournalCard {
 }
 export interface JournalPost extends JournalCard {
   bodyHtml: string;
+  shortAnswer?: string;
+  sources: { title: string; url: string }[];
+  relatedProducts: string[];
+  modifiedAt?: string;
   author?: string;
   tags: { slug: string; name: string }[];
   seo: SeoFields;
@@ -300,6 +312,10 @@ interface ArticleSnapshot {
   tags?: { slug: string; name: string }[];
   seo?: SeoFields;
   relatedIds?: number[];
+  shortAnswer?: string;
+  sources?: { title: string; url: string }[];
+  relatedProducts?: string[];
+  modifiedAt?: string;
 }
 
 /** Working copy of an article in the same shape as a published snapshot. */
@@ -324,6 +340,10 @@ async function articleDraftSnapshot(a: typeof articles.$inferSelect): Promise<Ar
     tags: tagRows,
     seo: a.seo,
     relatedIds: a.relatedIds,
+    shortAnswer: a.shortAnswer ?? undefined,
+    sources: a.sources ?? [],
+    relatedProducts: a.relatedProducts ?? [],
+    modifiedAt: a.updatedAt.toISOString(),
   };
 }
 
@@ -375,12 +395,21 @@ export async function getJournalPost(slug: string): Promise<JournalPost | null> 
   return {
     ...toCard(s),
     bodyHtml: s.bodyHtml,
+    shortAnswer: s.shortAnswer,
+    sources: s.sources ?? [],
+    relatedProducts: s.relatedProducts ?? [],
+    modifiedAt: s.modifiedAt ?? hit.updatedAt,
     author: s.author,
     tags: s.tags ?? [],
     seo: s.seo ?? {},
     related,
     updatedAt: hit.updatedAt,
   };
+}
+
+/** Published articles that are about a given product. */
+export async function getArticlesForProduct(slug: string): Promise<JournalCard[]> {
+  return (await loadArticles()).filter((a) => (a.snap.relatedProducts ?? []).includes(slug)).map((a) => toCard(a.snap));
 }
 
 // ── Pages & page-builder sections ─────────────────────────────

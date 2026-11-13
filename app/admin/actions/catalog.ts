@@ -34,6 +34,10 @@ export interface ProductInput {
   info: string[];
   imageCategory: string;
   orderLinks: { label: string; url: string }[];
+  ingredients: string;
+  serving: string;
+  storage: string;
+  preparation: string;
   seo: unknown;
 }
 
@@ -75,6 +79,10 @@ function cleanProduct(input: ProductInput) {
     info: (input.info ?? []).filter((x) => INFO.includes(x)),
     imageCategory: IMAGE_CATS.includes(input.imageCategory) ? input.imageCategory : 'food',
     orderLinks,
+    ingredients: cleanText(input.ingredients, 2000).trim() || null,
+    serving: cleanText(input.serving, 160).trim() || null,
+    storage: cleanText(input.storage, 2000).trim() || null,
+    preparation: cleanText(input.preparation, 2000).trim() || null,
     seo: cleanSeo(input.seo, problems),
   };
   return { data, problems };

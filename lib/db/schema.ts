@@ -186,6 +186,11 @@ export const products = mysqlTable('products', {
   imageCategory: varchar('image_category', { length: 20 }).notNull().default('food'),
   /** Extra order buttons, e.g. a specific Shopee listing. */
   orderLinks: json('order_links').$type<{ label: string; url: string }[]>().notNull(),
+  /** Verified product facts — shown only when filled in. */
+  ingredients: text('ingredients'),
+  serving: varchar('serving', { length: 160 }),
+  storage: text('storage'),
+  preparation: text('preparation'),
   seo: json('seo').$type<SeoFields>().notNull(),
   sortOrder: int('sort_order').notNull().default(0),
   ...timestamps,
@@ -226,6 +231,12 @@ export const articles = mysqlTable('articles', {
   /** Display/publication date. */
   publishedAt: datetime('published_at'),
   relatedIds: json('related_ids').$type<number[]>().notNull(),
+  /** Direct answer shown first (answer-engine friendly). */
+  shortAnswer: text('short_answer'),
+  /** References: [{ title, url }]. */
+  sources: json('sources').$type<{ title: string; url: string }[] | null>(),
+  /** Product slugs this article is about (links both ways). */
+  relatedProducts: json('related_products').$type<string[] | null>(),
   seo: json('seo').$type<SeoFields>().notNull(),
   // Live snapshot
   published: json('published').$type<Record<string, unknown> | null>(),
@@ -297,6 +308,25 @@ export const redirects = mysqlTable('redirects', {
   note: varchar('note', { length: 200 }),
   ...timestamps,
 }, (t) => [uniqueIndex('redirects_from_uq').on(t.fromPath)]);
+
+/** Leads from the website forms (catering, gifting, corporate). */
+export const inquiries = mysqlTable('inquiries', {
+  id: int('id').autoincrement().primaryKey(),
+  type: mysqlEnum('type', ['catering', 'gifting', 'corporate', 'general']).notNull(),
+  name: varchar('name', { length: 160 }),
+  company: varchar('company', { length: 160 }),
+  email: varchar('email', { length: 190 }),
+  phone: varchar('phone', { length: 40 }),
+  /** All submitted answers (validated, plain text). */
+  data: json('data').$type<Record<string, string>>().notNull(),
+  pagePath: varchar('page_path', { length: 255 }),
+  /** First-touch campaign info (utm_*, referrer host). */
+  source: json('source').$type<Record<string, string> | null>(),
+  status: mysqlEnum('status', ['new', 'contacted', 'quoted', 'won', 'lost', 'spam']).notNull().default('new'),
+  note: text('note'),
+  ipHash: varchar('ip_hash', { length: 64 }),
+  ...timestamps,
+}, (t) => [index('inquiries_status_idx').on(t.status, t.createdAt), index('inquiries_ip_idx').on(t.ipHash, t.createdAt)]);
 
 // ── Shared JSON shapes ────────────────────────────────────────
 export interface ImageRef {

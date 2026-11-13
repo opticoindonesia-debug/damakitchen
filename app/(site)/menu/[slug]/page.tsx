@@ -4,9 +4,11 @@ import { ImageWithScrim } from '@/components/ImageWithScrim';
 import { InfoIconRow } from '@/components/InfoIconRow';
 import { ProductOrderButtons } from '@/components/ProductOrderButtons';
 import { ProductCard } from '@/components/ProductCard';
-import { BreadcrumbJsonLd, JsonLdScript, absoluteUrl } from '@/components/JsonLd';
+import { BreadcrumbJsonLd, JsonLdScript, ORG_ID, absoluteUrl, brandId } from '@/components/JsonLd';
 import { buildMetadata, canonicalFor } from '@/lib/seo';
-import { getProduct, getProductsBySubBrand, getSettings, getSubBrands } from '@/lib/cms';
+import { getArticlesForProduct, getProduct, getProductsBySubBrand, getSettings, getSubBrands } from '@/lib/cms';
+import { JournalGrid } from '@/components/blocks/JournalCards';
+import { TrackOnView } from '@/components/AnalyticsTracker';
 import { redirectOrNotFound } from '@/lib/redirect';
 import { formatRupiah } from '@/lib/utils';
 
@@ -21,7 +23,7 @@ const AVAILABILITY: Record<string, { label: string; schema: string }> = {
 
 export async function generateMetadata({ params }: Props) {
   const [p, { site }] = await Promise.all([getProduct(params.slug), getSettings()]);
-  if (!p) return { title: { absolute: `Menu · ${site.siteName}` }, robots: { index: false } };
+  if (!p) return { title: { absolute: `Menu | ${site.siteName}` }, robots: { index: false } };
   return buildMetadata({ title: p.name, description: p.blurb, path: `/menu/${p.slug}`, seo: p.seo, siteName: site.siteName, image: p.image });
 }
 
@@ -29,7 +31,14 @@ export default async function ProductPage({ params }: Props) {
   const [p, subBrands] = await Promise.all([getProduct(params.slug), getSubBrands()]);
   if (!p) return redirectOrNotFound(`/menu/${params.slug}`);
   const sb = subBrands.find((s) => s.slug === p.subBrand);
-  const siblings = sb ? (await getProductsBySubBrand(sb.slug)).filter((x) => x.slug !== p.slug).slice(0, 3) : [];
+  const [siblingsAll, articles] = await Promise.all([sb ? getProductsBySubBrand(sb.slug) : Promise.resolve([]), getArticlesForProduct(p.slug)]);
+  const siblings = siblingsAll.filter((x) => x.slug !== p.slug).slice(0, 3);
+  const details = [
+    { title: 'Porsi / berat', body: p.serving },
+    { title: 'Bahan', body: p.ingredients },
+    { title: 'Cara penyimpanan', body: p.storage },
+    { title: 'Cara penyajian', body: p.preparation },
+  ].filter((d) => d.body);
   const path = `/menu/${p.slug}`;
   const avail = AVAILABILITY[p.availability] ?? AVAILABILITY.available;
   const images = [...(p.image ? [{ url: p.image, alt: p.imageAlt }] : []), ...p.gallery];
@@ -43,7 +52,8 @@ export default async function ProductPage({ params }: Props) {
           name: p.name,
           description: p.seo.description || p.description || p.blurb,
           ...(images.length ? { image: images.map((i) => absoluteUrl(i.url)) } : {}),
-          brand: { '@type': 'Brand', name: sb?.name ?? 'DAMA KITCHEN' },
+          brand: sb ? { '@id': brandId(sb.slug) } : { '@id': ORG_ID },
+          manufacturer: { '@id': ORG_ID },
           ...(p.category ? { category: p.category.name } : {}),
           url: canonicalFor(path, p.seo.canonical),
           ...(p.price != null
@@ -58,6 +68,7 @@ export default async function ProductPage({ params }: Props) {
           { name: p.name, path },
         ]}
       />
+      <TrackOnView event="view_item" params={{ item_id: p.slug, item_name: p.name, item_brand: sb?.name, item_category: p.category?.name, price: p.price ?? undefined, currency: p.price != null ? 'IDR' : undefined }} />
       <Section>
         <nav aria-label="Breadcrumb" className="mb-8 text-caption text-ink-soft">
           <Link href="/" className="hover:underline">Beranda</Link> / <Link href="/menu" className="hover:underline">Menu</Link>
@@ -107,12 +118,39 @@ export default async function ProductPage({ params }: Props) {
             <div className="mt-6">
               <InfoIconRow info={p.info} />
             </div>
+            {details.length > 0 && (
+              <dl className="mt-8 space-y-5 border-t border-teal/10 pt-6">
+                {details.map((d) => (
+                  <div key={d.title}>
+                    <dt className="font-display text-body-lg text-teal">{d.title}</dt>
+                    <dd className="mt-1 whitespace-pre-line text-body text-ink-soft">{d.body}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
             <div className="mt-8">
               <ProductOrderButtons productName={sb ? `${p.name} (${sb.name})` : p.name} channels={sb?.channels ?? ['whatsapp']} links={p.orderLinks} />
             </div>
           </div>
         </div>
       </Section>
+      {sb && sb.faqs.length > 0 && (
+        <Section dividerAbove eyebrow="Tanya jawab" title={`Tentang ${sb.name}`}>
+          <div className="max-w-prose space-y-6">
+            {sb.faqs.map((f) => (
+              <div key={f.q}>
+                <h3 className="font-display text-heading text-teal">{f.q}</h3>
+                <p className="mt-1 text-body text-ink-soft">{f.a}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+      {articles.length > 0 && (
+        <Section dividerAbove eyebrow="Catatan Dapur" title="Bacaan terkait">
+          <JournalGrid posts={articles.slice(0, 3)} headingAs="h3" />
+        </Section>
+      )}
       {siblings.length > 0 && sb && (
         <Section dividerAbove eyebrow={sb.name} title="Hidangan lain dari lini ini">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

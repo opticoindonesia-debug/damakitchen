@@ -20,6 +20,9 @@ export interface ArticleInput {
   publishedAt: string; // yyyy-mm-dd
   tags: string[];
   relatedIds: number[];
+  shortAnswer: string;
+  sources: { title: string; url: string }[];
+  relatedProducts: string[];
   seo: unknown;
 }
 
@@ -48,6 +51,18 @@ function cleanArticle(input: ArticleInput) {
       categoryId: Number.isInteger(input.categoryId) ? input.categoryId : null,
       publishedAt: date,
       relatedIds: (input.relatedIds ?? []).filter((n) => Number.isInteger(n)).slice(0, 6),
+      shortAnswer: cleanText(input.shortAnswer, 600).trim() || null,
+      sources: (input.sources ?? []).slice(0, 15).flatMap((src, i) => {
+        const t = cleanText(src?.title, 200).trim();
+        const u = String(src?.url ?? '').trim();
+        if (!t && !u) return [];
+        if (!t || !/^https:\/\/\S+$/.test(u)) {
+          problems.push(`Sumber ${i + 1}: isi judul dan tautan https:// yang valid.`);
+          return [];
+        }
+        return [{ title: t, url: u }];
+      }),
+      relatedProducts: (input.relatedProducts ?? []).filter((x) => SLUG_RE.test(x)).slice(0, 8),
       seo: cleanSeo(input.seo, problems),
     },
     tagNames: [...new Set((input.tags ?? []).map((t) => cleanText(t, 60).trim()).filter(Boolean))].slice(0, 15),
@@ -93,6 +108,10 @@ async function snapshot(id: number) {
     tags: tagRows,
     seo: a.seo,
     relatedIds: a.relatedIds,
+    shortAnswer: a.shortAnswer ?? undefined,
+    sources: a.sources ?? [],
+    relatedProducts: a.relatedProducts ?? [],
+    modifiedAt: new Date().toISOString(),
   };
 }
 

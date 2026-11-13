@@ -20,7 +20,7 @@ const BG: Record<Bg, { cls: string; dark: boolean }> = {
   soft: { cls: 'bg-blush/40', dark: false },
   highlight: { cls: 'bg-gold-20', dark: false },
   primary: { cls: 'bg-teal', dark: true },
-  accent: { cls: 'bg-terracotta', dark: true },
+  accent: { cls: 'bg-terracotta-deep', dark: true },
 };
 
 export const bgOf = (v: unknown): Bg => (typeof v === 'string' && v in BG ? (v as Bg) : 'cream');
@@ -32,8 +32,8 @@ export function toneOf(bg: Bg) {
     dark,
     tone: (dark ? 'dark' : 'light') as 'light' | 'dark',
     heading: dark ? 'text-cream' : 'text-teal',
-    body: dark ? 'text-cream/90' : 'text-ink',
-    muted: dark ? 'text-cream/80' : 'text-ink-soft',
+    body: bg === 'accent' ? 'text-cream' : dark ? 'text-cream/90' : 'text-ink',
+    muted: bg === 'accent' ? 'text-cream' : dark ? 'text-cream/80' : 'text-ink-soft',
     eyebrow: bg === 'primary' ? 'text-gold' : dark ? 'text-cream/90' : 'text-terracotta-deep',
     accentText: bg === 'primary' ? 'text-gold' : dark ? 'text-cream' : 'text-terracotta',
     link: dark ? 'text-cream' : 'text-terracotta-deep',
@@ -151,7 +151,7 @@ export function buttonClasses(style: string | undefined, bg: Bg) {
     BTN_BASE,
     bg === 'accent'
       ? 'bg-cream text-terracotta-deep hover:bg-cream-paper'
-      : 'bg-terracotta text-cream hover:bg-terracotta-80',
+      : 'bg-terracotta-deep text-cream hover:bg-terracotta-deep/90',
   );
 }
 

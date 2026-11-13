@@ -43,5 +43,20 @@ export const MIGRATIONS: { id: string; statements: string[] }[] = [
       "CREATE INDEX `sessions_user_idx` ON `sessions` (`user_id`);",
       "CREATE INDEX `sessions_expires_idx` ON `sessions` (`expires_at`);"
     ]
+  },
+  {
+    "id": "0001_seo_conversion",
+    "statements": [
+      "CREATE TABLE `inquiries` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`type` enum('catering','gifting','corporate','general') NOT NULL,\n\t`name` varchar(160),\n\t`company` varchar(160),\n\t`email` varchar(190),\n\t`phone` varchar(40),\n\t`data` json NOT NULL,\n\t`page_path` varchar(255),\n\t`source` json,\n\t`status` enum('new','contacted','quoted','won','lost','spam') NOT NULL DEFAULT 'new',\n\t`note` text,\n\t`ip_hash` varchar(64),\n\t`created_at` timestamp NOT NULL DEFAULT (now()),\n\t`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `inquiries_id` PRIMARY KEY(`id`)\n) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;",
+      "ALTER TABLE `articles` ADD `short_answer` text;",
+      "ALTER TABLE `articles` ADD `sources` json;",
+      "ALTER TABLE `articles` ADD `related_products` json;",
+      "ALTER TABLE `products` ADD `ingredients` text;",
+      "ALTER TABLE `products` ADD `serving` varchar(160);",
+      "ALTER TABLE `products` ADD `storage` text;",
+      "ALTER TABLE `products` ADD `preparation` text;",
+      "CREATE INDEX `inquiries_status_idx` ON `inquiries` (`status`,`created_at`);",
+      "CREATE INDEX `inquiries_ip_idx` ON `inquiries` (`ip_hash`,`created_at`);"
+    ]
   }
 ];

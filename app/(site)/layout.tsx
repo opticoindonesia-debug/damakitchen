@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { OrganizationJsonLd } from '@/components/JsonLd';
+import { SiteJsonLd } from '@/components/JsonLd';
+import { AnalyticsScripts } from '@/components/Analytics';
 import { SiteConfigProvider } from '@/components/SiteConfig';
 import { getSettings, getSubBrands, isPreview } from '@/lib/cms';
 import { themeCss } from '@/lib/themeCss';
@@ -19,7 +20,8 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
     <SiteConfigProvider value={{ whatsappNumber: site.whatsappNumber, whatsappMessage: site.whatsappMessage, channels: site.channels }}>
       {/* Built only from allow-listed tokens + validated hex colors; safe to inline. */}
       <style id="dama-theme" dangerouslySetInnerHTML={{ __html: themeCss(theme) }} />
-      <OrganizationJsonLd site={site} />
+      <SiteJsonLd site={site} subBrands={subBrands} />
+      <AnalyticsScripts />
       {preview && (
         <div className="sticky top-0 z-[70] flex items-center justify-center gap-3 bg-gold px-4 py-2 text-caption font-medium text-ink" role="status">
           Mode pratinjau — Anda melihat draf yang belum diterbitkan.
