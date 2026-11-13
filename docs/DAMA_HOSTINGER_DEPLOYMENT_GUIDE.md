@@ -126,7 +126,7 @@ Do this on **staging** before launch, so the owner can review.
    - writes pages, articles and settings as **drafts** for review;
    - uploads the photos;
    - writes a report: `sanity-export-import-report.md`.
-4. In the admin, review each page and article, then click **Terbitkan**.
+4. In the admin, click **Cadangan → Muat ulang data website**, then review each page and article and click **Terbitkan**.
 5. Remove your IP from Remote MySQL afterwards.
 
 ## 8. Acceptance on staging

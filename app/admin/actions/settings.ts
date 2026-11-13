@@ -61,3 +61,8 @@ export async function resetThemeDraft() {
     return { ok: true as const, message: 'Tampilan dikembalikan ke warna asli DAMA (sebagai draf). Klik Terbitkan untuk menerapkan.', data: DEFAULT_THEME };
   }, { revalidate: false });
 }
+
+/** Clears the website's data cache (e.g. after a CLI restore or import). */
+export async function refreshSiteCache() {
+  return adminAction(async () => ({ ok: true as const, message: 'Data website dimuat ulang. Perubahan dari luar admin kini tampil.' }));
+}

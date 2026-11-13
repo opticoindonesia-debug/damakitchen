@@ -1,4 +1,5 @@
 import 'server-only';
+import { createHash } from 'node:crypto';
 import { cache } from 'react';
 import { unstable_cache } from 'next/cache';
 import { draftMode } from 'next/headers';
@@ -52,6 +53,15 @@ import type { Testimonial } from '@/content/testimonials';
 
 const TAG = 'cms';
 
+/**
+ * Cache entries are scoped to the database (so two databases never share
+ * cached content) and expire after 5 minutes as a safety net for changes made
+ * outside the admin (CLI restore, import, phpMyAdmin). Admin saves invalidate
+ * the 'cms' tag immediately.
+ */
+const DB_SCOPE = createHash('sha256').update(process.env.DATABASE_URL ?? 'none').digest('hex').slice(0, 12);
+const CACHE_OPTS = { tags: [TAG], revalidate: 300 };
+
 /** True only for a signed-in admin who switched preview on. */
 export const isPreview = cache(async (): Promise<boolean> => {
   if (!draftMode().isEnabled) return false;
@@ -69,8 +79,8 @@ function cached<A extends unknown[], R>(name: string, fn: (preview: boolean, ...
       await ensureReady();
       return fn(false, ...args);
     },
-    ['dama', name],
-    { tags: [TAG] },
+    ['dama', DB_SCOPE, name],
+    CACHE_OPTS,
   );
   return async (...args: A): Promise<R> => {
     if (await isPreview()) {
@@ -101,8 +111,8 @@ const settingsPublished = unstable_cache(
     await ensureReady();
     return buildSettings(false);
   },
-  ['dama', 'settings'],
-  { tags: [TAG] },
+  ['dama', DB_SCOPE, 'settings'],
+  CACHE_OPTS,
 );
 
 async function buildSettings(preview: boolean): Promise<PublicSettings> {

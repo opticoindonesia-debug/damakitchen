@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { Button, Card, Field, Input, NoticeBar, Toggle, confirmAction, type Notice } from '@/components/admin/ui';
+import { refreshSiteCache } from '@/app/admin/actions/settings';
 
 export function BackupPanel({ isOwner, storage, scheduled }: { isOwner: boolean; storage: string; scheduled: boolean }) {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -51,6 +52,12 @@ export function BackupPanel({ isOwner, storage, scheduled }: { isOwner: boolean;
           <Field label='Ketik "PULIHKAN" untuk konfirmasi' htmlFor="restore-confirm"><Input id="restore-confirm" value={confirm} onChange={(e) => setConfirm(e.target.value)} autoComplete="off" /></Field>
           <div><Button variant="danger" busy={busy} disabled={confirm !== 'PULIHKAN'} onClick={restore}>Pulihkan sekarang</Button></div>
         </div>
+      </Card>
+      <Card title="4. Muat ulang data website" description="Gunakan setelah pemulihan lewat CLI/phpMyAdmin atau impor konten, agar website langsung menampilkan data terbaru (tanpa ini, paling lambat 5 menit).">
+        <Button onClick={async () => {
+          const res = await refreshSiteCache();
+          setNotice(res.ok ? { tone: 'success', text: res.message ?? 'Selesai.' } : { tone: 'error', text: res.error });
+        }}>Muat ulang data website</Button>
       </Card>
     </div>
   );

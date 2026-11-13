@@ -101,6 +101,8 @@ DATABASE_URL="mysql://…" pnpm restore ./dama-backup.json.gz --yes --with-users
 - A backup made by a **newer** schema version is refused until the app is updated.
 - Filesystem media is written back under `MEDIA_ROOT`.
 
+**Afterwards:** click **Admin → Cadangan → Muat ulang data website**. Otherwise the running site shows the restored content within 5 minutes, when its cache expires.
+
 ### C. Disaster recovery (new database or new server)
 
 1. Create an empty database, then deploy the app with the new `DATABASE_URL`.

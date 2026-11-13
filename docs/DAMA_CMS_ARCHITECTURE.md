@@ -49,6 +49,7 @@ All new dependencies are free, open-source (MIT / Apache-2.0) and run inside the
   - Public pages are rendered per request (`force-dynamic`).
   - Database reads go through `unstable_cache`, tagged `cms`.
   - Every admin save or publish calls `revalidateTag('cms')`, so changes are live immediately with no rebuild.
+  - Cache keys are scoped to the database (a hash of `DATABASE_URL`) and expire after 5 minutes. This is a safety net for changes made outside the admin (CLI restore, import, phpMyAdmin). For those changes, **Admin → Cadangan → Muat ulang data website** clears the cache immediately.
 - **Built-in pages.**
   - The 7 core pages (Beranda, Cerita, Menu, Katering, Hadiah, Pesan, Kontak) are rows in `pages` with `builtin_key`.
   - If a page has no visible sections, its original coded layout renders as a safe fallback.
